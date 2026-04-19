@@ -1,0 +1,13 @@
+# Bỏ qua các file biên dịch của Java
+*.class
+bin/
+out/
+target/
+
+# Bỏ qua các thư mục cấu hình của IDE (VS Code, IntelliJ, Eclipse)
+.vscode/
+.idea/
+*.iml
+
+# Bỏ qua các file log hoặc file nháp cá nhân
+*.log
