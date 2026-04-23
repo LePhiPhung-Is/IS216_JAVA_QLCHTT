@@ -1,4 +1,4 @@
-package scr.model;
+package src.model;
 
 
     public class KhachHang {
