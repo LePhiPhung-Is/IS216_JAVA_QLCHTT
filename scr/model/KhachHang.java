@@ -1,4 +1,4 @@
-package scr.mode1;
+package scr.model;
 
 
     public class KhachHang {
