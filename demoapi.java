@@ -317,7 +317,7 @@ public class demoapi extends JFrame {
             }
         }
 
-        // --- ĐỐI TƯỢNG HẠT MƯA ---
+       
         static class RainDrop {
             int x, y, speed;
             public RainDrop(int x, int y) { 
