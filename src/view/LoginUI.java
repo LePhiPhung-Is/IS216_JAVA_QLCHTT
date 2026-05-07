@@ -22,7 +22,7 @@ public class LoginUI extends JFrame {
         int height = screenSize.height;
 
         // ===== Background =====
-        ImageIcon icon = new ImageIcon("src/background.png");
+        ImageIcon icon = new ImageIcon("src/assets/background.png");
         Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
         JLabel background = new JLabel(new ImageIcon(img));
