@@ -145,16 +145,24 @@ public class LoginUI extends JFrame {
         background.add(slogan);
 
         // ===== Login giả =====
-        btnLogin.addActionListener(e -> {
-            String user = txtUser.getText();
-            String pass = new String(txtPass.getPassword());
+        // ===== Login giả =====
+btnLogin.addActionListener(e -> {
+    String user = txtUser.getText();
+    String pass = new String(txtPass.getPassword());
 
-            if (user.equals("admin") && pass.equals("123")) {
-                JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Sai tài khoản!");
-            }
-        });
+    if (user.equals("admin") && pass.equals("123")) {
+        // Có thể giữ lại hoặc bỏ dòng thông báo này tùy ý bạn
+        JOptionPane.showMessageDialog(this, "Đăng nhập thành công!"); 
+        
+        // Mở trang AdminUI
+        new AdminUI().setVisible(true); 
+        
+        // Đóng trang LoginUI hiện tại
+        this.dispose(); 
+    } else {
+        JOptionPane.showMessageDialog(this, "Sai tài khoản!");
+    }
+});
 
         // ===== Fade-in effect =====
         Timer timer = new Timer(20, e -> {
