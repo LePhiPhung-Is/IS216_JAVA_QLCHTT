@@ -11,3 +11,5 @@ target/
 
 # Bỏ qua các file log hoặc file nháp cá nhân
 *.log
+# Bỏ qua file chứa key bảo mật
+config.properties
