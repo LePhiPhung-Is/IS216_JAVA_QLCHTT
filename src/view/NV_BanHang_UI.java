@@ -74,7 +74,7 @@ public class NV_BanHang_UI extends JFrame {
         nameLabel.setBorder(new EmptyBorder(15, 0, 5, 0));
 
         JLabel roleLabel = new JLabel("Nhân viên bán hàng");
-        roleLabel.setFont(new F ont("Segoe UI", Font.PLAIN, 13));
+        roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         roleLabel.setForeground(new Color(160, 160, 160));
         roleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -117,8 +117,7 @@ public class NV_BanHang_UI extends JFrame {
         content = new JPanel(cardLayout);
         content.setBackground(MAIN_BG);
 
-        content.add(createPage("QUẢN LÝ SẢN PHẨM"), "product");
-        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
+    content.add(new ProductManagementPanel(), "product");        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
         content.add(createPage("QUẢN LÝ DANH MỤC"), "category");
         content.add(createPage("QUẢN LÝ ĐƠN HÀNG"), "order");
         content.add(createPage("XỬ LÝ ĐỔI TRẢ"), "return");
