@@ -22,7 +22,7 @@ public class CategoryManagementPanel extends JPanel {
     private final Color HEADER_BG    = new Color(30, 30, 30);
     private final Color BACK_BTN     = new Color(90, 90, 90);
 
-    // ===== DU LIEU =====
+    // ===== DỮ LIỆU =====
     private final List<String[]> categories = new ArrayList<>();
     private final List<String[]> allProducts = new ArrayList<>();
     private final Map<String, List<String[]>> catProducts = new LinkedHashMap<>();
@@ -31,11 +31,11 @@ public class CategoryManagementPanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardPanel;
 
-    // ===== BANG DANH MUC =====
+    // ===== BẢNG DANH MỤC =====
     private DefaultTableModel catModel;
     private JTable catTable;
 
-    private static final String[] CAT_COLS = {"Ma DM", "Ten danh muc", "Mo ta", "So SP", "Thao tac"};
+    private static final String[] CAT_COLS = {"Mã DM", "Tên danh mục", "Mô tả", "Số SP", "Thao tác"};
     private static final int CAT_COL_ACTION = 4;
 
     public CategoryManagementPanel() {
@@ -51,25 +51,28 @@ public class CategoryManagementPanel extends JPanel {
         add(cardPanel, BorderLayout.CENTER);
     }
 
+    // =========================================================
+    //  DỮ LIỆU MẪU
+    // =========================================================
     private void initData() {
-        categories.add(new String[]{"DM001", "Son moi",   "Cac loai son duong va son mau"});
-        categories.add(new String[]{"DM002", "Kem nen",   "Kem lot, cushion, BB cream"});
-        categories.add(new String[]{"DM003", "Phan phu",  "Phan bot va phan nen"});
-        categories.add(new String[]{"DM004", "Mat",       "Mascara, ke mat, phan mat"});
-        categories.add(new String[]{"DM005", "Cham soc",  "Kem duong, tay trang, xit khoang"});
+        categories.add(new String[]{"DM001", "Son môi",   "Các loại son dưỡng và son màu"});
+        categories.add(new String[]{"DM002", "Kem nền",   "Kem lót, cushion, BB cream"});
+        categories.add(new String[]{"DM003", "Phấn phủ",  "Phấn bột và phấn nén"});
+        categories.add(new String[]{"DM004", "Mắt",       "Mascara, kẻ mắt, phấn mắt"});
+        categories.add(new String[]{"DM005", "Chăm sóc",  "Kem dưỡng, tẩy trang, xịt khoáng"});
 
-        allProducts.add(new String[]{"SP001", "Son moi do Ruby",       "DM001", "185.000", "42"});
-        allProducts.add(new String[]{"SP002", "Son duong mat ong",     "DM001", "95.000",  "60"});
-        allProducts.add(new String[]{"SP003", "Son li nhung den",      "DM001", "220.000", "28"});
-        allProducts.add(new String[]{"SP004", "Kem nen CC Cream",      "DM002", "320.000", "18"});
-        allProducts.add(new String[]{"SP005", "Cushion kiem dau",      "DM002", "380.000", "15"});
-        allProducts.add(new String[]{"SP006", "Phan phu kiem dau",     "DM003", "210.000", "35"});
-        allProducts.add(new String[]{"SP007", "Phan bot trong suot",   "DM003", "175.000", "40"});
-        allProducts.add(new String[]{"SP008", "Mascara day mi",        "DM004", "155.000", "60"});
-        allProducts.add(new String[]{"SP009", "Ke mat nuoc den",       "DM004", "125.000", "55"});
-        allProducts.add(new String[]{"SP010", "Tay trang diu nhe",     "DM005", "98.000",  "27"});
-        allProducts.add(new String[]{"SP011", "Kem duong am ban dem",  "DM005", "450.000", "12"});
-        allProducts.add(new String[]{"SP012", "Xit khoang duong",      "DM005", "199.000", "33"});
+        allProducts.add(new String[]{"SP001", "Son môi đỏ Ruby",       "DM001", "185.000", "42"});
+        allProducts.add(new String[]{"SP002", "Son dưỡng mật ong",     "DM001", "95.000",  "60"});
+        allProducts.add(new String[]{"SP003", "Son lì nhung đen",      "DM001", "220.000", "28"});
+        allProducts.add(new String[]{"SP004", "Kem nền CC Cream",      "DM002", "320.000", "18"});
+        allProducts.add(new String[]{"SP005", "Cushion kiềm dầu",      "DM002", "380.000", "15"});
+        allProducts.add(new String[]{"SP006", "Phấn phủ kiềm dầu",    "DM003", "210.000", "35"});
+        allProducts.add(new String[]{"SP007", "Phấn bột trong suốt",   "DM003", "175.000", "40"});
+        allProducts.add(new String[]{"SP008", "Mascara dày mi",        "DM004", "155.000", "60"});
+        allProducts.add(new String[]{"SP009", "Kẻ mắt nước đen",      "DM004", "125.000", "55"});
+        allProducts.add(new String[]{"SP010", "Tẩy trang dịu nhẹ",    "DM005", "98.000",  "27"});
+        allProducts.add(new String[]{"SP011", "Kem dưỡng ẩm ban đêm", "DM005", "450.000", "12"});
+        allProducts.add(new String[]{"SP012", "Xịt khoáng dưỡng",     "DM005", "199.000", "33"});
 
         for (String[] cat : categories) {
             List<String[]> list = new ArrayList<>();
@@ -81,7 +84,7 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     // =========================================================
-    //  VIEW 1: DANH SACH DANH MUC
+    //  VIEW 1: DANH SÁCH DANH MỤC
     // =========================================================
     private JPanel buildCategoryListView() {
         JPanel root = new JPanel(new BorderLayout());
@@ -97,10 +100,11 @@ public class CategoryManagementPanel extends JPanel {
         header.setBackground(MAIN_BG);
         header.setBorder(new EmptyBorder(0, 0, 20, 0));
 
-        JLabel title = new JLabel("QUAN LY DANH MUC");
+        JLabel title = new JLabel("QUẢN LÝ DANH MỤC");
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(SIDEBAR_BG);
-        JLabel subtitle = new JLabel("Danh sach toan bo danh muc san pham");
+
+        JLabel subtitle = new JLabel("Danh sách toàn bộ danh mục sản phẩm");
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         subtitle.setForeground(new Color(130, 130, 130));
 
@@ -111,7 +115,7 @@ public class CategoryManagementPanel extends JPanel {
         titleBox.add(Box.createVerticalStrut(4));
         titleBox.add(subtitle);
 
-        JButton addBtn = makeGoldBtn("+ Them danh muc");
+        JButton addBtn = makeGoldBtn("+ Thêm danh mục");
         addBtn.addActionListener(e -> openCategoryDialog(null, -1));
 
         header.add(titleBox, BorderLayout.WEST);
@@ -164,6 +168,7 @@ public class CategoryManagementPanel extends JPanel {
         catTable.getColumnModel().getColumn(CAT_COL_ACTION).setCellRenderer(new CatActionRenderer());
         catTable.getColumnModel().getColumn(CAT_COL_ACTION).setCellEditor(new CatActionEditor());
 
+        // Click hàng (ngoài cột Thao tác) → mở chi tiết
         catTable.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 int row = catTable.rowAtPoint(e.getPoint());
@@ -190,14 +195,14 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     // =========================================================
-    //  RENDERER & EDITOR COT THAO TAC DANH MUC
+    //  RENDERER & EDITOR — CỘT THAO TÁC DANH MỤC
     // =========================================================
     class CatActionRenderer implements TableCellRenderer {
         private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
         CatActionRenderer() {
             panel.setOpaque(true);
-            panel.add(makeActionBtn("Edit Sua", EDIT_BLUE));
-            panel.add(makeActionBtn("Del Xoa", DELETE_RED));
+            panel.add(makeActionBtn("✏ Sửa", EDIT_BLUE));
+            panel.add(makeActionBtn("🗑 Xóa", DELETE_RED));
         }
         @Override public Component getTableCellRendererComponent(
                 JTable t, Object v, boolean sel, boolean foc, int row, int col) {
@@ -211,27 +216,29 @@ public class CategoryManagementPanel extends JPanel {
         private int currentRow;
 
         CatActionEditor() {
-            JButton editBtn = makeActionBtn("Edit Sua", EDIT_BLUE);
+            JButton editBtn = makeActionBtn("✏ Sửa", EDIT_BLUE);
             editBtn.addActionListener(e -> {
                 fireEditingStopped();
                 if (currentRow < categories.size())
                     openCategoryDialog(categories.get(currentRow), currentRow);
             });
-            JButton delBtn = makeActionBtn("Del Xoa", DELETE_RED);
+
+            JButton delBtn = makeActionBtn("🗑 Xóa", DELETE_RED);
             delBtn.addActionListener(e -> {
                 fireEditingStopped();
                 if (currentRow >= categories.size()) return;
                 String[] cat = categories.get(currentRow);
                 int confirm = JOptionPane.showConfirmDialog(
                         CategoryManagementPanel.this,
-                        "Xoa danh muc \"" + cat[1] + "\"?",
-                        "Xac nhan xoa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "Xóa danh mục \"" + cat[1] + "\"?",
+                        "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (confirm == JOptionPane.YES_OPTION) {
                     catProducts.remove(cat[0]);
                     categories.remove(currentRow);
                     refreshCatModel();
                 }
             });
+
             panel.add(editBtn);
             panel.add(delBtn);
         }
@@ -246,7 +253,7 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     // =========================================================
-    //  VIEW 2: CHI TIET DANH MUC
+    //  VIEW 2: CHI TIẾT DANH MỤC
     // =========================================================
     private void openDetailView(String[] cat) {
         String key = "detail_" + cat[0];
@@ -261,6 +268,7 @@ public class CategoryManagementPanel extends JPanel {
         root.setBackground(MAIN_BG);
         root.setBorder(new EmptyBorder(28, 32, 28, 32));
 
+        // --- Header chi tiết ---
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(MAIN_BG);
         header.setBorder(new EmptyBorder(0, 0, 20, 0));
@@ -268,7 +276,7 @@ public class CategoryManagementPanel extends JPanel {
         JPanel leftSide = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         leftSide.setBackground(MAIN_BG);
 
-        JButton backBtn = new JButton("<- Quay lai") {
+        JButton backBtn = new JButton("← Quay lại") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -290,7 +298,7 @@ public class CategoryManagementPanel extends JPanel {
             cardLayout.show(cardPanel, "list");
         });
 
-        JLabel countLabel = new JLabel(products.size() + " san pham");
+        JLabel countLabel = new JLabel(products.size() + " sản phẩm");
         countLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         countLabel.setForeground(new Color(130, 130, 130));
 
@@ -308,7 +316,7 @@ public class CategoryManagementPanel extends JPanel {
         leftSide.add(backBtn);
         leftSide.add(titleBox);
 
-        JButton addProductBtn = makeGoldBtn("+ Them san pham");
+        JButton addProductBtn = makeGoldBtn("+ Thêm sản phẩm");
         addProductBtn.addActionListener(e -> openAddProductDialog(cat[0], products, countLabel));
 
         header.add(leftSide, BorderLayout.WEST);
@@ -320,7 +328,8 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     private JScrollPane buildDetailTable(String catCode, List<String[]> products, JLabel countLabel) {
-        String[] cols = {"Ma SP", "Ten san pham", "Gia (VND)", "Hien thi", "Thao tac"};
+        String[] cols = {"Mã SP", "Tên sản phẩm", "Giá (VNĐ)", "Hiển thị", "Thao tác"};
+
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return c == 3 || c == 4; }
             @Override public Class<?> getColumnClass(int c) { return c == 3 ? Boolean.class : Object.class; }
@@ -367,6 +376,7 @@ public class CategoryManagementPanel extends JPanel {
         table.getColumnModel().getColumn(3).setPreferredWidth(90);
         table.getColumnModel().getColumn(4).setPreferredWidth(150);
 
+        // Toggle ẩn/hiện → cập nhật data
         model.addTableModelListener(e -> {
             if (e.getColumn() == 3) {
                 int row = e.getFirstRow();
@@ -375,13 +385,15 @@ public class CategoryManagementPanel extends JPanel {
             }
         });
 
+        // Renderer cột Thao tác
         table.getColumnModel().getColumn(4).setCellRenderer((t, v, sel, foc, row, col) -> {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 9));
             p.setBackground(row % 2 == 0 ? ROW_WHITE : ROW_STRIPE);
-            p.add(makeActionBtn("X Xoa khoi DM", DELETE_RED));
+            p.add(makeActionBtn("✕ Xóa khỏi DM", DELETE_RED));
             return p;
         });
 
+        // Editor cột Thao tác
         table.getColumnModel().getColumn(4).setCellEditor(new AbstractCellEditor() {
             int curRow;
             @Override public Object getCellEditorValue() { return ""; }
@@ -390,18 +402,18 @@ public class CategoryManagementPanel extends JPanel {
                 curRow = row;
                 JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 9));
                 p.setBackground(row % 2 == 0 ? ROW_WHITE : ROW_STRIPE);
-                JButton b = makeActionBtn("X Xoa khoi DM", DELETE_RED);
+                JButton b = makeActionBtn("✕ Xóa khỏi DM", DELETE_RED);
                 b.addActionListener(ev -> {
                     fireEditingStopped();
                     if (curRow >= products.size()) return;
                     int confirm = JOptionPane.showConfirmDialog(
                             CategoryManagementPanel.this,
-                            "Xoa \"" + products.get(curRow)[1] + "\" khoi danh muc?",
-                            "Xac nhan", JOptionPane.YES_NO_OPTION);
+                            "Xóa \"" + products.get(curRow)[1] + "\" khỏi danh mục?",
+                            "Xác nhận", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         products.remove(curRow);
                         model.removeRow(curRow);
-                        countLabel.setText(products.size() + " san pham");
+                        countLabel.setText(products.size() + " sản phẩm");
                     }
                 });
                 p.add(b);
@@ -416,7 +428,7 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     // =========================================================
-    //  DIALOG: CHON SAN PHAM THEM VAO DANH MUC
+    //  DIALOG: CHỌN SẢN PHẨM THÊM VÀO DANH MỤC
     // =========================================================
     private void openAddProductDialog(String catCode, List<String[]> currentProducts, JLabel countLabel) {
         Set<String> existing = new HashSet<>();
@@ -427,26 +439,28 @@ public class CategoryManagementPanel extends JPanel {
 
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog(owner instanceof Frame ? (Frame) owner : null,
-                "Chon san pham them vao danh muc", true);
+                "Chọn sản phẩm thêm vào danh mục", true);
         dialog.setSize(580, 480);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(MAIN_BG);
 
+        // Title bar
         JPanel titleBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titleBar.setBackground(HEADER_BG);
         titleBar.setBorder(new EmptyBorder(14, 20, 14, 20));
-        JLabel dlgTitle = new JLabel("CHON SAN PHAM");
+        JLabel dlgTitle = new JLabel("CHỌN SẢN PHẨM");
         dlgTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         dlgTitle.setForeground(BRAND_GOLD);
-        JLabel dlgSub = new JLabel("  -  Tick chon san pham muon them vao danh muc");
+        JLabel dlgSub = new JLabel("  —  Tick chọn sản phẩm muốn thêm vào danh mục");
         dlgSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         dlgSub.setForeground(new Color(180, 180, 180));
         titleBar.add(dlgTitle);
         titleBar.add(dlgSub);
 
+        // Bảng chọn SP
         DefaultTableModel pickModel = new DefaultTableModel(
-                new String[]{"", "Ma SP", "Ten san pham", "Gia (VND)"}, 0) {
+                new String[]{"", "Mã SP", "Tên sản phẩm", "Giá (VNĐ)"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return c == 0; }
             @Override public Class<?> getColumnClass(int c) { return c == 0 ? Boolean.class : String.class; }
         };
@@ -486,7 +500,7 @@ public class CategoryManagementPanel extends JPanel {
         tableWrapper.setBorder(new EmptyBorder(16, 20, 8, 20));
 
         if (available.isEmpty()) {
-            JLabel empty = new JLabel("Tat ca san pham da co trong danh muc nay.", SwingConstants.CENTER);
+            JLabel empty = new JLabel("Tất cả sản phẩm đã có trong danh mục này.", SwingConstants.CENTER);
             empty.setFont(new Font("Segoe UI", Font.ITALIC, 14));
             empty.setForeground(new Color(150, 150, 150));
             tableWrapper.add(empty, BorderLayout.CENTER);
@@ -497,11 +511,12 @@ public class CategoryManagementPanel extends JPanel {
             tableWrapper.add(pickScroll, BorderLayout.CENTER);
         }
 
+        // Nút xác nhận / hủy
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 12));
         btnRow.setBackground(MAIN_BG);
         btnRow.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR));
 
-        JButton cancelBtn = new JButton("Huy");
+        JButton cancelBtn = new JButton("Hủy");
         cancelBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cancelBtn.setForeground(new Color(80, 80, 80));
         cancelBtn.setFocusPainted(false);
@@ -511,7 +526,7 @@ public class CategoryManagementPanel extends JPanel {
                 new EmptyBorder(8, 20, 8, 20)));
         cancelBtn.addActionListener(e -> dialog.dispose());
 
-        JButton confirmBtn = makeGoldBtn("Xac nhan");
+        JButton confirmBtn = makeGoldBtn("✔ Xác nhận");
         confirmBtn.addActionListener(e -> {
             int added = 0;
             for (int i = 0; i < pickModel.getRowCount(); i++) {
@@ -523,11 +538,12 @@ public class CategoryManagementPanel extends JPanel {
             }
             if (added == 0) {
                 JOptionPane.showMessageDialog(dialog,
-                        "Chua chon san pham nao.", "Thong bao", JOptionPane.INFORMATION_MESSAGE);
+                        "Chưa chọn sản phẩm nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            countLabel.setText(currentProducts.size() + " san pham");
+            countLabel.setText(currentProducts.size() + " sản phẩm");
             dialog.dispose();
+            // Rebuild chi tiết để hiện SP mới
             for (String[] cat : categories) {
                 if (cat[0].equals(catCode)) {
                     openDetailView(cat);
@@ -546,25 +562,27 @@ public class CategoryManagementPanel extends JPanel {
     }
 
     // =========================================================
-    //  DIALOG: THEM / SUA DANH MUC
+    //  DIALOG: THÊM / SỬA DANH MỤC
     // =========================================================
     private void openCategoryDialog(String[] existing, int idx) {
         Window owner = SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog(owner instanceof Frame ? (Frame) owner : null,
-                existing == null ? "Them danh muc moi" : "Sua danh muc", true);
+                existing == null ? "Thêm danh mục mới" : "Sửa danh mục", true);
         dialog.setSize(420, 290);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(MAIN_BG);
 
+        // Title bar
         JPanel titleBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titleBar.setBackground(HEADER_BG);
         titleBar.setBorder(new EmptyBorder(14, 20, 14, 20));
-        JLabel dlgTitle = new JLabel(existing == null ? "THEM DANH MUC MOI" : "SUA DANH MUC");
+        JLabel dlgTitle = new JLabel(existing == null ? "THÊM DANH MỤC MỚI" : "SỬA DANH MỤC");
         dlgTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         dlgTitle.setForeground(BRAND_GOLD);
         titleBar.add(dlgTitle);
 
+        // Form
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(MAIN_BG);
         form.setBorder(new EmptyBorder(20, 30, 10, 30));
@@ -572,7 +590,7 @@ public class CategoryManagementPanel extends JPanel {
         gbc.insets = new Insets(10, 4, 10, 4);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        String[] labels   = {"Ma danh muc:", "Ten danh muc:", "Mo ta:"};
+        String[] labels   = {"Mã danh mục:", "Tên danh mục:", "Mô tả:"};
         String[] defaults = existing != null
                 ? new String[]{existing[0], existing[1], existing[2]}
                 : new String[]{"", "", ""};
@@ -594,11 +612,12 @@ public class CategoryManagementPanel extends JPanel {
             form.add(fields[i], gbc);
         }
 
+        // Buttons
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         btnRow.setBackground(MAIN_BG);
         btnRow.setBorder(new EmptyBorder(0, 30, 20, 30));
 
-        JButton cancelBtn = new JButton("Huy");
+        JButton cancelBtn = new JButton("Hủy");
         cancelBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cancelBtn.setForeground(new Color(80, 80, 80));
         cancelBtn.setFocusPainted(false);
@@ -608,14 +627,14 @@ public class CategoryManagementPanel extends JPanel {
                 new EmptyBorder(8, 20, 8, 20)));
         cancelBtn.addActionListener(e -> dialog.dispose());
 
-        JButton saveBtn = makeGoldBtn("Luu");
+        JButton saveBtn = makeGoldBtn("Lưu");
         saveBtn.addActionListener(e -> {
             String code = fields[0].getText().trim();
             String name = fields[1].getText().trim();
             String desc = fields[2].getText().trim();
             if (code.isEmpty() || name.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                        "Vui long nhap Ma va Ten danh muc.", "Loi", JOptionPane.WARNING_MESSAGE);
+                        "Vui lòng nhập Mã và Tên danh mục.", "Lỗi", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             if (idx < 0) {
