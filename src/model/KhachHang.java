@@ -1,6 +1,5 @@
 package src.model;
 
-
     public class KhachHang {
     private String maKH;
     private String tenKH;

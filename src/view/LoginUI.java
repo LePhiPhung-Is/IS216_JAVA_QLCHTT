@@ -155,7 +155,7 @@ btnLogin.addActionListener(e -> {
         JOptionPane.showMessageDialog(this, "Đăng nhập thành công!"); 
         
         // Mở trang AdminUI
-        new AdminUI().setVisible(true); 
+        new QuanLyUI().setVisible(true); 
         
         // Đóng trang LoginUI hiện tại
         this.dispose(); 

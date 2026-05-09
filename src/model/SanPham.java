@@ -1,37 +1,94 @@
 package src.model;
 
+public class SanPham {
 
-   public class SanPham {
     private String maSP;
+    private String maDM;
+    private String mauSac;
+    private String kichCo;
+    private double giaBan;
+    private int soLuongTon;
+    private String trangThai;
     private String tenSP;
-    private String loai;
-    private String size;
-    private String mau;
-    private double gia;
-    private int soLuong;
+    private String maKho;
 
-    
+    // Constructor rỗng
     public SanPham() {
     }
 
-    
-    public SanPham(String maSP, String tenSP, String loai, String size, String mau, double gia, int soLuong) {
+    // Constructor đầy đủ
+    public SanPham(String maSP, String maDM, String mauSac,
+                    String kichCo, double giaBan,
+                    int soLuongTon, String trangThai,
+                    String tenSP, String maKho) {
+
         this.maSP = maSP;
+        this.maDM = maDM;
+        this.mauSac = mauSac;
+        this.kichCo = kichCo;
+        this.giaBan = giaBan;
+        this.soLuongTon = soLuongTon;
+        this.trangThai = trangThai;
         this.tenSP = tenSP;
-        this.loai = loai;
-        this.size = size;
-        this.mau = mau;
-        this.gia = gia;
-        this.soLuong = soLuong;
+        this.maKho = maKho;
     }
 
-    
+    // Getter Setter
+
     public String getMaSP() {
         return maSP;
     }
 
     public void setMaSP(String maSP) {
         this.maSP = maSP;
+    }
+
+    public String getMaDM() {
+        return maDM;
+    }
+
+    public void setMaDM(String maDM) {
+        this.maDM = maDM;
+    }
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
+    }
+
+    public String getKichCo() {
+        return kichCo;
+    }
+
+    public void setKichCo(String kichCo) {
+        this.kichCo = kichCo;
+    }
+
+    public double getGiaBan() {
+        return giaBan;
+    }
+
+    public void setGiaBan(double giaBan) {
+        this.giaBan = giaBan;
+    }
+
+    public int getSoLuongTon() {
+        return soLuongTon;
+    }
+
+    public void setSoLuongTon(int soLuongTon) {
+        this.soLuongTon = soLuongTon;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
     }
 
     public String getTenSP() {
@@ -42,44 +99,21 @@ package src.model;
         this.tenSP = tenSP;
     }
 
-    public String getLoai() {
-        return loai;
+    public String getMaKho() {
+        return maKho;
     }
 
-    public void setLoai(String loai) {
-        this.loai = loai;
+    public void setMaKho(String maKho) {
+        this.maKho = maKho;
     }
 
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public String getMau() {
-        return mau;
-    }
-
-    public void setMau(String mau) {
-        this.mau = mau;
-    }
-
-    public double getGia() {
-        return gia;
-    }
-
-    public void setGia(double gia) {
-        this.gia = gia;
-    }
-
-    public int getSoLuong() {
-        return soLuong;
-    }
-
-    public void setSoLuong(int soLuong) {
-        this.soLuong = soLuong;
+    @Override
+    public String toString() {
+        return "SanPham{" +
+                "maSP='" + maSP + '\'' +
+                ", tenSP='" + tenSP + '\'' +
+                ", giaBan=" + giaBan +
+                ", soLuongTon=" + soLuongTon +
+                '}';
     }
 }
-
