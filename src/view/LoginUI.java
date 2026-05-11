@@ -118,11 +118,22 @@ public class LoginUI extends JFrame {
         });
 
         // ==========================================
-
-        // ===== Link =====
+// ===== Link =====
         JLabel lblRegister = new JLabel("Đăng ký");
         lblRegister.setForeground(Color.CYAN);
         lblRegister.setBounds(40, 265, 80, 20);
+
+        //lblRegister.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
+        
+        // Bắt sự kiện khi click chuột vào chữ "Đăng ký"
+        lblRegister.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new DangKyUI().setVisible(true);
+                LoginUI.this.dispose(); 
+            }
+        });
+        
         panel.add(lblRegister);
 
         JLabel lblForgot = new JLabel("Quên mật khẩu?");
