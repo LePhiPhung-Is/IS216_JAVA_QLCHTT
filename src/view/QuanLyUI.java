@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class AdminUI extends JFrame {
+public class QuanLyUI extends JFrame {
 
     // ================= MÀU GIAO DIỆN =================
     private final Color SIDEBAR_BG = new Color(5, 5, 5);
@@ -16,9 +16,9 @@ public class AdminUI extends JFrame {
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
 
-    public AdminUI() {
+    public QuanLyUI() {
 
-        setTitle("Admin Dashboard");
+        setTitle("Dashboard");
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -94,7 +94,7 @@ public class AdminUI extends JFrame {
 
         avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel nameLabel = new JLabel("Nguyễn Trần A");
+        JLabel nameLabel = new JLabel("Phùng Lê Phi");
 
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         nameLabel.setForeground(Color.WHITE);
@@ -103,7 +103,7 @@ public class AdminUI extends JFrame {
 
         nameLabel.setBorder(new EmptyBorder(15, 0, 5, 0));
 
-        JLabel roleLabel = new JLabel("Quản trị viên");
+        JLabel roleLabel = new JLabel("Quản lý");
 
         roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         roleLabel.setForeground(new Color(160, 160, 160));
@@ -254,7 +254,7 @@ public class AdminUI extends JFrame {
 
         SwingUtilities.invokeLater(() -> {
 
-            new AdminUI().setVisible(true);
+            new QuanLyUI().setVisible(true);
 
         });
     }

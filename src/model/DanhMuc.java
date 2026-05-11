@@ -52,7 +52,7 @@ public class DanhMuc {
     // BUSINESS LOGIC
     // ========================
 
-    // ➕ Thêm sản phẩm vào danh mục
+    // Thêm sản phẩm vào danh mục
     public void themSanPham(SanPham sp) {
         if (sp != null) {
             sp.setMaDM(this.maDM); // Gán đúng danh mục
@@ -60,7 +60,7 @@ public class DanhMuc {
         }
     }
 
-    // ❌ Xóa sản phẩm khỏi danh mục
+    // Xóa sản phẩm khỏi danh mục
     public void xoaSanPham(SanPham sp) {
         if (sp != null) {
             danhSachSanPham.remove(sp);
@@ -68,14 +68,14 @@ public class DanhMuc {
         }
     }
 
-    // 👁️ Ẩn sản phẩm (soft delete)
+    // Ẩn sản phẩm (soft delete)
     public void anSanPham(SanPham sp) {
         if (sp != null) {
             sp.setTrangThai("AN"); // bạn đang dùng String → OK
         }
     }
 
-    // 🔍 Lấy sản phẩm còn hoạt động
+    // Lấy sản phẩm còn hoạt động
     public List<SanPham> getSanPhamDangBan() {
         List<SanPham> list = new ArrayList<>();
         for (SanPham sp : danhSachSanPham) {
