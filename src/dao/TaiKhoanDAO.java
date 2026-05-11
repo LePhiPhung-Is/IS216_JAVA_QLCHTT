@@ -14,7 +14,7 @@ public class TaiKhoanDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
-            // Lấy dữ liệu từ file Model nhóm bạn đã viết
+            // Lấy dữ liệu từ file Model
             ps.setString(1, tk.getTenDangNhap());
             ps.setString(2, tk.getMatKhau());
             ps.setString(3, tk.getQuyen()); 
