@@ -117,8 +117,12 @@ public class NV_BanHang_UI extends JFrame {
         content = new JPanel(cardLayout);
         content.setBackground(MAIN_BG);
 
+<<<<<<< Updated upstream
         content.add(createPage("QUẢN LÝ SẢN PHẨM"), "product");
         content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
+=======
+        content.add(new ProductManagementPanel(), "product");        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
+>>>>>>> Stashed changes
         content.add(new CategoryManagementPanel(), "category");
         content.add(createPage("QUẢN LÝ ĐƠN HÀNG"), "order");
         content.add(createPage("XỬ LÝ ĐỔI TRẢ"), "return");
