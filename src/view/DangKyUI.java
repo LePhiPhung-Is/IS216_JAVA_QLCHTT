@@ -32,7 +32,7 @@ public class DangKyUI extends JFrame {
         background.setLayout(null);
         add(background);
 
-        // ===== Panel Đăng ký (bo góc giả lập, đen mờ) =====
+        // ===== Panel Đăng ký (bo góc giả lập, đen mờ) ====
         int panelW = 350;
         int panelH = 400; // Tăng chiều cao lên một chút để chứa ô Xác nhận mật khẩu
 

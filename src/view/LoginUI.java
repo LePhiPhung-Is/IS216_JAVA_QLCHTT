@@ -118,7 +118,7 @@ public class LoginUI extends JFrame {
         });
 
         // ==========================================
-// ===== Link =====\
+// ===== Link =====
         JLabel lblRegister = new JLabel("Đăng ký");
         lblRegister.setForeground(Color.CYAN);
         lblRegister.setBounds(40, 265, 80, 20);
