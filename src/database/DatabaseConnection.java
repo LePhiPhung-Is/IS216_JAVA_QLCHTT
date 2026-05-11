@@ -10,8 +10,9 @@ public class DatabaseConnection {
     // 'xe' là tên mặc định của bản Oracle Express. Nếu cài bản Enterprise, nó thường là 'orcl'
     //private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
     
-    private static final String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
     
+    private static final String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
+
     // ĐIỀN THÔNG TIN TÀI KHOẢN ORACLE CỦA BẠN VÀO ĐÂY
     private static final String USERNAME = "FASHION_ADMIN"; // Ví dụ: system, hr, hoặc user bạn tự tạo
     private static final String PASSWORD = "123456";

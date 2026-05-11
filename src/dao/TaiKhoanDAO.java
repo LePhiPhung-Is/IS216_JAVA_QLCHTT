@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class TaiKhoanDAO {
-    
     // Hàm xử lý đăng ký tài khoản mới
     public boolean dangKy(TaiKhoan tk) {
         String sql = "INSERT INTO TAIKHOAN (TENDANGNHAP, MATKHAU, QUYEN, TRANGTHAI) VALUES (?, ?, ?, ?)";

@@ -159,7 +159,6 @@ public class DangKyUI extends JFrame {
         });
 
         // ==========================================
-
         // ===== Link sang trang Đăng nhập =====
         JLabel lblLogin = new JLabel("Đã có tài khoản? Đăng nhập");
         lblLogin.setForeground(Color.CYAN);
