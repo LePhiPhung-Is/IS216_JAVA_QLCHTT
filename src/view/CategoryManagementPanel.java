@@ -126,8 +126,13 @@ public class CategoryManagementPanel extends JPanel {
         JTable catTable = new JTable(catTableModel) {
             @Override public Component prepareRenderer(TableCellRenderer r, int row, int col) {
                 Component c = super.prepareRenderer(r, row, col);
-                if (!isRowSelected(row))
+                if (isRowSelected(row)) {
+                    c.setBackground(new Color(212, 175, 55, 50));
+                    c.setForeground(SIDEBAR_BG);
+                } else {
                     c.setBackground(row % 2 == 0 ? ROW_WHITE : ROW_STRIPE);
+                    c.setForeground(SIDEBAR_BG);
+                }
                 return c;
             }
         };
@@ -429,8 +434,13 @@ public class CategoryManagementPanel extends JPanel {
         JTable detailTable = new JTable(detailTableModel) {
             @Override public Component prepareRenderer(TableCellRenderer r, int row, int col) {
                 Component c = super.prepareRenderer(r, row, col);
-                if (!isRowSelected(row))
+                if (isRowSelected(row)) {
+                    c.setBackground(new Color(212, 175, 55, 50));
+                    c.setForeground(SIDEBAR_BG);
+                } else {
                     c.setBackground(row % 2 == 0 ? ROW_WHITE : ROW_STRIPE);
+                    c.setForeground(SIDEBAR_BG);
+                }
                 return c;
             }
         };
