@@ -3,6 +3,10 @@ package src.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JComboBox;
+
+import src.dao.DanhMucDAO;
+
 public class DanhMuc {
 
     private String maDM;
@@ -74,7 +78,8 @@ public class DanhMuc {
             sp.setTrangThai("AN"); // bạn đang dùng String → OK
         }
     }
-
+    // 
+   
     // Lấy sản phẩm còn hoạt động
     public List<SanPham> getSanPhamDangBan() {
         List<SanPham> list = new ArrayList<>();
@@ -86,8 +91,20 @@ public class DanhMuc {
         return list;
     }
 
-    @Override
+    // Lấy ComboBox cho danh mục ====================================
+        @Override
     public String toString() {
-        return tenDM;
+        return this.getTenDM(); // HIỂN THỊ TÊN
     }
+    private void loadDanhMucToCombo(JComboBox<DanhMuc> combo) {
+    combo.removeAllItems();
+
+    List<DanhMuc> list = new DanhMucDAO().getAllDanhMuc();
+
+    for (DanhMuc dm : list) {
+        combo.addItem(dm);
+    }
+}
+
+//================================================
 }

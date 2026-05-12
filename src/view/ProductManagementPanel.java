@@ -1,6 +1,8 @@
 package src.view;
 
+import src.dao.DanhMucDAO;
 import src.dao.SanPhamDAO;
+import src.model.DanhMuc;
 import src.model.SanPham;
 
 import javax.swing.*;
@@ -31,10 +33,15 @@ public class ProductManagementPanel extends JPanel {
     private JTable table;
     private JTextField searchField;
     private final DecimalFormat df = new DecimalFormat("#,###đ");
-
+    
     // ===== CỘT BẢNG =====
-    private static final String[] COLUMNS  = {"Ảnh", "Mã SP", "Tên sản phẩm", "Danh mục", "Giá bán", "Tồn kho", "Thao tác"};
-    private static final int      COL_ACTION = 6;
+   // private static final String[] COLUMNS  = {"Ảnh", "Mã SP", "Tên sản phẩm", "Danh mục", "Giá bán", "Tồn kho", "Thao tác"};
+   private static final String[] COLUMNS  = {
+    "Ảnh", "Mã SP", "Tên sản phẩm", 
+    "Danh mục", "Kích cỡ", "Màu sắc", "Trạng thái",
+    "Giá bán", "Tồn kho", "Thao tác"
+};
+   private static final int      COL_ACTION = 9 ;
 
     // =====================================================================
     public ProductManagementPanel() {
@@ -193,12 +200,23 @@ public class ProductManagementPanel extends JPanel {
         table.getColumnModel().getColumn(2).setPreferredWidth(200);
         table.getColumnModel().getColumn(3).setCellRenderer(centerR);
         table.getColumnModel().getColumn(3).setPreferredWidth(100);
-        table.getColumnModel().getColumn(4).setCellRenderer(rightR);
-        table.getColumnModel().getColumn(4).setPreferredWidth(120);
-        table.getColumnModel().getColumn(5).setCellRenderer(centerR);
-        table.getColumnModel().getColumn(5).setPreferredWidth(80);
-        table.getColumnModel().getColumn(COL_ACTION).setPreferredWidth(140);
+        
+        table.getColumnModel().getColumn(4).setCellRenderer(centerR); // Kích cỡ
+        table.getColumnModel().getColumn(4).setPreferredWidth(80);
 
+        table.getColumnModel().getColumn(5).setCellRenderer(centerR); // Màu sắc
+        table.getColumnModel().getColumn(5).setPreferredWidth(100);
+
+        table.getColumnModel().getColumn(6).setCellRenderer(centerR); // Trạng thái
+        table.getColumnModel().getColumn(6).setPreferredWidth(100);
+
+        table.getColumnModel().getColumn(7).setCellRenderer(rightR); // Giá
+        table.getColumnModel().getColumn(7).setPreferredWidth(120);
+
+        table.getColumnModel().getColumn(8).setCellRenderer(centerR); // Tồn kho
+        table.getColumnModel().getColumn(8).setPreferredWidth(80);
+
+        table.getColumnModel().getColumn(9).setPreferredWidth(140); // Action
         table.getColumnModel().getColumn(COL_ACTION).setCellRenderer(new ActionCellRenderer());
         table.getColumnModel().getColumn(COL_ACTION).setCellEditor(new ActionCellEditor());
 
@@ -230,6 +248,9 @@ public class ProductManagementPanel extends JPanel {
                 sp.getMaSP(),
                 sp.getTenSP(),
                 sp.getMaDM(),
+                sp.getKichCo(),
+                sp.getMauSac(),
+                sp.getTrangThai(),
                 df.format(sp.getGiaBan()),
                 sp.getSoLuongTon(),
                 ""
@@ -287,23 +308,36 @@ public class ProductManagementPanel extends JPanel {
         // Các field — điền sẵn nếu đang sửa
         JTextField fieldMa     = makeField(isEdit ? existing.getMaSP()               : "");
         JTextField fieldTen    = makeField(isEdit ? existing.getTenSP()              : "");
-        JTextField fieldDM     = makeField(isEdit ? existing.getMaDM()               : "");
+       JComboBox<DanhMuc> cbDanhMuc = new JComboBox<>();
+       DanhMucDAO daoDM = new DanhMucDAO();
+        List<DanhMuc> listDM = daoDM.getAllDanhMuc();
+
+            for (DanhMuc dm : listDM) {
+                cbDanhMuc.addItem(dm);
+            }     
         JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
         JTextField fieldTon    = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
-        JTextField fieldMauSac = makeField(isEdit ? existing.getMauSac()             : "");
-        JTextField fieldKichCo = makeField(isEdit ? existing.getKichCo()             : "");
+        JComboBox<String> cbMauSac = new JComboBox<>(new String[]{
+            "Đen", "Trắng", "Xám", "Xanh", "Đỏ"        });
+
+        JComboBox<String> cbKichCo = new JComboBox<>(new String[]{
+            "S", "M", "L", "XL", "XXL"        });
+
+        JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
+            "Đang bán", "Ngừng bán"        });
         JTextField fieldAnh    = makeField(isEdit ? existing.getHinhAnh()            : "");
 
         fieldMa.setEditable(!isEdit); // Không cho sửa mã khi đang edit
 
         addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
         addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
-        addRow(form, gbc, 2, "Mã danh mục:",  fieldDM);
+        addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
         addRow(form, gbc, 3, "Giá bán (đ):",  fieldGia);
         addRow(form, gbc, 4, "Tồn kho:",       fieldTon);
-        addRow(form, gbc, 5, "Màu sắc:",       fieldMauSac);
-        addRow(form, gbc, 6, "Kích cỡ:",       fieldKichCo);
-        addRow(form, gbc, 7, "Tên file ảnh:",  fieldAnh);
+        addRowCombo(form, gbc, 5, "Màu sắc:", cbMauSac);
+        addRowCombo(form, gbc, 6, "Kích cỡ:", cbKichCo);
+        addRowCombo(form, gbc, 7, "Trạng thái:", cbTrangThai);
+        addRow(form, gbc, 8, "Tên file ảnh:",  fieldAnh);
 
         // ----- Nút Lưu / Hủy -----
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -336,28 +370,41 @@ public class ProductManagementPanel extends JPanel {
             }
 
             if (isEdit) {
+
+                for (int i = 0; i < cbDanhMuc.getItemCount(); i++) {
+                    DanhMuc dm = cbDanhMuc.getItemAt(i);
+                    if (dm.getMaDM().equals(existing.getMaDM())) {
+                        cbDanhMuc.setSelectedIndex(i);
+                        break;
+                     }
+                 }
+                
                 // Cập nhật thông tin sản phẩm đang sửa
                 existing.setTenSP(fieldTen.getText().trim());
-                existing.setMaDM(fieldDM.getText().trim());
+                DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
+                existing.setMaDM(dm.getMaDM());
                 existing.setGiaBan(gia);
                 existing.setSoLuongTon(ton);
-                existing.setMauSac(fieldMauSac.getText().trim());
-                existing.setKichCo(fieldKichCo.getText().trim());
+                existing.setMauSac(cbMauSac.getSelectedItem().toString());
+                existing.setKichCo(cbKichCo.getSelectedItem().toString());
+                 existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
                 existing.setHinhAnh(fieldAnh.getText().trim());
                 // TODO: gọi DAO cập nhật xuống database
             } else {
                 // Tạo sản phẩm mới
+                DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
+
                 SanPham sp = new SanPham(
-                        fieldMa.getText().trim(),
-                        fieldDM.getText().trim(),
-                        fieldMauSac.getText().trim(),
-                        fieldKichCo.getText().trim(),
-                        gia,
-                        ton,
-                        "DANG_BAN",
-                        fieldTen.getText().trim(),
-                        "",           // maKho — để trống hoặc thêm field nếu cần
-                        fieldAnh.getText().trim()
+                    fieldMa.getText().trim(),
+                    dm.getMaDM(),
+                    cbMauSac.getSelectedItem().toString(),
+                    cbKichCo.getSelectedItem().toString(),
+                    gia,
+                    ton,
+                    cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
+                    fieldTen.getText().trim(),
+                    "", 
+                    fieldAnh.getText().trim()
                 );
                 products.add(sp);
                 // TODO: gọi DAO lưu xuống database
@@ -475,6 +522,23 @@ public class ProductManagementPanel extends JPanel {
     //  HELPER — FORM & STYLE
     // =====================================================================
 
+    private void addRowCombo(JPanel form, GridBagConstraints gbc, int row, String label, JComboBox<?> combo) {
+            gbc.gridx = 0; 
+            gbc.gridy = row; 
+            gbc.weightx = 0.3;
+
+            JLabel lbl = new JLabel(label);
+            lbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lbl.setForeground(new Color(60, 60, 60));
+            form.add(lbl, gbc);
+
+            gbc.gridx = 1; 
+            gbc.weightx = 0.7;
+
+            combo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            combo.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+            form.add(combo, gbc);
+}
     private JTextField makeField(String value) {
         JTextField f = new JTextField(value, 22);
         f.setFont(new Font("Segoe UI", Font.PLAIN, 14));

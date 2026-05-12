@@ -42,7 +42,26 @@ public class DanhMucDAO {
 
         return list;
     }
+    // ===== LẤY TẤT CẢ MÃ DANH MỤC =====
+    public List<String> getAllMaDanhMuc() {
+    List<String> list = new ArrayList<>();
+    String sql = "SELECT MADM FROM DANHMUC";
 
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(sql);
+         ResultSet rs = pst.executeQuery()) {
+
+        while (rs.next()) {
+            list.add(rs.getString("MADM"));
+        }
+
+    } catch (Exception e) {
+        System.out.println("Lỗi DAO: Không thể lấy mã danh mục!");
+        e.printStackTrace();
+    }
+
+    return list;
+}
     // ===== LẤY SẢN PHẨM THEO DANH MỤC =====
     // Dùng chung Connection để tránh mở/đóng nhiều lần trong vòng lặp
     private List<SanPham> getSanPhamTheoDM(Connection conn, String maDM) {
