@@ -142,34 +142,42 @@ public class QuanLyUI extends JFrame {
         panel.add(label, BorderLayout.CENTER);
 
         // ===== Sự kiện chuột =====
-        panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // CHỈNH SỬA: Logic thay đổi trang khi click
-                if (text.equals("THỐNG KÊ HÀNG TỒN")) {
-                    content.removeAll(); // Xóa màn hình chào mừng
-                    content.add(new ThongKeHangTon(), BorderLayout.CENTER); // Nạp trang thống kê
-                    content.revalidate();
-                    content.repaint();
-                }
-            }
+        // ===== Sự kiện chuột khôi phục cho Doanh thu =====
+panel.addMouseListener(new MouseAdapter() {
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        // Logic thay đổi trang khi click
+        if (text.equals("THỐNG KÊ HÀNG TỒN")) {
+            content.removeAll(); 
+            content.add(new ThongKeHangTon(), BorderLayout.CENTER); 
+            content.revalidate();
+            content.repaint();
+        } 
+        // --- ĐOẠN KHÔI PHỤC CHO BÁO CÁO DOANH THU ---
+        else if (text.equals("THỐNG KÊ DOANH THU")) {
+            content.removeAll();
+            content.add(new ThongKeDoanhThu(), BorderLayout.CENTER); // Nạp trang doanh thu
+            content.revalidate();
+            content.repaint();
+        }
+    }
 
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                panel.setBackground(HOVER_BG);
-                label.setForeground(BRAND_GOLD);
-                panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
-                setCursor(new Cursor(Cursor.HAND_CURSOR));
-            }
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        panel.setBackground(HOVER_BG);
+        label.setForeground(BRAND_GOLD);
+        panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                panel.setBackground(SIDEBAR_BG);
-                label.setForeground(TEXT_LIGHT);
-                panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
-                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            }
-        });
+    @Override
+    public void mouseExited(MouseEvent e) {
+        panel.setBackground(SIDEBAR_BG);
+        label.setForeground(TEXT_LIGHT);
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+});
 
         return panel;
     }
