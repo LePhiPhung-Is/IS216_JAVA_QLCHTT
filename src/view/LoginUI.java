@@ -170,6 +170,10 @@ btnLogin.addActionListener(e -> {
         
         // Đóng trang LoginUI hiện tại
         this.dispose(); 
+    } else if (user.equals("kho") && pass.equals("123")) {
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền Nhân viên Kho!");
+                new NV_Kho_UI().setVisible(true); // Mở giao diện Nhân viên Kho
+                this.dispose();
     } else {
         JOptionPane.showMessageDialog(this, "Sai tài khoản!");
     }
