@@ -46,4 +46,46 @@ public class SanPhamDAO {
         }
         return list;
     }
+    // =======================================================
+    // HÀM MỚI: TÌM KIẾM SẢN PHẨM ĐỂ BÁN HÀNG TẠI QUẦY
+    // =======================================================
+    public SanPham timKiemSanPham(String tuKhoa) {
+        SanPham sp = null;
+        // Tìm theo Mã (chính xác) hoặc Tên SP (gần đúng)
+        String sql = "SELECT MASP, MADM, MAUSAC, KICHCO, GIABAN, SOLUONGTON, TRANGTHAI, TENSP, MAKHO, HINHANH " +
+                     "FROM SANPHAM WHERE UPPER(MASP) = ? OR UPPER(TENSP) LIKE ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+
+            // Truyền tham số (Chuyển hết thành in hoa để tìm kiếm không phân biệt hoa thường)
+            pst.setString(1, tuKhoa.toUpperCase());
+            pst.setString(2, "%" + tuKhoa.toUpperCase() + "%");
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    String ma = rs.getString("MASP");
+                    String maDM = rs.getString("MADM");
+                    String mauSac = rs.getString("MAUSAC");
+                    String kichCo = rs.getString("KICHCO");
+                    double gia = rs.getDouble("GIABAN");
+                    int tonKho = rs.getInt("SOLUONGTON");
+                    String trangThai = rs.getString("TRANGTHAI");
+                    String ten = rs.getString("TENSP");
+                    String maKho = rs.getString("MAKHO");
+                    
+                    String anh = rs.getString("HINHANH");
+                    if (anh == null || anh.trim().isEmpty()) {
+                        anh = "no_image.png"; 
+                    }
+
+                    sp = new SanPham(ma, maDM, mauSac, kichCo, gia, tonKho, trangThai, ten, maKho, anh);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Lỗi DAO: Không thể tìm kiếm Sản Phẩm!");
+            e.printStackTrace();
+        }
+        return sp; // Trả về null nếu không tìm thấy
+    }
 }

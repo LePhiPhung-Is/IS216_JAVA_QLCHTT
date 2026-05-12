@@ -1,34 +1,35 @@
 package src.model;
 
-    public class KhachHang {
+public class KhachHang {
     private String maKH;
     private String tenKH;
-    private String soDienThoai;
-    private String diaChi;
+    private String sdt;
+    private int diemTichLuy;
+    private String email;
+    private String tenDangNhap;
 
-   
-    public KhachHang() {
-    }
+    public KhachHang() {}
 
-    
-    public KhachHang(String maKH, String tenKH, String soDienThoai, String diaChi) {
+    public KhachHang(String maKH, String tenKH, String sdt, int diemTichLuy, String email, String tenDangNhap) {
         this.maKH = maKH;
         this.tenKH = tenKH;
-        this.soDienThoai = soDienThoai;
-        this.diaChi = diaChi;
+        this.sdt = sdt;
+        this.diemTichLuy = diemTichLuy;
+        this.email = email;
+        this.tenDangNhap = tenDangNhap;
     }
 
-    
+    // Getter & Setter
     public String getMaKH() { return maKH; }
     public void setMaKH(String maKH) { this.maKH = maKH; }
-
     public String getTenKH() { return tenKH; }
     public void setTenKH(String tenKH) { this.tenKH = tenKH; }
-
-    public String getSoDienThoai() { return soDienThoai; }
-    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
-
-    public String getDiaChi() { return diaChi; }
-    public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
+    public String getSdt() { return sdt; }
+    public void setSdt(String sdt) { this.sdt = sdt; }
+    public int getDiemTichLuy() { return diemTichLuy; }
+    public void setDiemTichLuy(int diemTichLuy) { this.diemTichLuy = diemTichLuy; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getTenDangNhap() { return tenDangNhap; }
+    public void setTenDangNhap(String tenDangNhap) { this.tenDangNhap = tenDangNhap; }
 }
-

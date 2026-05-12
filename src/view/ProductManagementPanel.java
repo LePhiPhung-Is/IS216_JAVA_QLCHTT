@@ -208,7 +208,7 @@ public class ProductManagementPanel extends JPanel {
             String tenFileAnh = sp.getHinhAnh() != null ? sp.getHinhAnh().trim() : "no_image.png";
             if (tenFileAnh.isEmpty()) tenFileAnh = "no_image.png";
 
-            // ĐƯỜNG DẪN MỚI CHUẨN XÁC: src/product_images/
+        System.out.println("Đang load ảnh SP: " + sp.getMaSP() + " | Tên file DB trả về: [" + tenFileAnh + "]");
             ImageIcon imageIcon = loadImage("src/assets/product_images/" + tenFileAnh, 60, 60);
             
             tableModel.addRow(new Object[]{
@@ -224,28 +224,26 @@ public class ProductManagementPanel extends JPanel {
     }
 
   // ===== HÀM TEST LỖI ẢNH (Tạm thời) =====
-    private ImageIcon loadImage(String fileName, int width, int height) {
+    // ===== HÀM LOAD ẢNH CHUẨN =====
+    private ImageIcon loadImage(String filePath, int width, int height) {
         try {
-            // CHÚ Ý: Đảm bảo tên file này đúng y hệt 100% với tên file trong VS Code của bạn
-            String tenAnhTest = "ao_so_mi.jpg"; 
+            // Dùng trực tiếp filePath được truyền vào từ refreshTableModel
+            File f = new File(filePath); 
             
-            File f = new File("src/assets/product_images/" + tenAnhTest);
-            
-            // In đường dẫn tuyệt đối ra Terminal để bạn tự kiểm tra
-            System.out.println("=========================================");
-            System.out.println("JAVA ĐANG TÌM ẢNH TẠI ĐỊA CHỈ NÀY:");
-            System.out.println(f.getAbsolutePath());
-            System.out.println("File có thực sự tồn tại không? -> " + f.exists());
-            System.out.println("=========================================");
-
             if (f.exists()) {
                 ImageIcon icon = new ImageIcon(f.getAbsolutePath());
                 Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
                 return new ImageIcon(img);
             } else {
-                return new ImageIcon(); // Trả về ảnh rỗng nếu không tìm thấy
+                // Trả về ảnh mặc định nếu không tìm thấy file
+                File defaultImg = new File("src/assets/product_images/no_image.png");
+                if(defaultImg.exists()) {
+                     ImageIcon icon = new ImageIcon(defaultImg.getAbsolutePath());
+                     Image img = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                     return new ImageIcon(img);
+                }
+                return new ImageIcon(); 
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             return new ImageIcon();
