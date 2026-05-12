@@ -209,7 +209,7 @@ public class ProductManagementPanel extends JPanel {
             if (tenFileAnh.isEmpty()) tenFileAnh = "no_image.png";
 
             // ĐƯỜNG DẪN MỚI CHUẨN XÁC: src/product_images/
-            ImageIcon imageIcon = loadImage("src/product_images/" + tenFileAnh, 60, 60);
+            ImageIcon imageIcon = loadImage("src/assets/product_images/" + tenFileAnh, 60, 60);
             
             tableModel.addRow(new Object[]{
                 imageIcon, 
@@ -229,7 +229,7 @@ public class ProductManagementPanel extends JPanel {
             // CHÚ Ý: Đảm bảo tên file này đúng y hệt 100% với tên file trong VS Code của bạn
             String tenAnhTest = "ao_so_mi.jpg"; 
             
-            File f = new File("src/product_images/" + tenAnhTest);
+            File f = new File("src/assets/product_images/" + tenAnhTest);
             
             // In đường dẫn tuyệt đối ra Terminal để bạn tự kiểm tra
             System.out.println("=========================================");
