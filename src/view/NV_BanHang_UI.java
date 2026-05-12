@@ -15,11 +15,14 @@ public class NV_BanHang_UI extends JFrame {
     private final Color TEXT_LIGHT = new Color(209, 209, 209);
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
+    
 
     // ================= CARD LAYOUT =================
     private CardLayout cardLayout;
     private JPanel content;
-
+    
+    private boolean isCollapsed = false;
+    private JPanel sidebar;
     public NV_BanHang_UI() {
 
         setTitle("Nhân viên bán hàng");
@@ -27,14 +30,52 @@ public class NV_BanHang_UI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        
+       //Hàm Toggle
+       
+
 
         // ================= SIDEBAR =================
-        JPanel sidebar = new JPanel();
+        sidebar = new JPanel();
         sidebar.setPreferredSize(new Dimension(280, 700));
         sidebar.setBackground(SIDEBAR_BG);
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, HOVER_BG));
+        //============== chỉ đổi màu chữ
+        JButton btnToggle = new JButton("☰");
+        btnToggle.setText("☰");
+        
 
+        // màu nền đồng bộ sidebar
+        btnToggle.setBackground(SIDEBAR_BG);
+        btnToggle.setOpaque(true);
+
+        // bỏ viền + focus
+        btnToggle.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        btnToggle.setFocusPainted(false);
+
+        // màu icon mặc định
+        btnToggle.setForeground(TEXT_LIGHT);
+
+        // cursor tay
+        btnToggle.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btnToggle.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnToggle.setForeground(BRAND_GOLD);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnToggle.setForeground(TEXT_LIGHT);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                toggleSidebar(); // 👈 THÊM DÒNG NÀY
+            }
+});
         // ================= LOGO =================
         JLabel brandLabel = new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
         brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -44,6 +85,7 @@ public class NV_BanHang_UI extends JFrame {
 
         JPanel brandPanel = new JPanel(new BorderLayout());
         brandPanel.setBackground(SIDEBAR_BG);
+        brandPanel.add(btnToggle, BorderLayout.WEST);
         brandPanel.add(brandLabel, BorderLayout.CENTER);
         brandPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR));
         brandPanel.setMaximumSize(new Dimension(280, 100));
@@ -106,7 +148,7 @@ public class NV_BanHang_UI extends JFrame {
 
         menuPanel.add(dividerContainer);
         menuPanel.add(createMenuItem("ĐĂNG XUẤT", "logout"));
-
+        
         sidebar.add(brandPanel);
         sidebar.add(userPanel);
         sidebar.add(menuPanel);
@@ -182,7 +224,18 @@ public class NV_BanHang_UI extends JFrame {
 
         return panel;
     }
+    //Hàm toggle 
+    private void toggleSidebar() {
+        isCollapsed = !isCollapsed;
 
+        if (isCollapsed) {
+            sidebar.setPreferredSize(new Dimension(80, getHeight()));
+        } else {
+            sidebar.setPreferredSize(new Dimension(280, getHeight()));
+        }
+
+        sidebar.revalidate();
+    }
     // ================= MAIN =================
     public static void main(String[] args) {
 

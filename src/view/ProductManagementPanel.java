@@ -394,18 +394,18 @@ public class ProductManagementPanel extends JPanel {
                 // Tạo sản phẩm mới
                 DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
 
-                SanPham sp = new SanPham(
-                    fieldMa.getText().trim(),
-                    dm.getMaDM(),
-                    cbMauSac.getSelectedItem().toString(),
-                    cbKichCo.getSelectedItem().toString(),
-                    gia,
-                    ton,
-                    cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
-                    fieldTen.getText().trim(),
-                    "", 
-                    fieldAnh.getText().trim()
-                );
+            SanPham sp = new SanPham(
+                fieldMa.getText().trim(),
+                dm.getMaDM(),
+                cbMauSac.getSelectedItem().toString(),
+                cbKichCo.getSelectedItem().toString(),
+                gia,
+                ton,
+                cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
+                fieldTen.getText().trim(),
+                "", 
+                fieldAnh.getText().trim()
+            );
                 products.add(sp);
                 // TODO: gọi DAO lưu xuống database
             }
@@ -446,8 +446,8 @@ public class ProductManagementPanel extends JPanel {
 
     class ActionCellRenderer implements TableCellRenderer {
         private final JPanel  panel   = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 15));
-        private final JButton editBtn = makeBtn("✏", EDIT_BLUE);
-        private final JButton delBtn  = makeBtn("🗑", DELETE_RED);
+        private final JButton editBtn = makeBtn("Sửa", EDIT_BLUE);
+        private final JButton delBtn  = makeBtn("Xóa", DELETE_RED);
 
         ActionCellRenderer() {
             panel.setOpaque(true);
