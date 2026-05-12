@@ -200,8 +200,8 @@ public class CategoryManagementPanel extends JPanel {
 
     class CatActionRenderer implements TableCellRenderer {
         private final JPanel  panel  = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 11));
-        private final JButton edit   = makeBtn("✏", EDIT_BLUE);
-        private final JButton delete = makeBtn("🗑", DELETE_RED);
+        private final JButton edit   = makeBtn("Sửa", EDIT_BLUE);
+        private final JButton delete = makeBtn("Xóa", DELETE_RED);
 
         CatActionRenderer() {
             panel.setOpaque(true);
