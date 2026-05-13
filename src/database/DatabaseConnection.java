@@ -13,7 +13,7 @@ public class DatabaseConnection {
 
 
     // ĐIỀN THÔNG TIN TÀI KHOẢN ORACLE CỦA BẠN VÀO ĐÂY
-    private static final String USERNAME = "c##FASHION"; // Ví dụ: system, hr, hoặc user bạn tự tạo
+    private static final String USERNAME = "sinhvien02"; // Ví dụ: system, hr, hoặc user bạn tự tạo
     private static final String PASSWORD = "123";
     // 2. Hàm tạo kết nối
     public static Connection getConnection() {
