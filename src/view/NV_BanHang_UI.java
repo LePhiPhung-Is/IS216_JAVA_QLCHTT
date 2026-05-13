@@ -227,25 +227,10 @@ public class NV_BanHang_UI extends JFrame {
 
         // ===== PANEL THẬT =====
         content.add(new ProductManagementPanel(), "product");
-
-        content.add(
-                createPage("QUẢN LÝ KHÁCH HÀNG"),
-                "customer"
-        );
-
-        content.add(
-                createPage("QUẢN LÝ DANH MỤC"),
-                "category"
-        );
-
+        content.add(new CategoryManagementPanel(), "category");
+        content.add(new DoiTraPanel(), "return");
         // ===== PANEL ĐƠN HÀNG =====
         content.add(new QuanLyDonHangPanel(), "order");
-
-        content.add(
-                createPage("XỬ LÝ ĐỔI TRẢ"),
-                "return"
-        );
-
         // =====================================================
         // ADD FRAME
         // =====================================================
