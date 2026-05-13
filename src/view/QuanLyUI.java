@@ -16,12 +16,12 @@ public class QuanLyUI extends JFrame {
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
 
-    // CHỈNH SỬA: Đưa content ra làm biến toàn cục để hàm createMenuItem có thể sử dụng
-    private JPanel content;
+    // ================= CARD LAYOUT =================
+    private CardLayout cardLayout;
+    private JPanel contentPanel;
 
     public QuanLyUI() {
-
-        setTitle("Dashboard");
+        setTitle("Dashboard - Quản Lý");
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -87,49 +87,66 @@ public class QuanLyUI extends JFrame {
         menuPanel.setBackground(SIDEBAR_BG);
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        // ===== Các mục Menu =====
-        menuPanel.add(createMenuItem("QUẢN LÝ NHÂN VIÊN"));
-        menuPanel.add(createMenuItem("QUẢN LÝ NHÀ CUNG CẤP"));
-        menuPanel.add(createMenuItem("QUẢN LÝ KHUYẾN MÃI"));
-        menuPanel.add(createMenuItem("THỐNG KÊ DOANH THU"));
-        menuPanel.add(createMenuItem("THỐNG KÊ HÀNG TỒN"));
+        // Gắn Tag nhận diện cho từng màn hình
+        menuPanel.add(createMenuItem("QUẢN LÝ NHÂN VIÊN", "NHAN_VIEN"));
+        menuPanel.add(createMenuItem("QUẢN LÝ NHÀ CUNG CẤP", "NHA_CUNG_CAP"));
+        menuPanel.add(createMenuItem("QUẢN LÝ KHUYẾN MÃI", "KHUYEN_MAI"));
+        menuPanel.add(createMenuItem("THỐNG KÊ DOANH THU", "DOANH_THU"));
+        menuPanel.add(createMenuItem("THỐNG KÊ HÀNG TỒN", "TON_KHO"));
 
-        // ===== Divider =====
+        // ===== DIVIDER =====
         JPanel divider = new JPanel();
         divider.setBackground(DIVIDER_COLOR);
         divider.setMaximumSize(new Dimension(230, 1));
+
         JPanel dividerContainer = new JPanel();
         dividerContainer.setBackground(SIDEBAR_BG);
         dividerContainer.setBorder(new EmptyBorder(20, 0, 20, 0));
         dividerContainer.add(divider);
 
         menuPanel.add(dividerContainer);
-        menuPanel.add(createMenuItem("ĐĂNG XUẤT"));
+        menuPanel.add(createMenuItem("ĐĂNG XUẤT", "DANG_XUAT"));
 
-        // ===== Add Sidebar =====
         sidebar.add(brandPanel);
         sidebar.add(userPanel);
         sidebar.add(menuPanel);
         sidebar.add(Box.createVerticalGlue());
 
-        // ================= CONTENT =================
-        // CHỈNH SỬA: Khởi tạo biến content (không viết JPanel phía trước)
-        content = new JPanel();
-        content.setBackground(MAIN_BG);
-        content.setLayout(new BorderLayout());
+        // ================= CONTENT (DÙNG CARD LAYOUT) =================
+        cardLayout = new CardLayout();
+        contentPanel = new JPanel(cardLayout);
+        contentPanel.setBackground(MAIN_BG);
 
-        JLabel welcome = new JLabel("WELCOME ADMIN", SwingConstants.CENTER);
-        welcome.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        welcome.setForeground(Color.GRAY);
-        content.add(welcome, BorderLayout.CENTER);
+        // Khởi tạo và nạp sẵn tất cả các Panel
+        contentPanel.add(createPage("WELCOME ADMIN"), "WELCOME");
+        
+        // Thêm các class thực tế của nhóm 8
+        contentPanel.add(new QuanLyNhanVienUI(), "NHAN_VIEN");
+        contentPanel.add(new ThongKeHangTon(), "TON_KHO");
+        contentPanel.add(new QuanLyNhaCungCap(), "NHA_CUNG_CAP");
+        contentPanel.add(new ThongKeDoanhThu(), "DOANH_THU");
+        
+        // Trang chưa code xong dùng tạm placeholder
+        contentPanel.add(createPage("QUẢN LÝ KHUYẾN MÃI"), "KHUYEN_MAI");
 
-        // ================= ADD FRAME =================
+        cardLayout.show(contentPanel, "WELCOME");
+
         add(sidebar, BorderLayout.WEST);
-        add(content, BorderLayout.CENTER);
+        add(contentPanel, BorderLayout.CENTER);
     }
 
-    // ================= MENU ITEM =================
-    private JPanel createMenuItem(String text) {
+    private JPanel createPage(String title) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(MAIN_BG);
+        JLabel lbl = new JLabel(title, SwingConstants.CENTER);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lbl.setForeground(Color.GRAY);
+        p.add(lbl, BorderLayout.CENTER);
+        return p;
+    }
+
+    // ================= MENU ITEM (ĐÃ FIX LỖI NGOẶC) =================
+    private JPanel createMenuItem(String text, String cardName) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(SIDEBAR_BG);
         panel.setMaximumSize(new Dimension(280, 50));
@@ -139,57 +156,47 @@ public class QuanLyUI extends JFrame {
         label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         label.setForeground(TEXT_LIGHT);
         label.setBorder(new EmptyBorder(10, 25, 10, 20));
+
         panel.add(label, BorderLayout.CENTER);
 
-        // ===== Sự kiện chuột =====
-        // ===== Sự kiện chuột khôi phục cho Doanh thu =====
-// ===== Sự kiện chuột cập nhật cho Quản lý nhà cung cấp =====
-panel.addMouseListener(new MouseAdapter() {
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        // Logic thay đổi trang khi click
-        if (text.equals("THỐNG KÊ HÀNG TỒN")) {
-            content.removeAll(); 
-            content.add(new ThongKeHangTon(), BorderLayout.CENTER); 
-            content.revalidate();
-            content.repaint();
-        } 
-        else if (text.equals("THỐNG KÊ DOANH THU")) {
-            content.removeAll();
-            content.add(new ThongKeDoanhThu(), BorderLayout.CENTER); 
-            content.revalidate();
-            content.repaint();
-        }
-        // --- ĐOẠN THÊM MỚI CHO QUẢN LÝ NHÀ CUNG CẤP ---
-        else if (text.equals("QUẢN LÝ NHÀ CUNG CẤP")) {
-            content.removeAll();
-            content.add(new QuanLyNhaCungCap(), BorderLayout.CENTER); // Nạp giao diện quản lý NCC
-            content.revalidate();
-            content.repaint();
-        }
-    }
+        panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (cardName.equals("DANG_XUAT")) {
+                    int confirm = JOptionPane.showConfirmDialog(
+                            QuanLyUI.this,
+                            "Bạn có chắc muốn đăng xuất?",
+                            "Xác nhận",
+                            JOptionPane.YES_NO_OPTION
+                    );
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        dispose();
+                    }
+                } else {
+                    cardLayout.show(contentPanel, cardName);
+                }
+            }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        panel.setBackground(HOVER_BG);
-        label.setForeground(BRAND_GOLD);
-        panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
-        setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                panel.setBackground(HOVER_BG);
+                label.setForeground(BRAND_GOLD);
+                panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
 
-    @Override
-    public void mouseExited(MouseEvent e) {
-        panel.setBackground(SIDEBAR_BG);
-        label.setForeground(TEXT_LIGHT);
-        panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
-        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-    }
-});
+            @Override
+            public void mouseExited(MouseEvent e) {
+                panel.setBackground(SIDEBAR_BG);
+                label.setForeground(TEXT_LIGHT);
+                panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
 
         return panel;
     }
 
-    // ================= MAIN =================
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
