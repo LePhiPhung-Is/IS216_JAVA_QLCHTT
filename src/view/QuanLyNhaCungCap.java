@@ -169,13 +169,20 @@ public class QuanLyNhaCungCap extends JPanel {
         g.insets = new Insets(8, 20, 8, 20);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField m = new JTextField(data != null ? data[0].toString() : "");
-        if (data != null) m.setEditable(false);
+        // VÁ LỖI TẠI ĐÂY: Kiểm tra null an toàn trước khi gọi .toString()
+        String strMa = (data != null && data[0] != null) ? data[0].toString() : "";
+        String strTen = (data != null && data[1] != null) ? data[1].toString() : "";
+        String strDiaChi = (data != null && data[2] != null) ? data[2].toString() : "";
+        String strSDT = (data != null && data[3] != null) ? data[3].toString() : "";
+        String strEmail = (data != null && data[4] != null) ? data[4].toString() : "";
+
+        JTextField m = new JTextField(strMa);
+        if (data != null) m.setEditable(false); // Mã không được sửa
         
-        JTextField t = new JTextField(data != null ? data[1].toString() : "");
-        JTextField d = new JTextField(data != null ? data[2].toString() : "");
-        JTextField s = new JTextField(data != null ? data[3].toString() : "");
-        JTextField e = new JTextField(data != null ? data[4].toString() : "");
+        JTextField t = new JTextField(strTen);
+        JTextField d = new JTextField(strDiaChi);
+        JTextField s = new JTextField(strSDT);
+        JTextField e = new JTextField(strEmail);
 
         addField(dialog, "Mã NCC:", m, g, 0);
         addField(dialog, "Tên đối tác:", t, g, 1);
@@ -200,6 +207,9 @@ public class QuanLyNhaCungCap extends JPanel {
             if (executeDBUpdate(data == null ? "INSERT" : "UPDATE", m, t, d, s, e)) {
                 dialog.dispose();
                 loadData();
+            } else {
+                // Thêm thông báo nếu update thất bại (tránh để giao diện đứng im)
+                JOptionPane.showMessageDialog(dialog, "Lỗi: Không thể cập nhật dữ liệu. Vui lòng kiểm tra lại!");
             }
         });
         dialog.setVisible(true);
@@ -298,7 +308,6 @@ public class QuanLyNhaCungCap extends JPanel {
                             fireEditingStopped();
                             loadData();
                         } catch (SQLException ex) { 
-                            // Xử lý lỗi ràng buộc khóa ngoại (ORA-02292)
                             if (ex.getErrorCode() == 2292) {
                                 JOptionPane.showMessageDialog(null, "Không thể xóa! Nhà cung cấp này đã có dữ liệu liên quan trong các phiếu nhập.");
                             } else {

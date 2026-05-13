@@ -12,6 +12,10 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Thống kê hàng tồn - BEAUTY SHOP
+ * Sinh viên thực hiện: ĐOÀN XUÂN CHIẾN - MSSV: 24520217
+ */
 public class ThongKeHangTon extends JPanel {
     private JComboBox<String> cbDanhMuc;
     private JButton btnThongKe, btnXuatBaoCao;
@@ -29,6 +33,11 @@ public class ThongKeHangTon extends JPanel {
         setBorder(new EmptyBorder(20, 20, 20, 20));
         setBackground(new Color(244, 247, 246));
         initComponents();
+        
+        // Nạp danh mục từ DB ngay khi khởi tạo
+        loadComboBox(); 
+        // Chạy thống kê mặc định lần đầu
+        queryStockNow(); 
     }
 
     private void initComponents() {
@@ -36,8 +45,10 @@ public class ThongKeHangTon extends JPanel {
         pnlHeader.setOpaque(false);
 
         pnlHeader.add(new JLabel("Lọc theo danh mục:"));
-        cbDanhMuc = new JComboBox<>(new String[]{"Tất cả", "Áo", "Quần", "Váy", "Giày", "Mũ", "Túi"});
-        cbDanhMuc.setPreferredSize(new Dimension(150, 30));
+        
+        // Khởi tạo ComboBox rỗng, dữ liệu sẽ được load từ DB
+        cbDanhMuc = new JComboBox<>();
+        cbDanhMuc.setPreferredSize(new Dimension(180, 30));
         pnlHeader.add(cbDanhMuc);
 
         btnThongKe = new JButton("Cập nhật dữ liệu");
@@ -45,8 +56,7 @@ public class ThongKeHangTon extends JPanel {
         btnThongKe.setBackground(Color.BLACK);
         btnThongKe.setForeground(Color.WHITE);
         btnThongKe.setPreferredSize(new Dimension(150, 30));
-        btnThongKe.setOpaque(true);
-        btnThongKe.setContentAreaFilled(true);
+        btnThongKe.setFocusPainted(false);
         btnThongKe.setBorderPainted(false);
         pnlHeader.add(btnThongKe);
 
@@ -55,8 +65,7 @@ public class ThongKeHangTon extends JPanel {
         btnXuatBaoCao.setBackground(BRAND_GOLD);
         btnXuatBaoCao.setForeground(Color.BLACK); 
         btnXuatBaoCao.setPreferredSize(new Dimension(120, 30));
-        btnXuatBaoCao.setOpaque(true);
-        btnXuatBaoCao.setContentAreaFilled(true);
+        btnXuatBaoCao.setFocusPainted(false);
         btnXuatBaoCao.setBorderPainted(false);
         pnlHeader.add(btnXuatBaoCao);
 
@@ -67,30 +76,63 @@ public class ThongKeHangTon extends JPanel {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
         tableKetQua = new JTable(model);
-        tableKetQua.setRowHeight(30);
+        tableKetQua.setRowHeight(35);
+        tableKetQua.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         add(new JScrollPane(tableKetQua), BorderLayout.CENTER);
 
         lblTongSoLuong = new JLabel("Tổng số lượng tồn kho: 0");
         lblTongSoLuong.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTongSoLuong.setForeground(new Color(178, 34, 34));
+        lblTongSoLuong.setBorder(new EmptyBorder(10, 0, 0, 0));
         add(lblTongSoLuong, BorderLayout.SOUTH);
 
         btnThongKe.addActionListener(e -> queryStockNow());
         btnXuatBaoCao.addActionListener(e -> moCuaSoXemTruoc());
+    }
+
+    /**
+     * TẢI DANH MỤC ĐỘNG TỪ DATABASE
+     */
+    private void loadComboBox() {
+        cbDanhMuc.removeAllItems();
+        cbDanhMuc.addItem("Tất cả");
         
-        queryStockNow();
+        String sql = "SELECT TENDM FROM DANHMUC ORDER BY MADM ASC";
+        
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                cbDanhMuc.addItem(rs.getString("TENDM"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi nạp danh mục: " + ex.getMessage());
+        }
     }
 
     private void queryStockNow() {
         model.setRowCount(0);
         int tong = 0; int stt = 1;
-        String sql = "SELECT s.MASP, s.TENSP, s.SoLuongTon FROM SANPHAM s JOIN DANHMUC d ON s.MaDM = d.MaDM ";
-        if (!cbDanhMuc.getSelectedItem().equals("Tất cả")) sql += "WHERE d.TenDM = ?";
-        sql += " ORDER BY s.SoLuongTon DESC";
+        String selected = (String) cbDanhMuc.getSelectedItem();
+        
+        // Xây dựng câu lệnh SQL có JOIN để lọc theo tên danh mục
+        String sql = "SELECT s.MASP, s.TENSP, s.SoLuongTon " +
+                     "FROM SANPHAM s JOIN DANHMUC d ON s.MaDM = d.MaDM ";
+        
+        if (selected != null && !selected.equals("Tất cả")) {
+            sql += "WHERE d.TenDM = ? ";
+        }
+        sql += "ORDER BY s.SoLuongTon DESC";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            if (!cbDanhMuc.getSelectedItem().equals("Tất cả")) pstmt.setString(1, (String)cbDanhMuc.getSelectedItem());
+            
+            if (selected != null && !selected.equals("Tất cả")) {
+                pstmt.setString(1, selected);
+            }
+            
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 int sl = rs.getInt("SoLuongTon");
@@ -98,10 +140,11 @@ public class ThongKeHangTon extends JPanel {
                 model.addRow(new Object[]{stt++, rs.getString("MASP"), rs.getString("TENSP"), sl});
             }
             lblTongSoLuong.setText("Tổng số lượng tồn kho hiện tại: " + tong);
-        } catch (SQLException ex) { ex.printStackTrace(); }
+        } catch (SQLException ex) { 
+            ex.printStackTrace(); 
+        }
     }
 
-    // --- CỬA SỔ XEM TRƯỚC VỚI NÚT BẤM MÀU MỚI ---
     private void moCuaSoXemTruoc() {
         JDialog dialog = new JDialog((Frame) null, "Xem trước báo cáo tồn kho", true);
         dialog.setSize(850, 650); 
@@ -113,27 +156,18 @@ public class ThongKeHangTon extends JPanel {
         txtPreview.setEditable(false);
         txtPreview.setText(generatePreviewContent());
 
-        // Panel chứa các nút bấm
         JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
 
-        // Nút Cập nhật Preview: Nền Vàng - Chữ Trắng
         JButton btnUpdate = new JButton("Cập nhật Preview");
-        btnUpdate.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnUpdate.setBackground(BRAND_GOLD);
         btnUpdate.setForeground(Color.WHITE);
         btnUpdate.setPreferredSize(new Dimension(150, 35));
-        btnUpdate.setOpaque(true);
-        btnUpdate.setContentAreaFilled(true);
         btnUpdate.setBorderPainted(false);
 
-        // Nút Xác nhận lưu: Nền Đen - Chữ Trắng
         JButton btnSave = new JButton("Xác nhận Lưu (.csv)");
-        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnSave.setBackground(Color.BLACK);
         btnSave.setForeground(Color.WHITE);
         btnSave.setPreferredSize(new Dimension(160, 35));
-        btnSave.setOpaque(true);
-        btnSave.setContentAreaFilled(true);
         btnSave.setBorderPainted(false);
 
         pnlBottom.add(btnUpdate);
