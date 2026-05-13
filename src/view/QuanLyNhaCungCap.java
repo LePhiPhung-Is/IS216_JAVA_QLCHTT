@@ -42,7 +42,6 @@ public class QuanLyNhaCungCap extends JPanel {
         JPanel pnlHeader = new JPanel(new BorderLayout(20, 0));
         pnlHeader.setOpaque(false);
 
-        // --- Cụm Tiêu đề (Bên trái) ---
         JPanel pnlTitle = new JPanel(new GridLayout(2, 1));
         pnlTitle.setOpaque(false);
         JLabel lblTitle = new JLabel("QUẢN LÝ NHÀ CUNG CẤP");
@@ -55,11 +54,9 @@ public class QuanLyNhaCungCap extends JPanel {
         pnlTitle.add(lblTitle);
         pnlTitle.add(lblSubTitle);
 
-        // --- Cụm Actions (Bên phải) ---
         JPanel pnlActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         pnlActions.setOpaque(false);
 
-        // Nhóm tìm kiếm
         JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         pnlSearchGroup.setOpaque(false);
         
@@ -76,7 +73,6 @@ public class QuanLyNhaCungCap extends JPanel {
         pnlSearchGroup.add(txtSearch);
         pnlSearchGroup.add(btnSearch);
         
-        // Nút thêm mới
         btnAdd = new JButton("+ Thêm nhà cung cấp");
         btnAdd.setBackground(BRAND_GOLD);
         btnAdd.setForeground(Color.WHITE);
@@ -92,7 +88,6 @@ public class QuanLyNhaCungCap extends JPanel {
         pnlHeader.add(pnlActions, BorderLayout.EAST);
         add(pnlHeader, BorderLayout.NORTH);
 
-        // Sự kiện
         btnSearch.addActionListener(e -> loadData());
         txtSearch.addActionListener(e -> loadData());
         btnAdd.addActionListener(e -> openSupplierDialog(null));
@@ -112,7 +107,6 @@ public class QuanLyNhaCungCap extends JPanel {
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setShowVerticalLines(false);
         
-        // FIX LỖI MẤT CHỮ: Thiết lập màu chữ khi được chọn là đen
         table.setSelectionBackground(new Color(235, 235, 235)); 
         table.setSelectionForeground(Color.BLACK); 
         
@@ -270,9 +264,11 @@ public class QuanLyNhaCungCap extends JPanel {
             
             JButton btnEdit = new JButton("Sửa");
             btnEdit.setBackground(ACTION_BLUE); btnEdit.setForeground(Color.WHITE);
+            btnEdit.setFont(new Font("Segoe UI", Font.BOLD, 12));
             
             JButton btnDelete = new JButton("Xóa");
             btnDelete.setBackground(ACTION_RED); btnDelete.setForeground(Color.WHITE);
+            btnDelete.setFont(new Font("Segoe UI", Font.BOLD, 12));
 
             btnEdit.addActionListener(e -> {
                 int row = table.getEditingRow();
@@ -293,11 +289,26 @@ public class QuanLyNhaCungCap extends JPanel {
                         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
                              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM NHACUNGCAP WHERE MANCC=?")) {
                             pstmt.setString(1, id);
-                            pstmt.executeUpdate();
+                            int rowsAffected = pstmt.executeUpdate();
+                            
+                            if (rowsAffected > 0) {
+                                JOptionPane.showMessageDialog(null, "Đã xóa nhà cung cấp thành công!");
+                            }
+                            
                             fireEditingStopped();
                             loadData();
-                        } catch (SQLException ex) { ex.printStackTrace(); }
-                    } else { fireEditingStopped(); }
+                        } catch (SQLException ex) { 
+                            // Xử lý lỗi ràng buộc khóa ngoại (ORA-02292)
+                            if (ex.getErrorCode() == 2292) {
+                                JOptionPane.showMessageDialog(null, "Không thể xóa! Nhà cung cấp này đã có dữ liệu liên quan trong các phiếu nhập.");
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Lỗi Database: " + ex.getMessage());
+                            }
+                            fireEditingStopped();
+                        }
+                    } else { 
+                        fireEditingStopped(); 
+                    }
                 }
             });
 

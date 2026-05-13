@@ -35,6 +35,10 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+/**
+ * Thống kê doanh thu - BEAUTY SHOP
+ * Sinh viên thực hiện: ĐOÀN XUÂN CHIẾN - MSSV: 24520217
+ */
 public class ThongKeDoanhThu extends JPanel {
     private JDateChooser dcTuNgay, dcDenNgay;
     private JButton btnThongKe, btnXuatPDF;
@@ -79,8 +83,7 @@ public class ThongKeDoanhThu extends JPanel {
         btnThongKe.setBackground(Color.BLACK);
         btnThongKe.setForeground(Color.WHITE);
         btnThongKe.setPreferredSize(new Dimension(120, 30));
-        btnThongKe.setOpaque(true);
-        btnThongKe.setContentAreaFilled(true);
+        btnThongKe.setFocusPainted(false);
         btnThongKe.setBorderPainted(false);
         pnlHeader.add(btnThongKe);
 
@@ -89,8 +92,7 @@ public class ThongKeDoanhThu extends JPanel {
         btnXuatPDF.setBackground(BRAND_GOLD);
         btnXuatPDF.setForeground(Color.BLACK);
         btnXuatPDF.setPreferredSize(new Dimension(120, 30));
-        btnXuatPDF.setOpaque(true);
-        btnXuatPDF.setContentAreaFilled(true);
+        btnXuatPDF.setFocusPainted(false);
         btnXuatPDF.setBorderPainted(false);
         pnlHeader.add(btnXuatPDF);
 
@@ -99,13 +101,14 @@ public class ThongKeDoanhThu extends JPanel {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
+        // --- TAB 1: DANH SÁCH ĐƠN HÀNG ---
         JPanel pnlTable = new JPanel(new BorderLayout());
         String[] columns = {"STT", "Mã Đơn Hàng", "Ngày Đặt", "Mã Nhân Viên", "Tổng tiền (VNĐ)"};
         model = new DefaultTableModel(columns, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
         tableOrders = new JTable(model);
-        tableOrders.setRowHeight(30);
+        tableOrders.setRowHeight(35);
         pnlTable.add(new JScrollPane(tableOrders), BorderLayout.CENTER);
 
         tableOrders.addMouseListener(new MouseAdapter() {
@@ -123,6 +126,7 @@ public class ThongKeDoanhThu extends JPanel {
 
         tabbedPane.addTab("📋 Danh Sách Đơn Hàng", pnlTable);
 
+        // --- TAB 2: BIỂU ĐỒ ---
         JPanel pnlCharts = new JPanel(new GridLayout(1, 2, 15, 15));
         pnlBarChart = new ChartPanel(null);
         pnlPieChart = new ChartPanel(null);
@@ -139,21 +143,68 @@ public class ThongKeDoanhThu extends JPanel {
         btnXuatPDF.addActionListener(e -> moCuaSoXemTruoc());
     }
 
+    /**
+     * HIỂN THỊ CHI TIẾT SẢN PHẨM TRONG ĐƠN HÀNG
+     * Đã cập nhật đúng tên cột KichCo theo bảng SANPHAM mới
+     */
     private void hienThiSanPhamCuaDonHang(String maDH) {
-        StringBuilder sb = new StringBuilder("Chi tiết sản phẩm đơn hàng: " + maDH + "\n\n");
-        String sql = "SELECT s.TenSP, ct.SoLuong, ct.ThanhTien FROM CHITIET_DONHANG ct " +
-                     "JOIN SANPHAM s ON ct.MaSP = s.MaSP WHERE ct.MaDH = ?";
+        JDialog detailDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết đơn hàng: " + maDH, true);
+        detailDialog.setSize(850, 450);
+        detailDialog.setLocationRelativeTo(this);
+        detailDialog.setLayout(new BorderLayout(15, 15));
+
+        String[] columns = {"STT", "Mã SP", "Tên Sản Phẩm", "Size", "Màu Sắc", "Đơn Giá", "SL", "Thành Tiền"};
+        DefaultTableModel detailModel = new DefaultTableModel(columns, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+        JTable detailTable = new JTable(detailModel);
+        detailTable.setRowHeight(35);
+        detailTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+
+        // SQL: Sửa s.KichThuoc -> s.KichCo cho đúng cấu trúc bảng
+        String sql = "SELECT s.MaSP, s.TenSP, s.KichCo, s.MauSac, ct.DonGia, ct.SoLuong, ct.ThanhTien " +
+                     "FROM CHITIET_DONHANG ct " +
+                     "JOIN SANPHAM s ON ct.MaSP = s.MaSP " +
+                     "WHERE ct.MaDH = ?";
+
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
             pstmt.setString(1, maDH);
             ResultSet rs = pstmt.executeQuery();
             DecimalFormat df = new DecimalFormat("#,###");
+            int stt = 1;
+
             while (rs.next()) {
-                sb.append("- ").append(rs.getString("TenSP")).append(" (x").append(rs.getInt("SoLuong"))
-                  .append("): ").append(df.format(rs.getLong("ThanhTien"))).append(" VNĐ\n");
+                detailModel.addRow(new Object[]{
+                    stt++,
+                    rs.getString("MaSP"),
+                    rs.getString("TenSP"),
+                    rs.getString("KichCo"), // Sửa tại đây
+                    rs.getString("MauSac"),
+                    df.format(rs.getLong("DonGia")),
+                    rs.getInt("SoLuong"),
+                    df.format(rs.getLong("ThanhTien"))
+                });
             }
-            JOptionPane.showMessageDialog(this, sb.toString(), "Thông tin chi tiết", JOptionPane.INFORMATION_MESSAGE);
-        } catch (SQLException ex) { ex.printStackTrace(); }
+        } catch (SQLException ex) { 
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi truy vấn chi tiết: " + ex.getMessage());
+        }
+
+        JPanel pnlContent = new JPanel(new BorderLayout());
+        pnlContent.setBorder(new EmptyBorder(15, 15, 15, 15));
+        pnlContent.setBackground(Color.WHITE);
+        pnlContent.add(new JScrollPane(detailTable), BorderLayout.CENTER);
+        detailDialog.add(pnlContent, BorderLayout.CENTER);
+        
+        JButton btnClose = new JButton("Đóng cửa sổ");
+        btnClose.addActionListener(e -> detailDialog.dispose());
+        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlBottom.add(btnClose);
+        detailDialog.add(pnlBottom, BorderLayout.SOUTH);
+
+        detailDialog.setVisible(true);
     }
 
     private void setInitialDate(JDateChooser dateChooser, boolean isStartOfMonth) {
@@ -200,27 +251,25 @@ public class ThongKeDoanhThu extends JPanel {
             try (PreparedStatement ps = conn.prepareStatement(sqlBar)) {
                 ps.setDate(1, new java.sql.Date(tu.getTime())); ps.setDate(2, new java.sql.Date(denPlusOne.getTime()));
                 ResultSet rs = ps.executeQuery();
-                while (rs.next()) barDS.addValue(rs.getDouble("DT"), "Tổng tiền", rs.getString("Ngay"));
+                while (rs.next()) barDS.addValue(rs.getDouble("DT"), "Doanh thu", rs.getString("Ngay"));
             }
             try (PreparedStatement ps = conn.prepareStatement(sqlPie)) {
                 ps.setDate(1, new java.sql.Date(tu.getTime())); ps.setDate(2, new java.sql.Date(denPlusOne.getTime()));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) pieDS.setValue(rs.getString("TenDM"), rs.getDouble("DT"));
             }
-            JFreeChart bar = ChartFactory.createBarChart("THỐNG KÊ TỔNG TIỀN THEO NGÀY", "Ngày", "VNĐ", barDS, PlotOrientation.VERTICAL, false, true, false);
-            JFreeChart pie = ChartFactory.createPieChart("TỶ TRỌNG (%)", pieDS, true, true, false);
+            JFreeChart bar = ChartFactory.createBarChart("DOANH THU THEO NGÀY", "Ngày", "VNĐ", barDS, PlotOrientation.VERTICAL, false, true, false);
+            JFreeChart pie = ChartFactory.createPieChart("CƠ CẤU DOANH THU THEO DANH MỤC", pieDS, true, true, false);
             ((PiePlot) pie.getPlot()).setLabelGenerator(new StandardPieSectionLabelGenerator("{0}: {2}"));
             pnlBarChart.setChart(bar); pnlPieChart.setChart(pie);
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
 
-    // --- CỬA SỔ XEM TRƯỚC ---
     private void moCuaSoXemTruoc() {
         JDialog dialog = new JDialog((Frame) null, "Xem trước báo cáo", true);
         dialog.setSize(1000, 700); dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout(15, 15));
 
-        // 1. THANH CHỌN NGÀY TRONG DIALOG
         JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         JDateChooser pdfTuNgay = new JDateChooser();
         pdfTuNgay.setDateFormatString("dd/MM/yyyy");
@@ -240,22 +289,18 @@ public class ThongKeDoanhThu extends JPanel {
         pnlTop.add(btnXemTruoc);
         dialog.add(pnlTop, BorderLayout.NORTH);
 
-        // 2. NỘI DUNG XEM TRƯỚC
         JEditorPane txtPreview = new JEditorPane(); 
         txtPreview.setContentType("text/html");
         txtPreview.setEditable(false);
         txtPreview.setText(generatePreviewContent(pdfTuNgay.getDate(), pdfDenNgay.getDate()));
         dialog.add(new JScrollPane(txtPreview), BorderLayout.CENTER);
 
-        // 3. NÚT LƯU Ở GÓC DƯỚI PHẢI
         JPanel pnlBtn = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
         JButton btnLuu = new JButton("Xác nhận lưu PDF");
         btnLuu.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnLuu.setBackground(BRAND_GOLD); 
         btnLuu.setForeground(Color.BLACK);
         btnLuu.setPreferredSize(new Dimension(160, 35));
-        btnLuu.setOpaque(true);
-        btnLuu.setContentAreaFilled(true);
         btnLuu.setBorderPainted(false);
         pnlBtn.add(btnLuu);
 
