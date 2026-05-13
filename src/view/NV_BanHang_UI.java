@@ -234,6 +234,13 @@ public class NV_BanHang_UI extends JFrame {
         // =====================================================
         // ADD FRAME
         // =====================================================
+
+        content.add(new ProductManagementPanel(), "product");        
+        content.add(new CustomerManagementPanel(), "customer");
+        content.add(new CategoryManagementPanel(), "category");
+      
+        content.add(createPage("ĐĂNG XUẤT"), "logout");
+
         add(sidebar, BorderLayout.WEST);
 
         add(content, BorderLayout.CENTER);

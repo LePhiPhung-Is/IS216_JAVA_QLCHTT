@@ -10,10 +10,14 @@ public class DatabaseConnection {
     // 'xe' là tên mặc định của bản Oracle Express. Nếu cài bản Enterprise, nó thường là 'orcl'
 
     private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    
+
     // ĐIỀN THÔNG TIN TÀI KHOẢN ORACLE CỦA BẠN VÀO ĐÂY
     private static final String USERNAME = "c##FASHION"; // Ví dụ: system, hr, hoặc user bạn tự tạo
     private static final String PASSWORD = "123";
+<<<<<<< HEAD
+=======
+
+>>>>>>> Quản-lí-khách-hàng-của-nhân-viên
     // 2. Hàm tạo kết nối
     public static Connection getConnection() {
         Connection connection = null;
