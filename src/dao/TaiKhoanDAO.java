@@ -28,6 +28,7 @@ public class TaiKhoanDAO {
             return false;
         }
     }
+
     // Hàm đặt lại mật khẩu mới
     public boolean datLaiMatKhau(String username, String newPassword) {
         // Lệnh UPDATE tìm đúng TENDANGNHAP để đổi MATKHAU
@@ -50,4 +51,5 @@ public class TaiKhoanDAO {
             return false;
         }
     }
+
 }
