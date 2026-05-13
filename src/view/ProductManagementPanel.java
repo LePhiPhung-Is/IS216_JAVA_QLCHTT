@@ -4,7 +4,8 @@ import src.dao.DanhMucDAO;
 import src.dao.SanPhamDAO;
 import src.model.DanhMuc;
 import src.model.SanPham;
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
@@ -278,19 +279,23 @@ public class ProductManagementPanel extends JPanel {
         }
     }
 
-    private ImageIcon loadImage(String path, int w, int h) {
-        try {
+        private ImageIcon loadImage(String path, int w, int h) {
             File f = new File(path);
-            if (f.exists()) {
-                Image img = new ImageIcon(f.getAbsolutePath()).getImage()
-                        .getScaledInstance(w, h, Image.SCALE_SMOOTH);
-                return new ImageIcon(img);
+
+            if (!f.exists()) {
+                return new ImageIcon(
+                    new ImageIcon("src/product_images/no_image.png")
+                        .getImage()
+                        .getScaledInstance(w, h, Image.SCALE_SMOOTH)
+                );
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            Image img = new ImageIcon(f.getAbsolutePath())
+                    .getImage()
+                    .getScaledInstance(w, h, Image.SCALE_SMOOTH);
+
+            return new ImageIcon(img);
         }
-        return new ImageIcon();
-    }
 
     // =====================================================================
     //  DIALOG — THÊM / SỬA SẢN PHẨM
@@ -348,10 +353,67 @@ public class ProductManagementPanel extends JPanel {
 
         JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
             "Đang bán", "Ngừng bán"        });
-        JTextField fieldAnh    = makeField(isEdit ? existing.getHinhAnh()            : "");
+        
 
         fieldMa.setEditable(!isEdit); // Không cho sửa mã khi đang edit
+        // --- Ảnh: preview + nút chọn ---
+        final String[] selectedFileName = { isEdit ? existing.getHinhAnh() : "" };
 
+        JLabel previewLabel = new JLabel();
+        previewLabel.setPreferredSize(new Dimension(70, 70));
+        previewLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Load ảnh hiện tại nếu đang sửa
+        if (isEdit && existing.getHinhAnh() != null && !existing.getHinhAnh().isEmpty()) {
+           ImageIcon icon = loadImage(
+        "src/product_images/" + existing.getHinhAnh(),
+        68, 68
+);
+previewLabel.setIcon(icon);
+            previewLabel.setText(icon.getImage().getWidth(null) > 0 ? "" : "No img");
+        } else {
+            previewLabel.setText("No img");
+        }
+
+        JLabel fileNameLabel = new JLabel(selectedFileName[0].isEmpty() ? "Chưa chọn ảnh" : selectedFileName[0]);
+        fileNameLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        fileNameLabel.setForeground(new Color(120, 120, 120));
+
+        JButton btnChonAnh = makePlainButton("📂 Chọn ảnh");
+        btnChonAnh.addActionListener(ev -> {
+            String fileName = chooseAndCopyImage(dialog);
+            if (fileName != null) {
+                selectedFileName[0] = fileName;
+                fileNameLabel.setText(fileName);
+                // Cập nhật preview ngay lập tức
+                ImageIcon icon = loadImage("src/product_images/" + fileName, 68, 68);
+                previewLabel.setIcon(icon);
+                previewLabel.setText("");
+                dialog.repaint();
+            }
+        });
+
+        // Panel chứa preview + tên file + nút chọn
+        JPanel anhPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        anhPanel.setBackground(MAIN_BG);
+        anhPanel.add(previewLabel);
+        JPanel anhRight = new JPanel();
+        anhRight.setLayout(new BoxLayout(anhRight, BoxLayout.Y_AXIS));
+        anhRight.setBackground(MAIN_BG);
+        anhRight.add(btnChonAnh);
+        anhRight.add(Box.createVerticalStrut(6));
+        anhRight.add(fileNameLabel);
+        anhPanel.add(anhRight);
+
+        // Thêm vào form
+        gbc.gridx = 0; gbc.gridy = 9; gbc.weightx = 0.3;
+        JLabel lblAnh = new JLabel("Hình ảnh:");
+        lblAnh.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblAnh.setForeground(new Color(60, 60, 60));
+        form.add(lblAnh, gbc);
+        gbc.gridx = 1; gbc.weightx = 0.7;
+        form.add(anhPanel, gbc);
         addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
         addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
         addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
@@ -361,7 +423,7 @@ public class ProductManagementPanel extends JPanel {
         addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
         addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
         addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
-        addRow(form, gbc, 9, "Tên file ảnh:",  fieldAnh);
+        
 
         // ----- Nút Lưu / Hủy -----
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -412,7 +474,7 @@ public class ProductManagementPanel extends JPanel {
                 existing.setMauSac(cbMauSac.getSelectedItem().toString());
                 existing.setKichCo(cbKichCo.getSelectedItem().toString());
                  existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
-                existing.setHinhAnh(fieldAnh.getText().trim());
+                existing.setHinhAnh(selectedFileName[0]);
                 SanPhamDAO dao = new SanPhamDAO();
                 boolean ok = dao.updateSanPham(existing);
 
@@ -435,7 +497,7 @@ public class ProductManagementPanel extends JPanel {
                 cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
                 fieldTen.getText().trim(),
                  cbKho.getSelectedItem().toString(), 
-                fieldAnh.getText().trim()
+                selectedFileName[0]
             );
                 products.add(sp);
                 SanPhamDAO dao = new SanPhamDAO();
@@ -640,4 +702,41 @@ if (ok) {
                 new EmptyBorder(8, 20, 8, 20)));
         return b;
     }
+    /**
+ * Mở JFileChooser, copy ảnh vào src/product_images/, trả về tên file.
+ * Trả về null nếu người dùng hủy hoặc có lỗi.
+ */
+private String chooseAndCopyImage(JDialog parent) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Chọn ảnh sản phẩm");
+    chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Image files (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
+
+    int result = chooser.showOpenDialog(parent);
+    if (result != JFileChooser.APPROVE_OPTION) return null;
+
+    File srcFile = chooser.getSelectedFile();
+
+    // Đảm bảo thư mục đích tồn tại
+    File destDir = new File("src/product_images");
+    if (!destDir.exists()) destDir.mkdirs();
+
+    File destFile = new File(destDir, srcFile.getName());
+
+    // Nếu trùng tên → thêm timestamp để tránh ghi đè
+    if (destFile.exists()) {
+        String name = srcFile.getName();
+        String ext  = name.contains(".") ? name.substring(name.lastIndexOf('.')) : "";
+        String base = name.contains(".") ? name.substring(0, name.lastIndexOf('.')) : name;
+        destFile = new File(destDir, base + "_" + System.currentTimeMillis() + ext);
+    }
+
+    try {
+        Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        return destFile.getName(); // chỉ lưu tên file, không lưu cả path
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(parent, "Lỗi khi copy ảnh: " + ex.getMessage());
+        return null;
+    }
+}
 }

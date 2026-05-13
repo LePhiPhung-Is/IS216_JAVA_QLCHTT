@@ -158,7 +158,7 @@ public class NV_BanHang_UI extends JFrame {
         cardLayout = new CardLayout();
         content = new JPanel(cardLayout);
         content.setBackground(MAIN_BG);
-
+        
 
         content.add(new ProductManagementPanel(), "product");        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
         content.add(new CategoryManagementPanel(), "category");
