@@ -23,6 +23,7 @@ public class NV_BanHang_UI extends JFrame {
     
     private boolean isCollapsed = false;
     private JPanel sidebar;
+    
     public NV_BanHang_UI() {
 
         setTitle("Nhân viên bán hàng");
@@ -30,10 +31,6 @@ public class NV_BanHang_UI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        
-       //Hàm Toggle
-       
-
 
         // ================= SIDEBAR =================
         sidebar = new JPanel();
@@ -41,11 +38,9 @@ public class NV_BanHang_UI extends JFrame {
         sidebar.setBackground(SIDEBAR_BG);
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, HOVER_BG));
-        //============== chỉ đổi màu chữ
-        JButton btnToggle = new JButton("☰");
-        btnToggle.setText("☰");
         
-
+        JButton btnToggle = new JButton("☰");
+        
         // màu nền đồng bộ sidebar
         btnToggle.setBackground(SIDEBAR_BG);
         btnToggle.setOpaque(true);
@@ -73,9 +68,10 @@ public class NV_BanHang_UI extends JFrame {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                toggleSidebar(); // 👈 THÊM DÒNG NÀY
+                toggleSidebar(); 
             }
-});
+        });
+        
         // ================= LOGO =================
         JLabel brandLabel = new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
         brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -125,7 +121,7 @@ public class NV_BanHang_UI extends JFrame {
         userPanel.add(roleLabel);
 
         // ================= MENU PANEL =================
-            JPanel menuPanel = new JPanel();
+        JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBackground(SIDEBAR_BG);
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
@@ -133,7 +129,10 @@ public class NV_BanHang_UI extends JFrame {
         menuPanel.add(createMenuItem("QUẢN LÝ SẢN PHẨM", "product"));
         menuPanel.add(createMenuItem("QUẢN LÝ KHÁCH HÀNG", "customer"));
         menuPanel.add(createMenuItem("QUẢN LÝ DANH MỤC", "category"));
-        menuPanel.add(createMenuItem("QUẢN LÝ ĐƠN HÀNG", "order"));
+        
+        // Nếu bạn muốn nối QuanLyDonHangPanel vào luôn thì sửa ở dòng khai báo CONTENT nhé
+        menuPanel.add(createMenuItem("QUẢN LÝ ĐƠN HÀNG", "order")); 
+        
         menuPanel.add(createMenuItem("XỬ LÝ ĐỔI TRẢ", "return"));
 
         // ===== Divider =====
@@ -159,11 +158,15 @@ public class NV_BanHang_UI extends JFrame {
         content = new JPanel(cardLayout);
         content.setBackground(MAIN_BG);
 
-
-        content.add(new ProductManagementPanel(), "product");        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
+        // Thêm các Panel tương ứng với Menu
+        content.add(new ProductManagementPanel(), "product");        
+        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
         content.add(new CategoryManagementPanel(), "category");
         content.add(createPage("QUẢN LÝ ĐƠN HÀNG"), "order");
-        content.add(createPage("XỬ LÝ ĐỔI TRẢ"), "return");
+        
+        // ĐÃ SỬA DÒNG NÀY ĐỂ HIỂN THỊ CHỨC NĂNG ĐỔI TRẢ
+        content.add(new DoiTraPanel(), "return"); 
+        
         content.add(createPage("ĐĂNG XUẤT"), "logout");
 
         add(sidebar, BorderLayout.WEST);
@@ -224,6 +227,7 @@ public class NV_BanHang_UI extends JFrame {
 
         return panel;
     }
+    
     //Hàm toggle 
     private void toggleSidebar() {
         isCollapsed = !isCollapsed;
@@ -236,9 +240,9 @@ public class NV_BanHang_UI extends JFrame {
 
         sidebar.revalidate();
     }
+    
     // ================= MAIN =================
     public static void main(String[] args) {
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {

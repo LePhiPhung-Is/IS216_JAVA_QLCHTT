@@ -12,8 +12,8 @@ public class DatabaseConnection {
     private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
     
     // ĐIỀN THÔNG TIN TÀI KHOẢN ORACLE CỦA BẠN VÀO ĐÂY
-    private static final String USERNAME = "FASHION_ADMIN"; // Ví dụ: system, hr, hoặc user bạn tự tạo
-    private static final String PASSWORD = "123456";
+    private static final String USERNAME = "c##FASHION"; // Ví dụ: system, hr, hoặc user bạn tự tạo
+    private static final String PASSWORD = "123";
     // 2. Hàm tạo kết nối
     public static Connection getConnection() {
         Connection connection = null;
