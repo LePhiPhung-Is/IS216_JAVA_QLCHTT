@@ -26,7 +26,7 @@ public class NV_BanHang_UI extends JFrame {
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
         setLayout(new BorderLayout());
 
         // =====================================================

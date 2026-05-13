@@ -19,15 +19,18 @@ public class DonHangDAO {
 
         try {
             conn = DatabaseConnection.getConnection();
+            
             // TẮT AUTO-COMMIT ĐỂ BẮT ĐẦU TRANSACTION
             conn.setAutoCommit(false); 
 
-            // 1. LƯU ĐƠN HÀNG
+            // ==========================================================
+            // 1. LƯU ĐƠN HÀNG (Bảng DONHANG)
+            // ==========================================================
             String sqlDH = "INSERT INTO DONHANG (MaDH, MaKH, MaNV, MaGiamGia, LoaiDon, TrangThai, TongTien, HinhThucThanhToan, DiemThuong, DiemSuDung, GhiChu) " +
                            "VALUES (?, ?, ?, ?, 'OFFLINE', 'Hoàn thành', ?, ?, ?, ?, ?)";
             psDonHang = conn.prepareStatement(sqlDH);
             psDonHang.setString(1, dh.getMaDH());
-            psDonHang.setString(2, dh.getMaKH()); // Có thể null nếu khách vãng lai
+            psDonHang.setString(2, dh.getMaKH()); // Có thể null
             psDonHang.setString(3, dh.getMaNV());
             psDonHang.setString(4, dh.getMaGiamGia());
             psDonHang.setDouble(5, dh.getTongTien());
@@ -38,12 +41,18 @@ public class DonHangDAO {
             
             psDonHang.executeUpdate();
 
-            // 2. LƯU CHI TIẾT ĐƠN HÀNG (Giả sử bạn có table CHITIET_DONHANG)
-            String sqlCT = "INSERT INTO CHITIET_DONHANG (MaDH, MaSP, SoLuong, DonGia) VALUES (?, ?, ?, ?)";
+            // ==========================================================
+            // 2. LƯU CHI TIẾT ĐƠN HÀNG 
+            // ĐÃ SỬA THÀNH: CHITIET_DONHANG (CÓ DẤU GẠCH DƯỚI)
+            // ==========================================================
+            String sqlCT = "INSERT INTO CHITIET_DONHANG (MaDH, MaSP, SoLuong, DonGia, ThanhTien) VALUES (?, ?, ?, ?, ?)";
             psChiTiet = conn.prepareStatement(sqlCT);
 
-            // 3. CẬP NHẬT TRỪ TỒN KHO SẢN PHẨM
-            String sqlKho = "UPDATE SANPHAM SET SoLuong = SoLuong - ? WHERE MaSP = ?";
+            // ==========================================================
+            // 3. CẬP NHẬT TỒN KHO SẢN PHẨM 
+            // (Đã sửa SoLuong thành SoLuongTon cho bảng SANPHAM)
+            // ==========================================================
+            String sqlKho = "UPDATE SANPHAM SET SoLuongTon = SoLuongTon - ? WHERE MaSP = ?";
             psCapNhatKho = conn.prepareStatement(sqlKho);
 
             // Duyệt qua giỏ hàng và Add vào Batch
@@ -53,6 +62,11 @@ public class DonHangDAO {
                 psChiTiet.setString(2, ct.getMaSP());
                 psChiTiet.setInt(3, ct.getSoLuong());
                 psChiTiet.setDouble(4, ct.getDonGia());
+                
+                // Tính và gán Thành Tiền cho cột thứ 5
+                double thanhTienMonHang = ct.getSoLuong() * ct.getDonGia();
+                psChiTiet.setDouble(5, thanhTienMonHang); 
+                
                 psChiTiet.addBatch();
 
                 // Set parameter cho tồn kho
@@ -65,13 +79,14 @@ public class DonHangDAO {
             psChiTiet.executeBatch();
             psCapNhatKho.executeBatch();
 
-            // NẾU MỌI THỨ THÀNH CÔNG -> LƯU VÀO DB
+            // NẾU MỌI THỨ THÀNH CÔNG -> LƯU VĨNH VIỄN VÀO DB
             conn.commit(); 
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // NẾU CÓ BẤT KỲ LỖI GÌ -> HOÀN TÁC TOÀN BỘ, KHÔNG BỊ RÁC DỮ LIỆU
+            e.printStackTrace(); 
+            
+            // NẾU CÓ BẤT KỲ LỖI GÌ -> HOÀN TÁC TOÀN BỘ
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException ex) {
@@ -79,13 +94,12 @@ public class DonHangDAO {
             }
             return false;
         } finally {
-            // Đóng kết nối
             try {
                 if (psDonHang != null) psDonHang.close();
                 if (psChiTiet != null) psChiTiet.close();
                 if (psCapNhatKho != null) psCapNhatKho.close();
                 if (conn != null) {
-                    conn.setAutoCommit(true); // Trả lại trạng thái mặc định
+                    conn.setAutoCommit(true); 
                     conn.close();
                 }
             } catch (SQLException ex) {

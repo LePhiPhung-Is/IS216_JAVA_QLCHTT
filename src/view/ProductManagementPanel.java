@@ -54,6 +54,7 @@ public class ProductManagementPanel extends JPanel {
         filterTable(); 
     }
 
+    // ===== HEADER: tiêu đề + tìm kiếm + nút thêm =====
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(MAIN_BG);
@@ -77,6 +78,7 @@ public class ProductManagementPanel extends JPanel {
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         rightPanel.setBackground(MAIN_BG);
 
+        // --- Ô NHẬP TÌM KIẾM ---
         searchField = new JTextField(20) {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -92,13 +94,32 @@ public class ProductManagementPanel extends JPanel {
                 BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
                 new EmptyBorder(7, 12, 7, 12)));
         searchField.setOpaque(false);
-        searchField.putClientProperty("JTextField.placeholderText", "🔍  Tìm kiếm...");
+        searchField.putClientProperty("JTextField.placeholderText", "🔍  Mã hoặc Tên SP...");
+        
+        // Vẫn giữ tính năng tự động lọc khi gõ chữ (rất tiện lợi)
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
         });
 
+        // --- BỔ SUNG NÚT TÌM KIẾM ---
+        JButton btnTimKiem = new JButton("Tìm kiếm");
+        btnTimKiem.setBackground(BRAND_GOLD);
+        btnTimKiem.setForeground(Color.BLACK); // Chữ đen cho dễ nhìn
+        btnTimKiem.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnTimKiem.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnTimKiem.setFocusPainted(false);
+        // Gắn sự kiện click nút cũng gọi hàm tìm kiếm
+        btnTimKiem.addActionListener(e -> filterTable());
+
+        // Bọc ô nhập và nút tìm kiếm vào chung 1 nhóm để nó đứng cạnh nhau
+        JPanel searchBoxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        searchBoxPanel.setBackground(MAIN_BG);
+        searchBoxPanel.add(searchField);
+        searchBoxPanel.add(btnTimKiem);
+
+        // --- NÚT THÊM SẢN PHẨM ---
         JButton addBtn = new JButton("+ Thêm sản phẩm") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -118,8 +139,10 @@ public class ProductManagementPanel extends JPanel {
         addBtn.setBorder(new EmptyBorder(9, 20, 9, 20));
         addBtn.addActionListener(e -> openProductDialog(null, -1));
 
-        rightPanel.add(searchField);
+        // Thêm các nhóm vào góc phải
+        rightPanel.add(searchBoxPanel); 
         rightPanel.add(addBtn);
+        
         header.add(titleBox, BorderLayout.WEST);
         header.add(rightPanel, BorderLayout.EAST);
         return header;
@@ -275,8 +298,8 @@ public class ProductManagementPanel extends JPanel {
 
     class ActionCellRenderer implements TableCellRenderer {
         private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 15));
-        private final JButton editBtn  = makeBtn("✏", EDIT_BLUE);
-        private final JButton delBtn   = makeBtn("🗑", DELETE_RED);
+        private final JButton editBtn  = makeBtn("Sửa", EDIT_BLUE);
+        private final JButton delBtn   = makeBtn("Xóa", DELETE_RED);
 
         ActionCellRenderer() {
             panel.setOpaque(true);
@@ -299,7 +322,7 @@ public class ProductManagementPanel extends JPanel {
 
         ActionCellEditor() {
             panel.setBackground(ROW_WHITE);
-            JButton editBtn = new JButton("✏"); editBtn.setBackground(EDIT_BLUE); editBtn.setForeground(Color.WHITE);
+            JButton editBtn = new JButton("Sửa"); editBtn.setBackground(EDIT_BLUE); editBtn.setForeground(Color.WHITE);
             editBtn.addActionListener(e -> {
                 fireEditingStopped();
                 String code = (String) tableModel.getValueAt(currentRow, 1);
@@ -311,7 +334,7 @@ public class ProductManagementPanel extends JPanel {
                 }
             });
 
-            JButton delBtn = new JButton("🗑"); delBtn.setBackground(DELETE_RED); delBtn.setForeground(Color.WHITE);
+            JButton delBtn = new JButton("Xóa"); delBtn.setBackground(DELETE_RED); delBtn.setForeground(Color.WHITE);
             delBtn.addActionListener(e -> {
                 fireEditingStopped();
                 deleteProduct(currentRow);
