@@ -16,12 +16,9 @@ public class QuanLyUI extends JFrame {
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
 
-    // ================= CARD LAYOUT =================
-    private CardLayout cardLayout;
-    private JPanel contentPanel;
-
     public QuanLyUI() {
-        setTitle("Dashboard - Quản Lý");
+
+        setTitle("Dashboard");
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -36,45 +33,81 @@ public class QuanLyUI extends JFrame {
 
         // ================= LOGO =================
         JLabel brandLabel = new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
+
         brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         brandLabel.setForeground(BRAND_GOLD);
         brandLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         brandLabel.setBorder(new EmptyBorder(30, 20, 30, 20));
 
         JPanel brandPanel = new JPanel(new BorderLayout());
+
         brandPanel.setBackground(SIDEBAR_BG);
         brandPanel.add(brandLabel, BorderLayout.CENTER);
-        brandPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR));
+
+        brandPanel.setBorder(
+                BorderFactory.createMatteBorder(
+                        0,
+                        0,
+                        1,
+                        0,
+                        DIVIDER_COLOR
+                )
+        );
+
         brandPanel.setMaximumSize(new Dimension(280, 100));
 
         // ================= USER PANEL =================
         JPanel userPanel = new JPanel();
+
         userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
         userPanel.setBackground(SIDEBAR_BG);
-        userPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR),
-                new EmptyBorder(25, 20, 25, 20)
-        ));
 
+        userPanel.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(
+                                0,
+                                0,
+                                1,
+                                0,
+                                DIVIDER_COLOR
+                        ),
+                        new EmptyBorder(25, 20, 25, 20)
+                )
+        );
+
+        // ===== Avatar =====
         JLabel avatar = new JLabel("A", SwingConstants.CENTER);
+
         avatar.setPreferredSize(new Dimension(80, 80));
         avatar.setMaximumSize(new Dimension(80, 80));
+        avatar.setMinimumSize(new Dimension(80, 80));
+
         avatar.setOpaque(true);
         avatar.setBackground(BRAND_GOLD);
         avatar.setForeground(Color.WHITE);
+
         avatar.setFont(new Font("Segoe UI", Font.BOLD, 35));
+
+        avatar.setHorizontalAlignment(SwingConstants.CENTER);
+
         avatar.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+
         avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel nameLabel = new JLabel("Phùng Lê Phi");
+
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         nameLabel.setForeground(Color.WHITE);
+
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         nameLabel.setBorder(new EmptyBorder(15, 0, 5, 0));
 
         JLabel roleLabel = new JLabel("Quản lý");
+
         roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         roleLabel.setForeground(new Color(160, 160, 160));
+
         roleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         userPanel.add(avatar);
@@ -83,112 +116,121 @@ public class QuanLyUI extends JFrame {
 
         // ================= MENU PANEL =================
         JPanel menuPanel = new JPanel();
+
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBackground(SIDEBAR_BG);
+
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        // Gắn Tag nhận diện cho từng màn hình
-        menuPanel.add(createMenuItem("QUẢN LÝ NHÂN VIÊN", "NHAN_VIEN"));
-        menuPanel.add(createMenuItem("QUẢN LÝ NHÀ CUNG CẤP", "NHA_CUNG_CAP"));
-        menuPanel.add(createMenuItem("QUẢN LÝ KHUYẾN MÃI", "KHUYEN_MAI"));
-        menuPanel.add(createMenuItem("THỐNG KÊ DOANH THU", "DOANH_THU"));
-        menuPanel.add(createMenuItem("THỐNG KÊ HÀNG TỒN", "TON_KHO"));
+        // ===== Menu =====
+        menuPanel.add(createMenuItem("QUẢN LÝ NHÂN VIÊN"));
+        menuPanel.add(createMenuItem("QUẢN LÝ NHÀ CUNG CẤP"));
+        menuPanel.add(createMenuItem("QUẢN LÝ KHUYẾN MÃI"));
+        menuPanel.add(createMenuItem("BÁO CÁO DOANH THU"));
 
-        // ===== DIVIDER =====
+        // ===== Divider =====
         JPanel divider = new JPanel();
+
         divider.setBackground(DIVIDER_COLOR);
         divider.setMaximumSize(new Dimension(230, 1));
 
         JPanel dividerContainer = new JPanel();
+
         dividerContainer.setBackground(SIDEBAR_BG);
         dividerContainer.setBorder(new EmptyBorder(20, 0, 20, 0));
+
         dividerContainer.add(divider);
 
         menuPanel.add(dividerContainer);
-        menuPanel.add(createMenuItem("ĐĂNG XUẤT", "DANG_XUAT"));
 
+        menuPanel.add(createMenuItem("ĐĂNG XUẤT"));
+
+        // ===== Add Sidebar =====
         sidebar.add(brandPanel);
         sidebar.add(userPanel);
         sidebar.add(menuPanel);
+
         sidebar.add(Box.createVerticalGlue());
 
-        // ================= CONTENT (DÙNG CARD LAYOUT) =================
-        cardLayout = new CardLayout();
-        contentPanel = new JPanel(cardLayout);
-        contentPanel.setBackground(MAIN_BG);
+        // ================= CONTENT =================
+        JPanel content = new JPanel();
 
-        // Khởi tạo và nạp sẵn tất cả các Panel
-        // contentPanel.add(createPage("WELCOME ADMIN"), "WELCOME");
-        
-        // Thêm các class thực tế của nhóm 8
-        contentPanel.add(new QuanLyNhanVienUI(), "NHAN_VIEN");
-        contentPanel.add(new ThongKeHangTon(), "TON_KHO");
-        contentPanel.add(new QuanLyNhaCungCap(), "NHA_CUNG_CAP");
-        contentPanel.add(new ThongKeDoanhThu(), "DOANH_THU");      
-        contentPanel.add(new QuanLyKhuyenMai(), "KHUYEN_MAI");
+        content.setBackground(MAIN_BG);
+        content.setLayout(new BorderLayout());
 
+        JLabel welcome = new JLabel(
+                "WELCOME ADMIN",
+                SwingConstants.CENTER
+        );
 
-        cardLayout.show(contentPanel, "WELCOME");
+        welcome.setFont(new Font("Segoe UI", Font.BOLD, 32));
 
+        welcome.setForeground(Color.GRAY);
+
+        content.add(welcome, BorderLayout.CENTER);
+
+        // ================= ADD FRAME =================
         add(sidebar, BorderLayout.WEST);
-        add(contentPanel, BorderLayout.CENTER);
+        add(content, BorderLayout.CENTER);
     }
 
-    private JPanel createPage(String title) {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(MAIN_BG);
-        JLabel lbl = new JLabel(title, SwingConstants.CENTER);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        lbl.setForeground(Color.GRAY);
-        p.add(lbl, BorderLayout.CENTER);
-        return p;
-    }
+    // ================= MENU ITEM =================
+    private JPanel createMenuItem(String text) {
 
-    // ================= MENU ITEM (ĐÃ FIX LỖI NGOẶC) =================
-    private JPanel createMenuItem(String text, String cardName) {
         JPanel panel = new JPanel(new BorderLayout());
+
         panel.setBackground(SIDEBAR_BG);
+
         panel.setMaximumSize(new Dimension(280, 50));
-        panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+
+        panel.setBorder(
+                BorderFactory.createEmptyBorder(0, 4, 0, 0)
+        );
 
         JLabel label = new JLabel(text);
+
         label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
         label.setForeground(TEXT_LIGHT);
+
         label.setBorder(new EmptyBorder(10, 25, 10, 20));
 
         panel.add(label, BorderLayout.CENTER);
 
+        // ===== Hover =====
         panel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (cardName.equals("DANG_XUAT")) {
-                    int confirm = JOptionPane.showConfirmDialog(
-                            QuanLyUI.this,
-                            "Bạn có chắc muốn đăng xuất?",
-                            "Xác nhận",
-                            JOptionPane.YES_NO_OPTION
-                    );
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        dispose();
-                    }
-                } else {
-                    cardLayout.show(contentPanel, cardName);
-                }
-            }
 
             @Override
             public void mouseEntered(MouseEvent e) {
+
                 panel.setBackground(HOVER_BG);
+
                 label.setForeground(BRAND_GOLD);
-                panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
+
+                panel.setBorder(
+                        BorderFactory.createMatteBorder(
+                                0,
+                                4,
+                                0,
+                                0,
+                                BRAND_GOLD
+                        )
+                );
+
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
+
                 panel.setBackground(SIDEBAR_BG);
+
                 label.setForeground(TEXT_LIGHT);
-                panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+
+                panel.setBorder(
+                        BorderFactory.createEmptyBorder(0, 4, 0, 0)
+                );
+
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
@@ -196,15 +238,24 @@ public class QuanLyUI extends JFrame {
         return panel;
     }
 
+    // ================= MAIN =================
     public static void main(String[] args) {
+
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName()
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         SwingUtilities.invokeLater(() -> {
+
             new QuanLyUI().setVisible(true);
+
         });
     }
 }
