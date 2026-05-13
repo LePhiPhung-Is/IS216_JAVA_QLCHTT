@@ -1,27 +1,23 @@
 package src.dao;
 
 import src.model.KhuyenMai;
-import src.database.DatabaseConnection;
+import src.database.DatabaseConnection; 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KhuyenMaiDAO {
-    
-    public KhuyenMai getKhuyenMaiHopLe(String maKM) {
-        // Kiểm tra mã: Đang chạy, còn hạn, còn lượt dùng
-        String sql = "SELECT * FROM KHUYENMAI WHERE MaKM = ? " +
-                     "AND TrangThai = 'Đang chạy' " +
-                     "AND SYSDATE BETWEEN NgayBatDau AND NgayKetThuc " +
-                     "AND SoLuotDung > 0";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, maKM);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
+    // 1. Lấy toàn bộ danh sách khuyến mãi
+    public List<KhuyenMai> getAllKhuyenMai() {
+        List<KhuyenMai> list = new ArrayList<>();
+        String sql = "SELECT * FROM KhuyenMai";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
                 KhuyenMai km = new KhuyenMai();
                 km.setMaKM(rs.getString("MaKM"));
                 km.setTenKM(rs.getString("TenKM"));
@@ -30,9 +26,123 @@ public class KhuyenMaiDAO {
                 km.setGiamToiDa(rs.getDouble("GiamToiDa"));
                 km.setNgayBatDau(rs.getDate("NgayBatDau"));
                 km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
-                km.setSoLuotDung(rs.getInt("SoLuotDung"));
+                km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
                 km.setTrangThai(rs.getString("TrangThai"));
-                return km;
+                list.add(km);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // 2. Lấy khuyến mãi theo Mã
+    public KhuyenMai getById(String maKM) {
+        String sql = "SELECT * FROM KhuyenMai WHERE MaKM = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maKM);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    KhuyenMai km = new KhuyenMai();
+                    km.setMaKM(rs.getString("MaKM"));
+                    km.setTenKM(rs.getString("TenKM"));
+                    km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
+                    km.setGiaTriToiThieu(rs.getDouble("GiaTriToiThieu"));
+                    km.setGiamToiDa(rs.getDouble("GiamToiDa"));
+                    km.setNgayBatDau(rs.getDate("NgayBatDau"));
+                    km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
+                    km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
+                    km.setTrangThai(rs.getString("TrangThai"));
+                    return km;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // 3. Thêm mới khuyến mãi
+    public boolean insertKhuyenMai(KhuyenMai km) {
+        String sql = "INSERT INTO KhuyenMai (MaKM, TenKM, PhanTramGiam, GiaTriToiThieu, GiamToiDa, NgayBatDau, NgayKetThuc, SoLuotDung, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, km.getMaKM());
+            ps.setString(2, km.getTenKM());
+            ps.setDouble(3, km.getPhanTramGiam());
+            ps.setDouble(4, km.getGiaTriToiThieu());
+            ps.setDouble(5, km.getGiamToiDa());
+            ps.setDate(6, new java.sql.Date(km.getNgayBatDau().getTime()));
+            ps.setDate(7, new java.sql.Date(km.getNgayKetThuc().getTime()));
+            ps.setLong(8, km.getSoLuotDung()); // Sửa thành setLong
+            ps.setString(9, km.getTrangThai());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 4. Cập nhật khuyến mãi
+    public boolean updateKhuyenMai(KhuyenMai km) {
+        String sql = "UPDATE KhuyenMai SET TenKM=?, PhanTramGiam=?, GiaTriToiThieu=?, GiamToiDa=?, NgayBatDau=?, NgayKetThuc=?, SoLuotDung=?, TrangThai=? WHERE MaKM=?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, km.getTenKM());
+            ps.setDouble(2, km.getPhanTramGiam());
+            ps.setDouble(3, km.getGiaTriToiThieu());
+            ps.setDouble(4, km.getGiamToiDa());
+            ps.setDate(5, new java.sql.Date(km.getNgayBatDau().getTime()));
+            ps.setDate(6, new java.sql.Date(km.getNgayKetThuc().getTime()));
+            ps.setLong(7, km.getSoLuotDung()); // Sửa thành setLong
+            ps.setString(8, km.getTrangThai());
+            ps.setString(9, km.getMaKM());
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 5. Xóa khuyến mãi
+    public boolean deleteKhuyenMai(String maKM) {
+        String sql = "DELETE FROM KhuyenMai WHERE MaKM=?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, maKM);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 6. Lấy khuyến mãi hợp lệ
+    public KhuyenMai getKhuyenMaiHopLe(String maKM) {
+        String sql = "SELECT * FROM KHUYENMAI WHERE MaKM = ? " +
+                     "AND TrangThai = 'Đang áp dụng' " +
+                     "AND SYSDATE BETWEEN NgayBatDau AND NgayKetThuc " +
+                     "AND SoLuotDung > 0";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, maKM);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    KhuyenMai km = new KhuyenMai();
+                    km.setMaKM(rs.getString("MaKM"));
+                    km.setTenKM(rs.getString("TenKM"));
+                    km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
+                    km.setGiaTriToiThieu(rs.getDouble("GiaTriToiThieu"));
+                    km.setGiamToiDa(rs.getDouble("GiamToiDa"));
+                    km.setNgayBatDau(rs.getDate("NgayBatDau"));
+                    km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
+                    km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
+                    km.setTrangThai(rs.getString("TrangThai"));
+                    return km;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

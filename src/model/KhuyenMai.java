@@ -10,11 +10,28 @@ public class KhuyenMai {
     private double giamToiDa;
     private Date ngayBatDau;
     private Date ngayKetThuc;
-    private int soLuotDung;
+    private long soLuotDung; // Dùng long
     private String trangThai;
 
+    // Constructor rỗng
     public KhuyenMai() {}
 
+    // Constructor đầy đủ tham số
+    public KhuyenMai(String maKM, String tenKM, double phanTramGiam, double giaTriToiThieu, 
+                     double giamToiDa, Date ngayBatDau, Date ngayKetThuc, long soLuotDung, String trangThai) {
+        this.maKM = maKM;
+        this.tenKM = tenKM;
+        this.phanTramGiam = phanTramGiam;
+        this.giaTriToiThieu = giaTriToiThieu;
+        this.giamToiDa = giamToiDa;
+        this.ngayBatDau = ngayBatDau;
+        this.ngayKetThuc = ngayKetThuc;
+        this.soLuotDung = soLuotDung;
+        this.trangThai = trangThai;
+    }
+
+    // ================= GETTERS & SETTERS =================
+    
     public String getMaKM() { return maKM; }
     public void setMaKM(String maKM) { this.maKM = maKM; }
 
@@ -36,8 +53,8 @@ public class KhuyenMai {
     public Date getNgayKetThuc() { return ngayKetThuc; }
     public void setNgayKetThuc(Date ngayKetThuc) { this.ngayKetThuc = ngayKetThuc; }
 
-    public int getSoLuotDung() { return soLuotDung; }
-    public void setSoLuotDung(int soLuotDung) { this.soLuotDung = soLuotDung; }
+    public long getSoLuotDung() { return soLuotDung; }
+    public void setSoLuotDung(long soLuotDung) { this.soLuotDung = soLuotDung; }
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }

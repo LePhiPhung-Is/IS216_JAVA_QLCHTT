@@ -16,9 +16,12 @@ public class QuanLyUI extends JFrame {
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
 
+    // ĐƯA KHUNG CONTENT LÊN ĐÂY ĐỂ CÁC HÀM KHÁC GỌI ĐƯỢC
+    private JPanel content; 
+
     public QuanLyUI() {
 
-        setTitle("Dashboard");
+        setTitle("Dashboard - Quản Lý Cửa Hàng");
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -46,11 +49,7 @@ public class QuanLyUI extends JFrame {
 
         brandPanel.setBorder(
                 BorderFactory.createMatteBorder(
-                        0,
-                        0,
-                        1,
-                        0,
-                        DIVIDER_COLOR
+                        0, 0, 1, 0, DIVIDER_COLOR
                 )
         );
 
@@ -65,18 +64,14 @@ public class QuanLyUI extends JFrame {
         userPanel.setBorder(
                 BorderFactory.createCompoundBorder(
                         BorderFactory.createMatteBorder(
-                                0,
-                                0,
-                                1,
-                                0,
-                                DIVIDER_COLOR
+                                0, 0, 1, 0, DIVIDER_COLOR
                         ),
                         new EmptyBorder(25, 20, 25, 20)
                 )
         );
 
         // ===== Avatar =====
-        JLabel avatar = new JLabel("A", SwingConstants.CENTER);
+        JLabel avatar = new JLabel("P", SwingConstants.CENTER); // Đổi thành chữ P (Phi)
 
         avatar.setPreferredSize(new Dimension(80, 80));
         avatar.setMaximumSize(new Dimension(80, 80));
@@ -122,11 +117,12 @@ public class QuanLyUI extends JFrame {
 
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        // ===== Menu =====
+        // ===== Menu (Đã cập nhật theo yêu cầu của bạn) =====
         menuPanel.add(createMenuItem("QUẢN LÝ NHÂN VIÊN"));
         menuPanel.add(createMenuItem("QUẢN LÝ NHÀ CUNG CẤP"));
         menuPanel.add(createMenuItem("QUẢN LÝ KHUYẾN MÃI"));
-        menuPanel.add(createMenuItem("BÁO CÁO DOANH THU"));
+        menuPanel.add(createMenuItem("THỐNG KÊ DOANH THU"));
+        menuPanel.add(createMenuItem("THỐNG KÊ HÀNG TỒN"));
 
         // ===== Divider =====
         JPanel divider = new JPanel();
@@ -146,11 +142,10 @@ public class QuanLyUI extends JFrame {
         // ===== Nút Đăng Xuất =====
         JPanel pnlDangXuat = createMenuItem("ĐĂNG XUẤT");
         
-        // Thêm sự kiện Click 
+        // Thêm sự kiện Click cho nút Đăng xuất
         pnlDangXuat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Hiển thị hộp thoại xác nhận
                 int xacNhan = JOptionPane.showConfirmDialog(
                         QuanLyUI.this, 
                         "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?", 
@@ -161,7 +156,7 @@ public class QuanLyUI extends JFrame {
 
                 if (xacNhan == JOptionPane.YES_OPTION) {
                     QuanLyUI.this.dispose(); 
-                    
+                    // Mở lại trang đăng nhập
                     new LoginUI().setVisible(true);
                 }
             }
@@ -176,26 +171,66 @@ public class QuanLyUI extends JFrame {
 
         sidebar.add(Box.createVerticalGlue());
 
-        // ================= CONTENT =================
-        JPanel content = new JPanel();
-
+        // ================= KHỞI TẠO KHUNG CONTENT CHÍNH =================
+        content = new JPanel();
         content.setBackground(MAIN_BG);
         content.setLayout(new BorderLayout());
 
-        JLabel welcome = new JLabel(
-                "WELCOME ADMIN",
-                SwingConstants.CENTER
-        );
-
-        welcome.setFont(new Font("Segoe UI", Font.BOLD, 32));
-
-        welcome.setForeground(Color.GRAY);
-
-        content.add(welcome, BorderLayout.CENTER);
+        // Hiển thị màn hình Welcome mặc định lúc mới mở
+        showWelcomeScreen();
 
         // ================= ADD FRAME =================
         add(sidebar, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
+    }
+
+    // ================= HÀM CHUYỂN TRANG (SWITCH PANEL) =================
+    private void showPanel(String tenMenu) {
+        // Xóa hết nội dung cũ bên phải
+        content.removeAll();
+
+        JPanel newPanel = null;
+
+        // Dựa vào tên Menu được click để gọi Class Panel tương ứng
+        switch (tenMenu) {
+            case "QUẢN LÝ NHÂN VIÊN":
+                newPanel = new QuanLyNhanVienUI(); 
+                break;
+            case "QUẢN LÝ NHÀ CUNG CẤP":
+                newPanel = new QuanLyNhaCungCap(); 
+                break;
+            case "QUẢN LÝ KHUYẾN MÃI":
+                newPanel = new QuanLyKhuyenMai();
+                break;
+            case "THỐNG KÊ DOANH THU":
+                newPanel = new ThongKeDoanhThu(); 
+                break;
+            case "THỐNG KÊ HÀNG TỒN":
+                newPanel = new ThongKeHangTon(); 
+                break;
+        }
+
+        // Nếu Panel được tìm thấy, thêm nó vào khung giữa
+        if (newPanel != null) {
+            content.add(newPanel, BorderLayout.CENTER);
+        } else if (!tenMenu.equals("ĐĂNG XUẤT")) {
+            // Nếu chưa code xong class Panel đó thì báo lỗi nhẹ
+            JLabel lblBaoLoi = new JLabel("Tính năng " + tenMenu + " đang được phát triển...", SwingConstants.CENTER);
+            lblBaoLoi.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            content.add(lblBaoLoi, BorderLayout.CENTER);
+        }
+
+        // Làm mới (Refresh) lại khung nhìn
+        content.revalidate();
+        content.repaint();
+    }
+
+    // ================= MÀN HÌNH WELCOME =================
+    private void showWelcomeScreen() {
+        JLabel welcome = new JLabel("WELCOME ADMIN", SwingConstants.CENTER);
+        welcome.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        welcome.setForeground(Color.GRAY);
+        content.add(welcome, BorderLayout.CENTER);
     }
 
     // ================= MENU ITEM =================
@@ -204,57 +239,42 @@ public class QuanLyUI extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         panel.setBackground(SIDEBAR_BG);
-
         panel.setMaximumSize(new Dimension(280, 50));
-
-        panel.setBorder(
-                BorderFactory.createEmptyBorder(0, 4, 0, 0)
-        );
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
 
         JLabel label = new JLabel(text);
-
         label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
         label.setForeground(TEXT_LIGHT);
-
         label.setBorder(new EmptyBorder(10, 25, 10, 20));
 
         panel.add(label, BorderLayout.CENTER);
 
-        // ===== Hover =====
+        // ===== SỰ KIỆN CHUỘT (Click & Hover) =====
         panel.addMouseListener(new MouseAdapter() {
+            
+            // XỬ LÝ CLICK ĐỂ CHUYỂN TRANG
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showPanel(text);
+            }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-
                 panel.setBackground(HOVER_BG);
-
                 label.setForeground(BRAND_GOLD);
-
                 panel.setBorder(
                         BorderFactory.createMatteBorder(
-                                0,
-                                4,
-                                0,
-                                0,
-                                BRAND_GOLD
+                                0, 4, 0, 0, BRAND_GOLD
                         )
                 );
-
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-
                 panel.setBackground(SIDEBAR_BG);
-
                 label.setForeground(TEXT_LIGHT);
-
-                panel.setBorder(
-                        BorderFactory.createEmptyBorder(0, 4, 0, 0)
-                );
-
+                panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
@@ -262,24 +282,16 @@ public class QuanLyUI extends JFrame {
         return panel;
     }
 
-    // ================= MAIN =================
+    // ================= MAIN (Dùng để test giao diện nhanh) =================
     public static void main(String[] args) {
-
         try {
-
-            UIManager.setLookAndFeel(
-                    UIManager.getSystemLookAndFeelClassName()
-            );
-
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         SwingUtilities.invokeLater(() -> {
-
             new QuanLyUI().setVisible(true);
-
         });
     }
 }
