@@ -24,9 +24,10 @@ public class NV_Kho_UI extends JFrame {
     public NV_Kho_UI() {
 
         setTitle("Nhân viên Quản lý kho");
-        setSize(1200, 700);
+        setUndecorated(true); 
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         // ================= SIDEBAR =================
@@ -118,7 +119,11 @@ public class NV_Kho_UI extends JFrame {
         content.setBackground(MAIN_BG);
 
         // Thêm các trang chức năng (đã được thiết kế layout cơ bản bên dưới)
+<<<<<<< HEAD
         content.add(new LapPhieuNhapKho(), "nhapkho");
+=======
+        content.add(createPhieuNhapKhoPanel(), "nhapkho");
+>>>>>>> 36338e03d74ada1567e1935570181a80aa421186
         content.add(createKiemKeKhoPanel(), "kiemke");
         content.add(createThongKePanel(), "thongke");
         content.add(createPage("ĐĂNG XUẤT"), "logout");

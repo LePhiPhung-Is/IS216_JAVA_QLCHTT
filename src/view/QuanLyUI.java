@@ -143,7 +143,31 @@ public class QuanLyUI extends JFrame {
 
         menuPanel.add(dividerContainer);
 
-        menuPanel.add(createMenuItem("ĐĂNG XUẤT"));
+        // ===== Nút Đăng Xuất =====
+        JPanel pnlDangXuat = createMenuItem("ĐĂNG XUẤT");
+        
+        // Thêm sự kiện Click 
+        pnlDangXuat.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Hiển thị hộp thoại xác nhận
+                int xacNhan = JOptionPane.showConfirmDialog(
+                        QuanLyUI.this, 
+                        "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?", 
+                        "Xác nhận đăng xuất", 
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+
+                if (xacNhan == JOptionPane.YES_OPTION) {
+                    QuanLyUI.this.dispose(); 
+                    
+                    new LoginUI().setVisible(true);
+                }
+            }
+        });
+        
+        menuPanel.add(pnlDangXuat);
 
         // ===== Add Sidebar =====
         sidebar.add(brandPanel);

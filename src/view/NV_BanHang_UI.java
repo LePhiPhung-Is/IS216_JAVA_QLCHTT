@@ -15,183 +15,386 @@ public class NV_BanHang_UI extends JFrame {
     private final Color TEXT_LIGHT = new Color(209, 209, 209);
     private final Color HOVER_BG = new Color(26, 26, 26);
     private final Color DIVIDER_COLOR = new Color(51, 51, 51);
+    
 
     // ================= CARD LAYOUT =================
     private CardLayout cardLayout;
     private JPanel content;
-
+    
+    private boolean isCollapsed = false;
+    private JPanel sidebar;
+    
     public NV_BanHang_UI() {
 
         setTitle("Nhân viên bán hàng");
         setSize(1200, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(true);
         setLayout(new BorderLayout());
 
-        // ================= SIDEBAR =================
+        // =====================================================
+        // SIDEBAR
+        // =====================================================
         JPanel sidebar = new JPanel();
+
         sidebar.setPreferredSize(new Dimension(280, 700));
         sidebar.setBackground(SIDEBAR_BG);
-        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, HOVER_BG));
 
-        // ================= LOGO =================
-        JLabel brandLabel = new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+
+        sidebar.setBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 2, HOVER_BG)
+        );
+
+        // =====================================================
+        // LOGO
+        // =====================================================
+        JLabel brandLabel =
+                new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
+
         brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+
         brandLabel.setForeground(BRAND_GOLD);
+
         brandLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        brandLabel.setBorder(new EmptyBorder(30, 20, 30, 20));
+
+        brandLabel.setBorder(
+                new EmptyBorder(30, 20, 30, 20)
+        );
 
         JPanel brandPanel = new JPanel(new BorderLayout());
+
         brandPanel.setBackground(SIDEBAR_BG);
         brandPanel.add(brandLabel, BorderLayout.CENTER);
-        brandPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR));
+
+        brandPanel.setBorder(
+                BorderFactory.createMatteBorder(
+                        0,
+                        0,
+                        1,
+                        0,
+                        DIVIDER_COLOR
+                )
+        );
+
         brandPanel.setMaximumSize(new Dimension(280, 100));
 
-        // ================= USER PANEL =================
+        // =====================================================
+        // USER PANEL
+        // =====================================================
         JPanel userPanel = new JPanel();
+
         userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
+
         userPanel.setBackground(SIDEBAR_BG);
-        userPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR),
-                new EmptyBorder(25, 20, 25, 20)
-        ));
+
+        userPanel.setBorder(
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(
+                                0,
+                                0,
+                                1,
+                                0,
+                                DIVIDER_COLOR
+                        ),
+                        new EmptyBorder(25, 20, 25, 20)
+                )
+        );
 
         JLabel avatar = new JLabel("S", SwingConstants.CENTER);
+
         avatar.setPreferredSize(new Dimension(80, 80));
+
         avatar.setMaximumSize(new Dimension(80, 80));
+
         avatar.setOpaque(true);
+
         avatar.setBackground(BRAND_GOLD);
+
         avatar.setForeground(Color.WHITE);
+
         avatar.setFont(new Font("Segoe UI", Font.BOLD, 35));
-        avatar.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+
+        avatar.setBorder(
+                BorderFactory.createLineBorder(Color.WHITE, 2)
+        );
+
         avatar.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel nameLabel = new JLabel("Nhân viên A");
+
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+
         nameLabel.setForeground(Color.WHITE);
+
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        nameLabel.setBorder(new EmptyBorder(15, 0, 5, 0));
+
+        nameLabel.setBorder(
+                new EmptyBorder(15, 0, 5, 0)
+        );
 
         JLabel roleLabel = new JLabel("Nhân viên bán hàng");
+
         roleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
         roleLabel.setForeground(new Color(160, 160, 160));
+
         roleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         userPanel.add(avatar);
         userPanel.add(nameLabel);
         userPanel.add(roleLabel);
 
-        // ================= MENU PANEL =================
-            JPanel menuPanel = new JPanel();
+        // =====================================================
+        // MENU PANEL
+        // =====================================================
+        JPanel menuPanel = new JPanel();
+
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+
         menuPanel.setBackground(SIDEBAR_BG);
+
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        menuPanel.add(createMenuItem("QUẢN LÝ SẢN PHẨM", "product"));
-        menuPanel.add(createMenuItem("QUẢN LÝ KHÁCH HÀNG", "customer"));
-        menuPanel.add(createMenuItem("QUẢN LÝ DANH MỤC", "category"));
-        menuPanel.add(createMenuItem("QUẢN LÝ ĐƠN HÀNG", "order"));
-        menuPanel.add(createMenuItem("XỬ LÝ ĐỔI TRẢ", "return"));
+        menuPanel.add(createMenuItem(
+                "QUẢN LÝ SẢN PHẨM",
+                "product"
+        ));
 
-        // ===== Divider =====
+        menuPanel.add(createMenuItem(
+                "QUẢN LÝ KHÁCH HÀNG",
+                "customer"
+        ));
+
+        menuPanel.add(createMenuItem(
+                "QUẢN LÝ DANH MỤC",
+                "category"
+        ));
+
+        menuPanel.add(createMenuItem(
+                "QUẢN LÝ ĐƠN HÀNG",
+                "order"
+        ));
+
+        menuPanel.add(createMenuItem(
+                "XỬ LÝ ĐỔI TRẢ",
+                "return"
+        ));
+
+        // =====================================================
+        // DIVIDER
+        // =====================================================
         JPanel divider = new JPanel();
+
         divider.setBackground(DIVIDER_COLOR);
+
         divider.setMaximumSize(new Dimension(230, 1));
 
         JPanel dividerContainer = new JPanel();
+
         dividerContainer.setBackground(SIDEBAR_BG);
-        dividerContainer.setBorder(new EmptyBorder(20, 0, 20, 0));
+
+        dividerContainer.setBorder(
+                new EmptyBorder(20, 0, 20, 0)
+        );
+
         dividerContainer.add(divider);
 
         menuPanel.add(dividerContainer);
-        menuPanel.add(createMenuItem("ĐĂNG XUẤT", "logout"));
+
+        // =====================================================
+        // LOGOUT
+        // =====================================================
+        menuPanel.add(createMenuItem(
+                "ĐĂNG XUẤT",
+                "logout"
+        ));
 
         sidebar.add(brandPanel);
         sidebar.add(userPanel);
         sidebar.add(menuPanel);
         sidebar.add(Box.createVerticalGlue());
 
-        // ================= CONTENT =================
+        // =====================================================
+        // CONTENT
+        // =====================================================
         cardLayout = new CardLayout();
+
         content = new JPanel(cardLayout);
+
         content.setBackground(MAIN_BG);
 
-    
-        content.add(createPage("QUẢN LÝ DANH MỤC"), "category");
-        content.add(createPage("QUẢN LÝ ĐƠN HÀNG"), "order");
-        content.add(createPage("XỬ LÝ ĐỔI TRẢ"), "return");
+        // ===== PANEL THẬT =====
+        content.add(new ProductManagementPanel(), "product");
+        content.add(new CategoryManagementPanel(), "category");
+        content.add(new DoiTraPanel(), "return");
+        // ===== PANEL ĐƠN HÀNG =====
+        content.add(new QuanLyDonHangPanel(), "order");
+        // =====================================================
+        // ADD FRAME
+        // =====================================================         
+        content.add(new CustomerManagementPanel(), "customer");
+       
+      
         content.add(createPage("ĐĂNG XUẤT"), "logout");
 
         add(sidebar, BorderLayout.WEST);
+
         add(content, BorderLayout.CENTER);
+
+        // ===== PANEL MẶC ĐỊNH =====
+        cardLayout.show(content, "order");
     }
 
-    // ================= PAGE =================
+    // =========================================================
+    // PAGE PLACEHOLDER
+    // =========================================================
     private JPanel createPage(String title) {
+
         JPanel panel = new JPanel(new BorderLayout());
+
         panel.setBackground(MAIN_BG);
 
         JLabel label = new JLabel(title, SwingConstants.CENTER);
+
         label.setFont(new Font("Segoe UI", Font.BOLD, 28));
+
         label.setForeground(Color.GRAY);
 
         panel.add(label, BorderLayout.CENTER);
+
         return panel;
     }
 
-    // ================= MENU ITEM =================
+    // =========================================================
+    // MENU ITEM
+    // =========================================================
     private JPanel createMenuItem(String text, String cardName) {
 
         JPanel panel = new JPanel(new BorderLayout());
+
         panel.setBackground(SIDEBAR_BG);
+
         panel.setMaximumSize(new Dimension(280, 50));
-        panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+
+        panel.setBorder(
+                BorderFactory.createEmptyBorder(0, 4, 0, 0)
+        );
 
         JLabel label = new JLabel(text);
+
         label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
         label.setForeground(TEXT_LIGHT);
-        label.setBorder(new EmptyBorder(10, 25, 10, 20));
+
+        label.setBorder(
+                new EmptyBorder(10, 25, 10, 20)
+        );
 
         panel.add(label, BorderLayout.CENTER);
 
+        // =====================================================
+        // MOUSE EVENT
+        // =====================================================
         panel.addMouseListener(new MouseAdapter() {
 
             @Override
             public void mouseEntered(MouseEvent e) {
+
                 panel.setBackground(HOVER_BG);
+
                 label.setForeground(BRAND_GOLD);
-                panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
+
+                panel.setBorder(
+                        BorderFactory.createMatteBorder(
+                                0,
+                                4,
+                                0,
+                                0,
+                                BRAND_GOLD
+                        )
+                );
+
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
+
                 panel.setBackground(SIDEBAR_BG);
+
                 label.setForeground(TEXT_LIGHT);
-                panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
+
+                panel.setBorder(
+                        BorderFactory.createEmptyBorder(
+                                0,
+                                4,
+                                0,
+                                0
+                        )
+                );
+
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                cardLayout.show(content, cardName);
+
+                // ===== LOGOUT =====
+                if (cardName.equals("logout")) {
+
+                    int confirm = JOptionPane.showConfirmDialog(
+                            null,
+                            "Bạn có muốn đăng xuất?",
+                            "Xác nhận",
+                            JOptionPane.YES_NO_OPTION
+                    );
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+
+                        dispose();
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Đăng xuất thành công!"
+                        );
+
+                        // TODO:
+                        // new LoginUI().setVisible(true);
+                    }
+
+                } else {
+
+                    cardLayout.show(content, cardName);
+                }
             }
         });
 
         return panel;
     }
-
-    // ================= MAIN =================
+    
+    //Hàm toggle 
+    private void toggleSidebar() {
+        isCollapsed = !isCollapsed;
+    }
+    // =========================================================
+    // MAIN
+    // =========================================================
     public static void main(String[] args) {
-
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName()
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         SwingUtilities.invokeLater(() -> {
+
             new NV_BanHang_UI().setVisible(true);
         });
     }
