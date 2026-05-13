@@ -46,6 +46,7 @@ public class ProductManagementPanel extends JPanel {
 
     // =====================================================================
     public ProductManagementPanel() {
+        
         setLayout(new BorderLayout());
         setBackground(MAIN_BG);
         setBorder(new EmptyBorder(28, 32, 28, 32));
@@ -278,22 +279,33 @@ public class ProductManagementPanel extends JPanel {
             });
         }
     }
+        private ImageIcon makePlaceholderIcon(int w, int h) {
+            java.awt.image.BufferedImage bi =
+                new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = bi.createGraphics();
+            g2.setColor(new Color(220, 220, 220));
+            g2.fillRect(0, 0, w, h);
+            g2.setColor(new Color(150, 150, 150));
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            g2.drawString("No img", w / 2 - 14, h / 2 + 4);
+            g2.dispose();
+            return new ImageIcon(bi);
+        }
+
 
         private ImageIcon loadImage(String path, int w, int h) {
-            File f = new File(path);
+            String projectRoot = System.getProperty("user.dir");
+            String fileName = new File(path).getName(); // lấy tên file thôi
+
+            File f = new File(projectRoot, "src/assets/product_images/" + fileName);
 
             if (!f.exists()) {
-                return new ImageIcon(
-                    new ImageIcon("src/product_images/no_image.png")
-                        .getImage()
-                        .getScaledInstance(w, h, Image.SCALE_SMOOTH)
-                );
+                return makePlaceholderIcon(w, h);
             }
 
             Image img = new ImageIcon(f.getAbsolutePath())
                     .getImage()
                     .getScaledInstance(w, h, Image.SCALE_SMOOTH);
-
             return new ImageIcon(img);
         }
 
@@ -366,12 +378,13 @@ public class ProductManagementPanel extends JPanel {
 
         // Load ảnh hiện tại nếu đang sửa
         if (isEdit && existing.getHinhAnh() != null && !existing.getHinhAnh().isEmpty()) {
-           ImageIcon icon = loadImage(
-        "src/product_images/" + existing.getHinhAnh(),
-        68, 68
-);
-previewLabel.setIcon(icon);
-            previewLabel.setText(icon.getImage().getWidth(null) > 0 ? "" : "No img");
+                ImageIcon icon = loadImage(
+                 existing.getHinhAnh(),
+                68, 68
+        );
+
+        previewLabel.setIcon(icon);
+        previewLabel.setText("");
         } else {
             previewLabel.setText("No img");
         }
@@ -387,7 +400,7 @@ previewLabel.setIcon(icon);
                 selectedFileName[0] = fileName;
                 fileNameLabel.setText(fileName);
                 // Cập nhật preview ngay lập tức
-                ImageIcon icon = loadImage("src/product_images/" + fileName, 68, 68);
+                ImageIcon icon = loadImage( fileName, 68, 68);
                 previewLabel.setIcon(icon);
                 previewLabel.setText("");
                 dialog.repaint();
@@ -499,9 +512,9 @@ previewLabel.setIcon(icon);
                  cbKho.getSelectedItem().toString(), 
                 selectedFileName[0]
             );
-                products.add(sp);
+                
                 SanPhamDAO dao = new SanPhamDAO();
-boolean ok = dao.insertSanPham(sp);
+                boolean ok = dao.insertSanPham(sp);
 
 if (ok) {
     JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
