@@ -126,8 +126,12 @@ public class QuanLyUI extends JFrame {
         contentPanel.add(new QuanLyNhaCungCap(), "NHA_CUNG_CAP");
         contentPanel.add(new ThongKeDoanhThu(), "DOANH_THU");
         
-        // Trang chưa code xong dùng tạm placeholder
-        contentPanel.add(createPage("QUẢN LÝ KHUYẾN MÃI"), "KHUYEN_MAI");
+
+        // Các trang chưa code thì dùng tạm hàm createPage để giữ chỗ
+        contentPanel.add(createPage("QUẢN LÝ NHÀ CUNG CẤP"), "NHA_CUNG_CAP");
+        contentPanel.add(new QuanLyKhuyenMai(), "KHUYEN_MAI");
+        contentPanel.add(createPage("THỐNG KÊ DOANH THU"), "DOANH_THU");
+
 
         cardLayout.show(contentPanel, "WELCOME");
 
