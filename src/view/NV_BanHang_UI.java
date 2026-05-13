@@ -242,7 +242,9 @@ public class NV_BanHang_UI extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            e.printStackTrace();
+               System.out.println("LỖI INSERT SẢN PHẨM:");
+                 e.printStackTrace();
+   
         }
 
         SwingUtilities.invokeLater(() -> {

@@ -61,7 +61,7 @@ public class ProductManagementPanel extends JPanel {
 
     private void loadDataFromDatabase() {
         products = new SanPhamDAO().getAllSanPham();
-        filterTable();
+        filterTable(); 
     }
 
     // =====================================================================
@@ -115,10 +115,12 @@ public class ProductManagementPanel extends JPanel {
                 new EmptyBorder(7, 12, 7, 12)));
         searchField.setOpaque(false);
         searchField.putClientProperty("JTextField.placeholderText", "🔍  Tìm kiếm...");
+        searchField.setText("🔍 Tìm kiếm sản phẩm...");
+        
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e)  { loadDataFromDatabase(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e)  { loadDataFromDatabase(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { loadDataFromDatabase(); }
         });
         return searchField;
     }
@@ -315,7 +317,10 @@ public class ProductManagementPanel extends JPanel {
             for (DanhMuc dm : listDM) {
                 cbDanhMuc.addItem(dm);
             }     
-        JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
+        JComboBox<String> cbKho = new JComboBox<>(new String[]{
+    "KHO01", "KHO02"
+});
+            JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
         JTextField fieldTon    = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
         JComboBox<String> cbMauSac = new JComboBox<>(new String[]{
             "Đen", "Trắng", "Xám", "Xanh", "Đỏ"        });
@@ -332,12 +337,13 @@ public class ProductManagementPanel extends JPanel {
         addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
         addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
         addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
-        addRow(form, gbc, 3, "Giá bán (đ):",  fieldGia);
-        addRow(form, gbc, 4, "Tồn kho:",       fieldTon);
-        addRowCombo(form, gbc, 5, "Màu sắc:", cbMauSac);
-        addRowCombo(form, gbc, 6, "Kích cỡ:", cbKichCo);
-        addRowCombo(form, gbc, 7, "Trạng thái:", cbTrangThai);
-        addRow(form, gbc, 8, "Tên file ảnh:",  fieldAnh);
+        addRowCombo(form, gbc, 3, "Kho:", cbKho);
+        addRow(form, gbc, 4, "Giá bán (đ):",  fieldGia);
+        addRow(form, gbc, 5, "Tồn kho:",       fieldTon);
+        addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
+        addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
+        addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
+        addRow(form, gbc, 9, "Tên file ảnh:",  fieldAnh);
 
         // ----- Nút Lưu / Hủy -----
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -389,7 +395,14 @@ public class ProductManagementPanel extends JPanel {
                 existing.setKichCo(cbKichCo.getSelectedItem().toString());
                  existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
                 existing.setHinhAnh(fieldAnh.getText().trim());
-                // TODO: gọi DAO cập nhật xuống database
+                SanPhamDAO dao = new SanPhamDAO();
+                boolean ok = dao.updateSanPham(existing);
+
+                if (ok) {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thất bại!");
+                }
             } else {
                 // Tạo sản phẩm mới
                 DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
@@ -403,14 +416,22 @@ public class ProductManagementPanel extends JPanel {
                 ton,
                 cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
                 fieldTen.getText().trim(),
-                "", 
+                 cbKho.getSelectedItem().toString(), 
                 fieldAnh.getText().trim()
             );
                 products.add(sp);
-                // TODO: gọi DAO lưu xuống database
+                SanPhamDAO dao = new SanPhamDAO();
+boolean ok = dao.insertSanPham(sp);
+
+if (ok) {
+    JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
+    products.add(sp); // chỉ add khi DB thành công
+} else {
+    JOptionPane.showMessageDialog(dialog, "Thêm thất bại!");
+}
             }
 
-            filterTable();
+            loadDataFromDatabase();
             dialog.dispose();
         });
 
@@ -433,11 +454,21 @@ public class ProductManagementPanel extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc muốn xóa sản phẩm \"" + name + "\" không?",
                 "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            products.removeIf(p -> p.getMaSP().equals(code));
-            // TODO: gọi DAO xóa xuống database
-            filterTable();
+       if (confirm == JOptionPane.YES_OPTION) {
+    try {
+        boolean result = new SanPhamDAO().deleteSanPham(code);
+
+        if (result) {
+            loadDataFromDatabase(); // reload lại từ DB
+            JOptionPane.showMessageDialog(this, "Xóa thành công!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa thất bại!");
         }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Không thể xóa! Có ràng buộc dữ liệu.");
+    }
+}
     }
 
     // =====================================================================
@@ -476,7 +507,7 @@ public class ProductManagementPanel extends JPanel {
         private int currentRow;
 
         ActionCellEditor() {
-            JButton editBtn = new JButton("✏");
+            JButton editBtn = new JButton("Sửa");
             editBtn.setBackground(EDIT_BLUE);
             editBtn.setForeground(Color.WHITE);
             editBtn.setBorderPainted(false);
@@ -493,7 +524,7 @@ public class ProductManagementPanel extends JPanel {
                 }
             });
 
-            JButton delBtn = new JButton("🗑");
+            JButton delBtn = new JButton("Xóa");
             delBtn.setBackground(DELETE_RED);
             delBtn.setForeground(Color.WHITE);
             delBtn.setBorderPainted(false);
