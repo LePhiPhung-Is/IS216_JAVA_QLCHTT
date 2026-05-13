@@ -126,7 +126,7 @@ public class QuanLyUI extends JFrame {
         
         // Các trang chưa code thì dùng tạm hàm createPage để giữ chỗ
         contentPanel.add(createPage("QUẢN LÝ NHÀ CUNG CẤP"), "NHA_CUNG_CAP");
-        contentPanel.add(createPage("QUẢN LÝ KHUYẾN MÃI"), "KHUYEN_MAI");
+        contentPanel.add(new QuanLyKhuyenMai(), "KHUYEN_MAI");
         contentPanel.add(createPage("THỐNG KÊ DOANH THU"), "DOANH_THU");
 
         // Mặc định lúc vừa mở phần mềm sẽ hiện trang WELCOME
