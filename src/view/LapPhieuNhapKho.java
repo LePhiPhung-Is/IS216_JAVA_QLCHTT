@@ -23,9 +23,9 @@ public class LapPhieuNhapKho extends JPanel {
     private final Color MAIN_BG = new Color(244, 247, 246);
 
     // Cấu hình Database Oracle UIT
-    private final String DB_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String DB_USER = "FASHION_ADMIN";
-    private final String DB_PASS = "123456";
+    private final String DB_URL = "jdbc:oracle:thin:@localhost:1522/xepdb1";
+    private final String USERNAME = "sinhvien02";
+    private final String DB_PASS = "123";
 
     public LapPhieuNhapKho() {
         setLayout(new BorderLayout(20, 20));
@@ -113,7 +113,7 @@ public class LapPhieuNhapKho extends JPanel {
     }
 
     private void loadNCCData() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(DB_URL, USERNAME, DB_PASS);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT MANCC || ' - ' || TENNCC as NCC FROM NHACUNGCAP")) {
             cbNCC.removeAllItems();
@@ -122,7 +122,7 @@ public class LapPhieuNhapKho extends JPanel {
     }
 
     private void loadProductData() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(DB_URL, USERNAME, DB_PASS);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT MASP || ' - ' || TENSP as SP FROM SANPHAM")) {
             cbSanPham.removeAllItems();
@@ -167,7 +167,7 @@ public class LapPhieuNhapKho extends JPanel {
             return;
         }
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, USERNAME, DB_PASS)) {
             conn.setAutoCommit(false);
             
             // 1. Lưu Phiếu Nhập

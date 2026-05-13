@@ -48,9 +48,9 @@ public class ThongKeDoanhThu extends JPanel {
     private ChartPanel pnlBarChart, pnlPieChart;
 
     private final Color BRAND_GOLD = new Color(212, 175, 55);
-    private final String DB_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String DB_USER = "FASHION_ADMIN";
-    private final String DB_PASS = "123456"; 
+    private final String URL = "jdbc:oracle:thin:@localhost:1522/xepdb1";
+    private final String USERNAME = "sinhvien02";
+    private final String PASSWORD = "123"; 
 
     public ThongKeDoanhThu() {
         setLayout(new BorderLayout(15, 15));
@@ -167,7 +167,7 @@ public class ThongKeDoanhThu extends JPanel {
                      "JOIN SANPHAM s ON ct.MaSP = s.MaSP " +
                      "WHERE ct.MaDH = ?";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, maDH);
@@ -220,7 +220,7 @@ public class ThongKeDoanhThu extends JPanel {
         model.setRowCount(0); long tong = 0; int stt = 1;
         String sql = "SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY HH24:MI') as Ngay, MaNV, TongTien FROM DONHANG " +
                      "WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE' ORDER BY NgayDat DESC";
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDate(1, new java.sql.Date(tu.getTime()));
             pstmt.setDate(2, new java.sql.Date(denPlusOne.getTime()));
@@ -247,7 +247,7 @@ public class ThongKeDoanhThu extends JPanel {
                         "JOIN SANPHAM s ON ct.MaSP = s.MaSP JOIN DANHMUC d ON s.MaDM = d.MaDM " +
                         "WHERE h.NgayDat >= ? AND h.NgayDat < ? AND h.LoaiDon = 'OFFLINE' GROUP BY d.TenDM";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
             try (PreparedStatement ps = conn.prepareStatement(sqlBar)) {
                 ps.setDate(1, new java.sql.Date(tu.getTime())); ps.setDate(2, new java.sql.Date(denPlusOne.getTime()));
                 ResultSet rs = ps.executeQuery();
@@ -332,7 +332,7 @@ public class ThongKeDoanhThu extends JPanel {
         sb.append("<tr bgcolor='#f2f2f2'><th>STT</th><th>Mã Đơn</th><th>Ngày Đặt</th><th>Tổng tiền</th></tr>");
         
         long tong = 0;
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE'")) {
             ps.setDate(1, new java.sql.Date(tu.getTime()));
             Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -366,7 +366,7 @@ public class ThongKeDoanhThu extends JPanel {
             for (String s : h) { PdfPCell c = new PdfPCell(new Phrase(s, fBold)); c.setBackgroundColor(BaseColor.LIGHT_GRAY); t.addCell(c); }
             
             long tong = 0;
-            try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
                  PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE'")) {
                 ps.setDate(1, new java.sql.Date(tu.getTime()));
                 Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);

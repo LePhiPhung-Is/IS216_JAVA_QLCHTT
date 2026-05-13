@@ -24,9 +24,9 @@ public class QuanLyNhaCungCap extends JPanel {
     private final Color ACTION_BLUE = new Color(51, 122, 183);
     private final Color ACTION_RED = new Color(217, 83, 79);
 
-    private final String DB_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String DB_USER = "FASHION_ADMIN";
-    private final String DB_PASS = "123456";
+    private final String URL = "jdbc:oracle:thin:@localhost:1522/xepdb1";
+    private final String USERNAME = "sinhvien02";
+    private final String PASSWORD = "123";
 
     public QuanLyNhaCungCap() {
         setLayout(new BorderLayout(20, 20));
@@ -140,7 +140,7 @@ public class QuanLyNhaCungCap extends JPanel {
         String sql = "SELECT MANCC, TENNCC, DIACHI, SDT, EMAIL FROM NHACUNGCAP " +
                      "WHERE LOWER(TENNCC) LIKE ? OR LOWER(MANCC) LIKE ?";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "%" + keyword + "%");
             pstmt.setString(2, "%" + keyword + "%");
@@ -227,7 +227,7 @@ public class QuanLyNhaCungCap extends JPanel {
             "INSERT INTO NHACUNGCAP (MANCC, TENNCC, DIACHI, SDT, EMAIL) VALUES(?,?,?,?,?)" :
             "UPDATE NHACUNGCAP SET TENNCC=?, DIACHI=?, SDT=?, EMAIL=? WHERE MANCC=?";
         
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             if (type.equals("INSERT")) {
                 pstmt.setString(1, m.getText()); pstmt.setString(2, t.getText());
@@ -296,7 +296,7 @@ public class QuanLyNhaCungCap extends JPanel {
                     String id = model.getValueAt(row, 0).toString();
                     if (JOptionPane.showConfirmDialog(null, "Xóa nhà cung cấp " + id + "?", 
                             "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+                        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
                              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM NHACUNGCAP WHERE MANCC=?")) {
                             pstmt.setString(1, id);
                             int rowsAffected = pstmt.executeUpdate();

@@ -24,9 +24,9 @@ public class ThongKeHangTon extends JPanel {
     private JLabel lblTongSoLuong;
 
     private final Color BRAND_GOLD = new Color(212, 175, 55);
-    private final String DB_URL = "jdbc:oracle:thin:@localhost:1521:orcl";
-    private final String DB_USER = "FASHION_ADMIN";
-    private final String DB_PASS = "123456"; 
+    private final String URL = "jdbc:oracle:thin:@localhost:1522/xepdb1";
+    private final String USERNAME = "sinhvien02";
+    private final String PASSWORD = "123"; 
 
     public ThongKeHangTon() {
         setLayout(new BorderLayout(15, 15));
@@ -99,7 +99,7 @@ public class ThongKeHangTon extends JPanel {
         
         String sql = "SELECT TENDM FROM DANHMUC ORDER BY MADM ASC";
         
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             
@@ -126,7 +126,7 @@ public class ThongKeHangTon extends JPanel {
         }
         sql += "ORDER BY s.SoLuongTon DESC";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             if (selected != null && !selected.equals("Tất cả")) {
