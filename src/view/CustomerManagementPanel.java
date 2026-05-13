@@ -2,6 +2,7 @@ package src.view;
 
 import src.model.KhachHang;
 import src.dao.KhachHangDAO;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
@@ -59,7 +60,8 @@ public class CustomerManagementPanel extends JPanel {
             String kw = searchField.getText().toLowerCase();
             List<KhachHang> res = new ArrayList<>();
             for(KhachHang k : customers) {
-                if(k.getTenKH().toLowerCase().contains(kw) || k.getSoDienThoai().contains(kw)) res.add(k);
+                // Đã cập nhật thành getSdt() theo Model mới
+                if(k.getTenKH().toLowerCase().contains(kw) || k.getSdt().contains(kw)) res.add(k);
             }
             refreshTable(res);
         });
@@ -74,9 +76,10 @@ public class CustomerManagementPanel extends JPanel {
     }
 
     private JScrollPane buildTablePanel() {
-        String[] cols = {"Mã KH", "Tên khách hàng", "Số điện thoại", "Địa chỉ", "Thao tác"};
+        // Đã cập nhật lại các Cột theo Model mới
+        String[] cols = {"Mã KH", "Tên khách hàng", "Số điện thoại", "Email", "Điểm", "Tên ĐN", "Thao tác"};
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 4; }
+            @Override public boolean isCellEditable(int r, int c) { return c == 6; } // Cột thao tác dời sang vị trí số 6
         };
         table = new JTable(tableModel);
         table.setRowHeight(60);
@@ -87,9 +90,9 @@ public class CustomerManagementPanel extends JPanel {
         th.setForeground(BRAND_GOLD);
         th.setPreferredSize(new Dimension(0, 44));
 
-        table.getColumnModel().getColumn(4).setPreferredWidth(160);
-        table.getColumnModel().getColumn(4).setCellRenderer(new ActionRenderer());
-        table.getColumnModel().getColumn(4).setCellEditor(new ActionEditor());
+        table.getColumnModel().getColumn(6).setPreferredWidth(160);
+        table.getColumnModel().getColumn(6).setCellRenderer(new ActionRenderer());
+        table.getColumnModel().getColumn(6).setCellEditor(new ActionEditor());
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(BorderFactory.createLineBorder(new Color(220, 225, 222)));
@@ -99,7 +102,16 @@ public class CustomerManagementPanel extends JPanel {
     public void refreshTable(List<KhachHang> data) {
         tableModel.setRowCount(0);
         for (KhachHang k : data) {
-            tableModel.addRow(new Object[]{k.getMaKH(), k.getTenKH(), k.getSoDienThoai(), k.getDiaChi(), ""});
+            // Đổ dữ liệu mới vào bảng (thêm Email, DiemTichLuy, TenDangNhap)
+            tableModel.addRow(new Object[]{
+                k.getMaKH(), 
+                k.getTenKH(), 
+                k.getSdt(), 
+                k.getEmail(), 
+                k.getDiemTichLuy(), 
+                k.getTenDangNhap(), 
+                ""
+            });
         }
     }
 
@@ -117,10 +129,12 @@ public class CustomerManagementPanel extends JPanel {
     private void openDialog(KhachHang target) {
         boolean isEdit = (target != null);
         JDialog d = new JDialog((Frame)null, isEdit ? "SỬA THÔNG TIN" : "THÊM KHÁCH HÀNG", true);
-        d.setSize(400, 380); d.setLayout(new BorderLayout());
+        d.setSize(450, 450); // Tăng chiều cao để chứa thêm ô nhập liệu
+        d.setLayout(new BorderLayout());
         d.setLocationRelativeTo(this);
 
-        JPanel pForm = new JPanel(new GridLayout(4, 2, 10, 20));
+        // Chuyển sang 6 hàng 2 cột
+        JPanel pForm = new JPanel(new GridLayout(6, 2, 10, 20));
         pForm.setBorder(new EmptyBorder(25, 25, 25, 25));
 
         JTextField fMa = new JTextField(isEdit ? target.getMaKH() : autoMaKH());
@@ -128,13 +142,18 @@ public class CustomerManagementPanel extends JPanel {
         fMa.setBackground(new Color(235, 235, 235));
         
         JTextField fTen = new JTextField(isEdit ? target.getTenKH() : "");
-        JTextField fSDT = new JTextField(isEdit ? target.getSoDienThoai() : "");
-        JTextField fDC = new JTextField(isEdit ? target.getDiaChi() : "");
+        JTextField fSDT = new JTextField(isEdit ? target.getSdt() : "");
+        JTextField fEmail = new JTextField(isEdit ? target.getEmail() : "");
+        // Điểm tích lũy là int nên cần bọc lại bằng String, nếu mới thì mặc định là 0
+        JTextField fDiem = new JTextField(isEdit ? String.valueOf(target.getDiemTichLuy()) : "0"); 
+        JTextField fTenDN = new JTextField(isEdit ? target.getTenDangNhap() : "");
 
         pForm.add(new JLabel("Mã KH:")); pForm.add(fMa);
         pForm.add(new JLabel("Họ Tên:")); pForm.add(fTen);
         pForm.add(new JLabel("Số ĐT:")); pForm.add(fSDT);
-        pForm.add(new JLabel("Địa chỉ:")); pForm.add(fDC);
+        pForm.add(new JLabel("Email:")); pForm.add(fEmail);
+        pForm.add(new JLabel("Điểm tích lũy:")); pForm.add(fDiem);
+        pForm.add(new JLabel("Tên đăng nhập:")); pForm.add(fTenDN);
 
         JButton btnSave = new JButton(isEdit ? "CẬP NHẬT" : "THÊM MỚI");
         btnSave.setBackground(BRAND_GOLD);
@@ -144,14 +163,37 @@ public class CustomerManagementPanel extends JPanel {
                 JOptionPane.showMessageDialog(d, "Vui lòng nhập Tên và SĐT!");
                 return;
             }
+            
+            // Xử lý riêng lỗi người dùng nhập sai kiểu số ở ô Điểm tích lũy
+            int diemTichLuy = 0;
+            try {
+                diemTichLuy = Integer.parseInt(fDiem.getText().trim());
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(d, "Điểm tích lũy phải là số nguyên!");
+                return;
+            }
+
             if(isEdit) {
-                target.setTenKH(fTen.getText()); target.setSoDienThoai(fSDT.getText()); target.setDiaChi(fDC.getText());
+                target.setTenKH(fTen.getText()); 
+                target.setSdt(fSDT.getText()); 
+                target.setEmail(fEmail.getText());
+                target.setDiemTichLuy(diemTichLuy);
+                target.setTenDangNhap(fTenDN.getText());
+                
                 dao.suaKhachHang(target);
             } else {
-                KhachHang newK = new KhachHang(fMa.getText(), fTen.getText(), fSDT.getText(), fDC.getText());
+                KhachHang newK = new KhachHang(
+                    fMa.getText(), 
+                    fTen.getText(), 
+                    fSDT.getText(), 
+                    diemTichLuy, 
+                    fEmail.getText(), 
+                    fTenDN.getText()
+                );
                 dao.themKhachHang(newK);
             }
-            loadData(); d.dispose();
+            loadData(); 
+            d.dispose();
         });
         
         d.add(pForm, BorderLayout.CENTER);
@@ -196,6 +238,7 @@ public class CustomerManagementPanel extends JPanel {
         JButton b = new JButton(txt); b.setBackground(BRAND_GOLD); b.setOpaque(true); b.setBorderPainted(false); 
         b.setCursor(new Cursor(Cursor.HAND_CURSOR)); return b;
     }
+    
     private JButton makeSmallBtn(String txt, Color bg) {
         JButton b = new JButton(txt); b.setBackground(bg); b.setForeground(Color.WHITE); b.setOpaque(true); b.setBorderPainted(false); 
         b.setCursor(new Cursor(Cursor.HAND_CURSOR)); return b;
