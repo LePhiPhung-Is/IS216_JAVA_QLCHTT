@@ -4,7 +4,8 @@ import src.dao.DanhMucDAO;
 import src.dao.SanPhamDAO;
 import src.model.DanhMuc;
 import src.model.SanPham;
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
@@ -45,6 +46,7 @@ public class ProductManagementPanel extends JPanel {
 
     // =====================================================================
     public ProductManagementPanel() {
+        
         setLayout(new BorderLayout());
         setBackground(MAIN_BG);
         setBorder(new EmptyBorder(28, 32, 28, 32));
@@ -61,7 +63,7 @@ public class ProductManagementPanel extends JPanel {
 
     private void loadDataFromDatabase() {
         products = new SanPhamDAO().getAllSanPham();
-        filterTable();
+        filterTable(); 
     }
 
     // =====================================================================
@@ -98,28 +100,48 @@ public class ProductManagementPanel extends JPanel {
         return header;
     }
 
-    private JTextField buildSearchField() {
+   private JTextField buildSearchField() {
+        final String PLACEHOLDER      = "🔍  Tìm kiếm sản phẩm...";
+        final Color  PLACEHOLDER_COLOR = new Color(160, 160, 160);
+ 
         searchField = new JTextField(20) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                // Vẽ nền bo tròn
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.dispose();
                 super.paintComponent(g);
+ 
+                // Vẽ placeholder khi ô trống và không được focus
+                if (getText().isEmpty() && !isFocusOwner()) {
+                    Graphics2D g3 = (Graphics2D) getGraphics();
+                    g3.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g3.setFont(getFont().deriveFont(Font.ITALIC));
+                    g3.setColor(PLACEHOLDER_COLOR);
+                    Insets ins = getInsets();
+                    int y = (getHeight() + g3.getFontMetrics().getAscent() - g3.getFontMetrics().getDescent()) / 2;
+                    g3.drawString(PLACEHOLDER, ins.left, y);
+                    g3.dispose();
+                }
             }
         };
+ 
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
                 new EmptyBorder(7, 12, 7, 12)));
         searchField.setOpaque(false);
-        searchField.putClientProperty("JTextField.placeholderText", "🔍  Tìm kiếm...");
+ 
+        // Lọc real-time theo từ khoá
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
         });
+ 
         return searchField;
     }
 
@@ -257,20 +279,35 @@ public class ProductManagementPanel extends JPanel {
             });
         }
     }
-
-    private ImageIcon loadImage(String path, int w, int h) {
-        try {
-            File f = new File(path);
-            if (f.exists()) {
-                Image img = new ImageIcon(f.getAbsolutePath()).getImage()
-                        .getScaledInstance(w, h, Image.SCALE_SMOOTH);
-                return new ImageIcon(img);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        private ImageIcon makePlaceholderIcon(int w, int h) {
+            java.awt.image.BufferedImage bi =
+                new java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = bi.createGraphics();
+            g2.setColor(new Color(220, 220, 220));
+            g2.fillRect(0, 0, w, h);
+            g2.setColor(new Color(150, 150, 150));
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+            g2.drawString("No img", w / 2 - 14, h / 2 + 4);
+            g2.dispose();
+            return new ImageIcon(bi);
         }
-        return new ImageIcon();
-    }
+
+
+        private ImageIcon loadImage(String path, int w, int h) {
+            String projectRoot = System.getProperty("user.dir");
+            String fileName = new File(path).getName(); // lấy tên file thôi
+
+            File f = new File(projectRoot, "src/assets/product_images/" + fileName);
+
+            if (!f.exists()) {
+                return makePlaceholderIcon(w, h);
+            }
+
+            Image img = new ImageIcon(f.getAbsolutePath())
+                    .getImage()
+                    .getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            return new ImageIcon(img);
+        }
 
     // =====================================================================
     //  DIALOG — THÊM / SỬA SẢN PHẨM
@@ -315,7 +352,10 @@ public class ProductManagementPanel extends JPanel {
             for (DanhMuc dm : listDM) {
                 cbDanhMuc.addItem(dm);
             }     
-        JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
+        JComboBox<String> cbKho = new JComboBox<>(new String[]{
+    "KHO01", "KHO02"
+});
+            JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
         JTextField fieldTon    = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
         JComboBox<String> cbMauSac = new JComboBox<>(new String[]{
             "Đen", "Trắng", "Xám", "Xanh", "Đỏ"        });
@@ -325,19 +365,78 @@ public class ProductManagementPanel extends JPanel {
 
         JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
             "Đang bán", "Ngừng bán"        });
-        JTextField fieldAnh    = makeField(isEdit ? existing.getHinhAnh()            : "");
+        
 
         fieldMa.setEditable(!isEdit); // Không cho sửa mã khi đang edit
+        // --- Ảnh: preview + nút chọn ---
+        final String[] selectedFileName = { isEdit ? existing.getHinhAnh() : "" };
 
+        JLabel previewLabel = new JLabel();
+        previewLabel.setPreferredSize(new Dimension(70, 70));
+        previewLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+        previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Load ảnh hiện tại nếu đang sửa
+        if (isEdit && existing.getHinhAnh() != null && !existing.getHinhAnh().isEmpty()) {
+                ImageIcon icon = loadImage(
+                 existing.getHinhAnh(),
+                68, 68
+        );
+
+        previewLabel.setIcon(icon);
+        previewLabel.setText("");
+        } else {
+            previewLabel.setText("No img");
+        }
+
+        JLabel fileNameLabel = new JLabel(selectedFileName[0].isEmpty() ? "Chưa chọn ảnh" : selectedFileName[0]);
+        fileNameLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        fileNameLabel.setForeground(new Color(120, 120, 120));
+
+        JButton btnChonAnh = makePlainButton("📂 Chọn ảnh");
+        btnChonAnh.addActionListener(ev -> {
+            String fileName = chooseAndCopyImage(dialog);
+            if (fileName != null) {
+                selectedFileName[0] = fileName;
+                fileNameLabel.setText(fileName);
+                // Cập nhật preview ngay lập tức
+                ImageIcon icon = loadImage( fileName, 68, 68);
+                previewLabel.setIcon(icon);
+                previewLabel.setText("");
+                dialog.repaint();
+            }
+        });
+
+        // Panel chứa preview + tên file + nút chọn
+        JPanel anhPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        anhPanel.setBackground(MAIN_BG);
+        anhPanel.add(previewLabel);
+        JPanel anhRight = new JPanel();
+        anhRight.setLayout(new BoxLayout(anhRight, BoxLayout.Y_AXIS));
+        anhRight.setBackground(MAIN_BG);
+        anhRight.add(btnChonAnh);
+        anhRight.add(Box.createVerticalStrut(6));
+        anhRight.add(fileNameLabel);
+        anhPanel.add(anhRight);
+
+        // Thêm vào form
+        gbc.gridx = 0; gbc.gridy = 9; gbc.weightx = 0.3;
+        JLabel lblAnh = new JLabel("Hình ảnh:");
+        lblAnh.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblAnh.setForeground(new Color(60, 60, 60));
+        form.add(lblAnh, gbc);
+        gbc.gridx = 1; gbc.weightx = 0.7;
+        form.add(anhPanel, gbc);
         addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
         addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
         addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
-        addRow(form, gbc, 3, "Giá bán (đ):",  fieldGia);
-        addRow(form, gbc, 4, "Tồn kho:",       fieldTon);
-        addRowCombo(form, gbc, 5, "Màu sắc:", cbMauSac);
-        addRowCombo(form, gbc, 6, "Kích cỡ:", cbKichCo);
-        addRowCombo(form, gbc, 7, "Trạng thái:", cbTrangThai);
-        addRow(form, gbc, 8, "Tên file ảnh:",  fieldAnh);
+        addRowCombo(form, gbc, 3, "Kho:", cbKho);
+        addRow(form, gbc, 4, "Giá bán (đ):",  fieldGia);
+        addRow(form, gbc, 5, "Tồn kho:",       fieldTon);
+        addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
+        addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
+        addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
+        
 
         // ----- Nút Lưu / Hủy -----
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -388,8 +487,15 @@ public class ProductManagementPanel extends JPanel {
                 existing.setMauSac(cbMauSac.getSelectedItem().toString());
                 existing.setKichCo(cbKichCo.getSelectedItem().toString());
                  existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
-                existing.setHinhAnh(fieldAnh.getText().trim());
-                // TODO: gọi DAO cập nhật xuống database
+                existing.setHinhAnh(selectedFileName[0]);
+                SanPhamDAO dao = new SanPhamDAO();
+                boolean ok = dao.updateSanPham(existing);
+
+                if (ok) {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thất bại!");
+                }
             } else {
                 // Tạo sản phẩm mới
                 DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
@@ -403,14 +509,22 @@ public class ProductManagementPanel extends JPanel {
                 ton,
                 cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
                 fieldTen.getText().trim(),
-                "", 
-                fieldAnh.getText().trim()
+                 cbKho.getSelectedItem().toString(), 
+                selectedFileName[0]
             );
-                products.add(sp);
-                // TODO: gọi DAO lưu xuống database
+                
+                SanPhamDAO dao = new SanPhamDAO();
+                boolean ok = dao.insertSanPham(sp);
+
+if (ok) {
+    JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
+    products.add(sp); // chỉ add khi DB thành công
+} else {
+    JOptionPane.showMessageDialog(dialog, "Thêm thất bại!");
+}
             }
 
-            filterTable();
+            loadDataFromDatabase();
             dialog.dispose();
         });
 
@@ -433,11 +547,21 @@ public class ProductManagementPanel extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc muốn xóa sản phẩm \"" + name + "\" không?",
                 "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            products.removeIf(p -> p.getMaSP().equals(code));
-            // TODO: gọi DAO xóa xuống database
-            filterTable();
+       if (confirm == JOptionPane.YES_OPTION) {
+    try {
+        boolean result = new SanPhamDAO().deleteSanPham(code);
+
+        if (result) {
+            loadDataFromDatabase(); // reload lại từ DB
+            JOptionPane.showMessageDialog(this, "Xóa thành công!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa thất bại!");
         }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Không thể xóa! Có ràng buộc dữ liệu.");
+    }
+}
     }
 
     // =====================================================================
@@ -476,7 +600,7 @@ public class ProductManagementPanel extends JPanel {
         private int currentRow;
 
         ActionCellEditor() {
-            JButton editBtn = new JButton("✏");
+            JButton editBtn = new JButton("Sửa");
             editBtn.setBackground(EDIT_BLUE);
             editBtn.setForeground(Color.WHITE);
             editBtn.setBorderPainted(false);
@@ -493,7 +617,7 @@ public class ProductManagementPanel extends JPanel {
                 }
             });
 
-            JButton delBtn = new JButton("🗑");
+            JButton delBtn = new JButton("Xóa");
             delBtn.setBackground(DELETE_RED);
             delBtn.setForeground(Color.WHITE);
             delBtn.setBorderPainted(false);
@@ -591,4 +715,41 @@ public class ProductManagementPanel extends JPanel {
                 new EmptyBorder(8, 20, 8, 20)));
         return b;
     }
+    /**
+ * Mở JFileChooser, copy ảnh vào src/product_images/, trả về tên file.
+ * Trả về null nếu người dùng hủy hoặc có lỗi.
+ */
+private String chooseAndCopyImage(JDialog parent) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Chọn ảnh sản phẩm");
+    chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Image files (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
+
+    int result = chooser.showOpenDialog(parent);
+    if (result != JFileChooser.APPROVE_OPTION) return null;
+
+    File srcFile = chooser.getSelectedFile();
+
+    // Đảm bảo thư mục đích tồn tại
+    File destDir = new File("src/product_images");
+    if (!destDir.exists()) destDir.mkdirs();
+
+    File destFile = new File(destDir, srcFile.getName());
+
+    // Nếu trùng tên → thêm timestamp để tránh ghi đè
+    if (destFile.exists()) {
+        String name = srcFile.getName();
+        String ext  = name.contains(".") ? name.substring(name.lastIndexOf('.')) : "";
+        String base = name.contains(".") ? name.substring(0, name.lastIndexOf('.')) : name;
+        destFile = new File(destDir, base + "_" + System.currentTimeMillis() + ext);
+    }
+
+    try {
+        Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        return destFile.getName(); // chỉ lưu tên file, không lưu cả path
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(parent, "Lỗi khi copy ảnh: " + ex.getMessage());
+        return null;
+    }
+}
 }
