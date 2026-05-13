@@ -162,7 +162,7 @@ public class QuenMatKhauUI extends JFrame {
 
         // ==========================================
         // ===== Link sang trang Đăng nhập =====
-        JLabel lblLogin = new JLabel("Đã nhớ mật khẩu? Đăng nhập");
+        
         JLabel lblLogin = new JLabel("Đăng nhập");
         lblLogin.setForeground(Color.CYAN);
         lblLogin.setBounds(80, 335, 200, 20);
