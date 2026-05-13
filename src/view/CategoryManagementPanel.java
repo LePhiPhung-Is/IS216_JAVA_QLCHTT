@@ -363,12 +363,28 @@ public class CategoryManagementPanel extends JPanel {
 
             if (isEdit) {
                 existing.setTenDM(tenDM);
-                // TODO: gọi DAO cập nhật xuống database
+                boolean ok = new DanhMucDAO().update(existing);
+                if (ok) {
+                    refreshCatTable();
+                    dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(dialog,
+                        "Cập nhật thất bại! Vui lòng thử lại.",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
-                DanhMuc newDM = new DanhMuc(maDM, tenDM);
-                danhSachDM.add(newDM);
-                // TODO: gọi DAO lưu xuống database
-            }
+    DanhMuc newDM = new DanhMuc(maDM, tenDM);
+    boolean ok = new DanhMucDAO().insert(newDM);
+    if (ok) {
+        danhSachDM.add(newDM);
+        refreshCatTable();
+        dialog.dispose();
+    } else {
+        JOptionPane.showMessageDialog(dialog,
+            "Thêm danh mục thất bại! Mã có thể đã tồn tại.",
+            "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+}
 
             refreshCatTable();
             dialog.dispose();
@@ -552,8 +568,18 @@ public class CategoryManagementPanel extends JPanel {
 
                 if (dangXemDM != null && curRow < dangXemDM.getDanhSachSanPham().size()) {
                     SanPham sp = dangXemDM.getDanhSachSanPham().get(curRow);
-                    sp.setTrangThai(curValue ? "DANG_BAN" : "AN");
-                    // TODO: gọi DAO cập nhật trạng thái xuống database
+                    String trangThaiMoi = curValue ? "DANG_BAN" : "AN";
+                    sp.setTrangThai(trangThaiMoi);
+                    boolean ok = new DanhMucDAO().capNhatTrangThai(sp.getMaSP(), trangThaiMoi);
+                    if (!ok) {
+                        // Rollback nếu DB lỗi
+                        curValue = !curValue;
+                        sp.setTrangThai(curValue ? "DANG_BAN" : "AN");
+                        applyStyle();
+                        JOptionPane.showMessageDialog(CategoryManagementPanel.this,
+                            "Cập nhật trạng thái thất bại!",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
                 }
 
                 detailTableModel.setValueAt(curValue, curRow, DETAIL_COL_TOGGLE);
@@ -579,14 +605,14 @@ public class CategoryManagementPanel extends JPanel {
         public Object getCellEditorValue() { return curValue; }
 
         private void applyStyle() {
-            btn.setText(curValue ? "👁  Đang hiện" : "🙈  Đang ẩn");
+            btn.setText(curValue ? "👁  Đang hiện" : "  Đang ẩn");
             btn.setBackground(curValue ? new Color(40, 167, 80) : HIDE_GRAY);
         }
     }
 
     // Nút xóa SP khỏi danh mục
     private JButton makeDeleteButton() {
-        JButton btn = new JButton("🗑 Xóa");
+        JButton btn = new JButton("Xóa");
         btn.setBackground(DELETE_RED);
         btn.setForeground(Color.WHITE);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
@@ -618,10 +644,16 @@ public class CategoryManagementPanel extends JPanel {
                         "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
                 if (confirm == JOptionPane.YES_OPTION) {
-                    dangXemDM.xoaSanPham(sp); // dùng business logic của DanhMuc model
-                    // TODO: gọi DAO cập nhật xuống database
-                    detailTableModel.removeRow(curRow);
-                    updateDetailCount();
+                    boolean ok = new DanhMucDAO().xoaSanPhamKhoiDanhMuc(sp.getMaSP());
+                    if (ok) {
+                        dangXemDM.xoaSanPham(sp);
+                        detailTableModel.removeRow(curRow);
+                        updateDetailCount();
+                    } else {
+                        JOptionPane.showMessageDialog(CategoryManagementPanel.this,
+                            "Xóa sản phẩm khỏi danh mục thất bại!",
+                            "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             });
         }
@@ -752,19 +784,34 @@ public class CategoryManagementPanel extends JPanel {
 
         JButton confirmBtn = makeGoldButton("✔ Xác nhận");
         confirmBtn.addActionListener(e -> {
-            int added = 0;
-            for (int i = 0; i < pickModel.getRowCount(); i++) {
-                if ((Boolean) pickModel.getValueAt(i, 0)) {
-                    dangXemDM.themSanPham(available.get(i));
-                    added++;
-                }
+        List<SanPham> selected = new ArrayList<>();
+        for (int i = 0; i < pickModel.getRowCount(); i++) {
+            if ((Boolean) pickModel.getValueAt(i, 0)) {
+                selected.add(available.get(i));
             }
-            if (added == 0) {
+        }
+        if (selected.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                        "Chưa chọn sản phẩm nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    "Chưa chọn sản phẩm nào.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            // TODO: gọi DAO lưu xuống database
+
+            DanhMucDAO dao = new DanhMucDAO();
+            int successCount = 0;
+            for (SanPham sp : selected) {
+                boolean ok = dao.themSanPhamVaoDanhMuc(sp.getMaSP(), dangXemDM.getMaDM());
+                if (ok) {
+                    dangXemDM.themSanPham(sp);
+                    successCount++;
+                }
+            }
+
+            if (successCount == 0) {
+                JOptionPane.showMessageDialog(dialog,
+                    "Thêm sản phẩm thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             refreshDetailTable();
             dialog.dispose();
         });

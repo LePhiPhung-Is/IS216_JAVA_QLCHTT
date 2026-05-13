@@ -12,6 +12,8 @@ import java.util.List;
 
 public class DanhMucDAO {
 
+    
+
     // ===== LẤY TẤT CẢ DANH MỤC =====
     public List<DanhMuc> getAllDanhMuc() {
         List<DanhMuc> list = new ArrayList<>();
@@ -140,6 +142,24 @@ public class DanhMucDAO {
             return false;
         }
     }
+    // ===== XÓA SẢN PHẨM KHỎI DANH MỤC =====
+    public boolean xoaSanPhamKhoiDanhMuc(String maSP) {
+    String sql = "UPDATE SANPHAM SET MADM = NULL WHERE MASP = ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(sql)) {
+
+        pst.setString(1, maSP);
+        return pst.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        System.out.println("Lỗi DAO: Không thể xóa sản phẩm " + maSP + " khỏi danh mục");
+        e.printStackTrace();
+        return false;
+    }
+}
+    
+    
     // ===== XÓA DANH MỤC =====
 public boolean delete(String maDM) {
     String sql = "DELETE FROM DANHMUC WHERE MADM = ?";
@@ -157,6 +177,25 @@ public boolean delete(String maDM) {
         return false;
     }
 }
+
+// THÊM DANH MUC MỚI
+    public boolean insert(DanhMuc dm) {
+    String sql = "INSERT INTO DANHMUC (MADM, TENDM) VALUES (?, ?)";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(sql)) {
+
+        pst.setString(1, dm.getMaDM());
+        pst.setString(2, dm.getTenDM());
+        return pst.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        System.out.println("Lỗi DAO: Không thể thêm danh mục " + dm.getMaDM());
+        e.printStackTrace();
+        return false;
+    }
+}
+        
 public boolean update(DanhMuc dm) {
     String sql = "UPDATE DANHMUC SET TENDM = ? WHERE MADM = ?";
 
