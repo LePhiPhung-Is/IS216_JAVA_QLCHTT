@@ -141,6 +141,13 @@ public class LoginUI extends JFrame {
         lblForgot.setBounds(180, 265, 150, 20);
         panel.add(lblForgot);
 
+        lblForgot.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                new QuenMatKhauUI().setVisible(true); // Mở trang Quên mật khẩu
+                LoginUI.this.dispose();               // Đóng trang Đăng nhập
+            }
+        });
+
         // ===== Logo =====
         JLabel logo = new JLabel("BEAUTY SHOP");
         logo.setFont(new Font("Serif", Font.BOLD, 40));
@@ -170,6 +177,10 @@ btnLogin.addActionListener(e -> {
         
         // Đóng trang LoginUI hiện tại
         this.dispose(); 
+    } else if (user.equals("kho") && pass.equals("123")) {
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền Nhân viên Kho!");
+                new NV_Kho_UI().setVisible(true); // Mở giao diện Nhân viên Kho
+                this.dispose();
     } else {
         JOptionPane.showMessageDialog(this, "Sai tài khoản!");
     }

@@ -12,8 +12,6 @@ public class DatabaseConnection {
 
     private static final String URL = "jdbc:oracle:thin:@localhost:1521:orcl";
 
-    
-    private static final String URL = "jdbc:oracle:thin:@localhost:1521/XEPDB1";
 
     // ĐIỀN THÔNG TIN TÀI KHOẢN ORACLE CỦA BẠN VÀO ĐÂY
     private static final String USERNAME = "FASHION_ADMIN"; // Ví dụ: system, hr, hoặc user bạn tự tạo
