@@ -118,19 +118,14 @@ public class QuanLyUI extends JFrame {
         contentPanel.setBackground(MAIN_BG);
 
         // Khởi tạo và nạp sẵn tất cả các Panel
-        contentPanel.add(createPage("WELCOME ADMIN"), "WELCOME");
+        // contentPanel.add(createPage("WELCOME ADMIN"), "WELCOME");
         
         // Thêm các class thực tế của nhóm 8
         contentPanel.add(new QuanLyNhanVienUI(), "NHAN_VIEN");
         contentPanel.add(new ThongKeHangTon(), "TON_KHO");
         contentPanel.add(new QuanLyNhaCungCap(), "NHA_CUNG_CAP");
-        contentPanel.add(new ThongKeDoanhThu(), "DOANH_THU");
-        
-
-        // Các trang chưa code thì dùng tạm hàm createPage để giữ chỗ
-        contentPanel.add(createPage("QUẢN LÝ NHÀ CUNG CẤP"), "NHA_CUNG_CAP");
+        contentPanel.add(new ThongKeDoanhThu(), "DOANH_THU");      
         contentPanel.add(new QuanLyKhuyenMai(), "KHUYEN_MAI");
-        contentPanel.add(createPage("THỐNG KÊ DOANH THU"), "DOANH_THU");
 
 
         cardLayout.show(contentPanel, "WELCOME");
