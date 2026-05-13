@@ -140,4 +140,37 @@ public class DanhMucDAO {
             return false;
         }
     }
+    // ===== XÓA DANH MỤC =====
+public boolean delete(String maDM) {
+    String sql = "DELETE FROM DANHMUC WHERE MADM = ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement pst = conn.prepareStatement(sql)) {
+
+        pst.setString(1, maDM);
+
+        return pst.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        System.out.println("Lỗi DAO: Không thể xóa danh mục " + maDM);
+        e.printStackTrace();
+        return false;
+    }
+}
+public boolean update(DanhMuc dm) {
+    String sql = "UPDATE DANHMUC SET TENDM = ? WHERE MADM = ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, dm.getTenDM());
+        ps.setString(2, dm.getMaDM());
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }

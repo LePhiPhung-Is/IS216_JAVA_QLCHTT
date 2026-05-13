@@ -98,30 +98,48 @@ public class ProductManagementPanel extends JPanel {
         return header;
     }
 
-    private JTextField buildSearchField() {
+   private JTextField buildSearchField() {
+        final String PLACEHOLDER      = "🔍  Tìm kiếm sản phẩm...";
+        final Color  PLACEHOLDER_COLOR = new Color(160, 160, 160);
+ 
         searchField = new JTextField(20) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                // Vẽ nền bo tròn
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.dispose();
                 super.paintComponent(g);
+ 
+                // Vẽ placeholder khi ô trống và không được focus
+                if (getText().isEmpty() && !isFocusOwner()) {
+                    Graphics2D g3 = (Graphics2D) getGraphics();
+                    g3.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g3.setFont(getFont().deriveFont(Font.ITALIC));
+                    g3.setColor(PLACEHOLDER_COLOR);
+                    Insets ins = getInsets();
+                    int y = (getHeight() + g3.getFontMetrics().getAscent() - g3.getFontMetrics().getDescent()) / 2;
+                    g3.drawString(PLACEHOLDER, ins.left, y);
+                    g3.dispose();
+                }
             }
         };
+ 
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
                 new EmptyBorder(7, 12, 7, 12)));
         searchField.setOpaque(false);
-        searchField.putClientProperty("JTextField.placeholderText", "🔍  Tìm kiếm...");
-        searchField.setText("🔍 Tìm kiếm sản phẩm...");
-        
+ 
+        // Lọc real-time theo từ khoá
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e)  { loadDataFromDatabase(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e)  { loadDataFromDatabase(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { loadDataFromDatabase(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
         });
+ 
         return searchField;
     }
 

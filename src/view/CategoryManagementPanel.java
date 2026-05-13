@@ -231,8 +231,8 @@ public class CategoryManagementPanel extends JPanel {
         private int currentRow;
 
         CatActionEditor(JTable catTable) {
-            JButton editBtn   = makeBtn("✏", EDIT_BLUE);
-            JButton deleteBtn = makeBtn("🗑", DELETE_RED);
+            JButton editBtn   = makeBtn("Sửa", EDIT_BLUE);
+            JButton deleteBtn = makeBtn("Xóa", DELETE_RED);
 
             // Sửa danh mục
             editBtn.addActionListener(e -> {
@@ -243,19 +243,38 @@ public class CategoryManagementPanel extends JPanel {
 
             // Xóa danh mục
             deleteBtn.addActionListener(e -> {
-                fireEditingStopped();
-                if (currentRow >= danhSachDM.size()) return;
-                DanhMuc dm = danhSachDM.get(currentRow);
-                int confirm = JOptionPane.showConfirmDialog(
-                        CategoryManagementPanel.this,
-                        "Xóa danh mục \"" + dm.getTenDM() + "\"?\nHành động này không thể hoàn tác.",
-                        "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    danhSachDM.remove(currentRow);
-                    // TODO: gọi DAO xóa xuống database
-                    refreshCatTable();
-                }
-            });
+    fireEditingStopped();
+
+    if (currentRow >= danhSachDM.size()) return;
+
+    DanhMuc dm = danhSachDM.get(currentRow);
+
+    int confirm = JOptionPane.showConfirmDialog(
+            CategoryManagementPanel.this,
+            "Xóa danh mục \"" + dm.getTenDM() + "\"?\nHành động này không thể hoàn tác.",
+            "Xác nhận xóa",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE
+    );
+
+    if (confirm == JOptionPane.YES_OPTION) {
+
+        // ✅ GỌI DAO TRƯỚC
+        boolean ok = new DanhMucDAO().delete(dm.getMaDM());
+
+        if (ok) {
+            danhSachDM.remove(currentRow);   // xóa khỏi list
+            refreshCatTable();               // reload UI
+        } else {
+            JOptionPane.showMessageDialog(
+                    CategoryManagementPanel.this,
+                    "Xóa thất bại!",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+});
 
             panel.add(editBtn);
             panel.add(deleteBtn);
