@@ -46,10 +46,55 @@ public class SanPhamDAO {
         }
         return list;
     }
-    // =======================================================
-    // HÀM MỚI: TÌM KIẾM SẢN PHẨM ĐỂ BÁN HÀNG TẠI QUẦY
-    // =======================================================
-    public SanPham timKiemSanPham(String tuKhoa) {
+    public boolean insertSanPham(SanPham sp) {
+    String sql = "INSERT INTO SANPHAM (MASP, MADM, MAUSAC, KICHCO, GIABAN, SOLUONGTON, TRANGTHAI, TENSP, MAKHO, HINHANH) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, sp.getMaSP());
+        ps.setString(2, sp.getMaDM());
+        ps.setString(3, sp.getMauSac());
+        ps.setString(4, sp.getKichCo());
+        ps.setDouble(5, sp.getGiaBan());
+        ps.setInt(6, sp.getSoLuongTon());
+        ps.setString(7, sp.getTrangThai());
+        ps.setString(8, sp.getTenSP());
+        ps.setString(9, sp.getMaKho());
+        ps.setString(10, sp.getHinhAnh());
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    public boolean updateSanPham(SanPham sp) {
+    String sql = "UPDATE SANPHAM SET MADM=?, MAUSAC=?, KICHCO=?, GIABAN=?, SOLUONGTON=?, TRANGTHAI=?, TENSP=?, MAKHO=?, HINHANH=? WHERE MASP=?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, sp.getMaDM());
+        ps.setString(2, sp.getMauSac());
+        ps.setString(3, sp.getKichCo());
+        ps.setDouble(4, sp.getGiaBan());
+        ps.setInt(5, sp.getSoLuongTon());
+        ps.setString(6, sp.getTrangThai());
+        ps.setString(7, sp.getTenSP());
+        ps.setString(8, sp.getMaKho());
+        ps.setString(9, sp.getHinhAnh());
+        ps.setString(10, sp.getMaSP());
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+ public SanPham timKiemSanPham(String tuKhoa) {
         SanPham sp = null;
         // Tìm theo Mã (chính xác) hoặc Tên SP (gần đúng)
         String sql = "SELECT MASP, MADM, MAUSAC, KICHCO, GIABAN, SOLUONGTON, TRANGTHAI, TENSP, MAKHO, HINHANH " +
@@ -88,4 +133,20 @@ public class SanPhamDAO {
         }
         return sp; // Trả về null nếu không tìm thấy
     }
+public boolean deleteSanPham(String maSP) {
+    String sql = "DELETE FROM SanPham WHERE MaSP = ?";
+
+    try (Connection conn = DatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, maSP);
+
+        return ps.executeUpdate() > 0;
+
+    } catch (Exception e) {
+        throw new RuntimeException(e); // để UI catch
+    }
+
+   
+}
 }
