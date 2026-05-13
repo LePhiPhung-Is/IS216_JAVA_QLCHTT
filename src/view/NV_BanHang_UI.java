@@ -160,10 +160,10 @@ public class NV_BanHang_UI extends JFrame {
         content.setBackground(MAIN_BG);
         
 
-        content.add(new ProductManagementPanel(), "product");        content.add(createPage("QUẢN LÝ KHÁCH HÀNG"), "customer");
+        content.add(new ProductManagementPanel(), "product");        
+        content.add(new CustomerManagementPanel(), "customer");
         content.add(new CategoryManagementPanel(), "category");
-        content.add(createPage("QUẢN LÝ ĐƠN HÀNG"), "order");
-        content.add(createPage("XỬ LÝ ĐỔI TRẢ"), "return");
+      
         content.add(createPage("ĐĂNG XUẤT"), "logout");
 
         add(sidebar, BorderLayout.WEST);
