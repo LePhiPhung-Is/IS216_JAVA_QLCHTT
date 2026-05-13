@@ -61,7 +61,7 @@ public class ProductManagementPanel extends JPanel {
 
     private void loadDataFromDatabase() {
         products = new SanPhamDAO().getAllSanPham();
-        filterTable();
+        filterTable(); 
     }
 
     // =====================================================================
@@ -98,28 +98,48 @@ public class ProductManagementPanel extends JPanel {
         return header;
     }
 
-    private JTextField buildSearchField() {
+   private JTextField buildSearchField() {
+        final String PLACEHOLDER      = "🔍  Tìm kiếm sản phẩm...";
+        final Color  PLACEHOLDER_COLOR = new Color(160, 160, 160);
+ 
         searchField = new JTextField(20) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                // Vẽ nền bo tròn
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(Color.WHITE);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.dispose();
                 super.paintComponent(g);
+ 
+                // Vẽ placeholder khi ô trống và không được focus
+                if (getText().isEmpty() && !isFocusOwner()) {
+                    Graphics2D g3 = (Graphics2D) getGraphics();
+                    g3.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g3.setFont(getFont().deriveFont(Font.ITALIC));
+                    g3.setColor(PLACEHOLDER_COLOR);
+                    Insets ins = getInsets();
+                    int y = (getHeight() + g3.getFontMetrics().getAscent() - g3.getFontMetrics().getDescent()) / 2;
+                    g3.drawString(PLACEHOLDER, ins.left, y);
+                    g3.dispose();
+                }
             }
         };
+ 
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
                 new EmptyBorder(7, 12, 7, 12)));
         searchField.setOpaque(false);
-        searchField.putClientProperty("JTextField.placeholderText", "🔍  Tìm kiếm...");
+ 
+        // Lọc real-time theo từ khoá
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e)  { filterTable(); }
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filterTable(); }
         });
+ 
         return searchField;
     }
 
@@ -315,7 +335,10 @@ public class ProductManagementPanel extends JPanel {
             for (DanhMuc dm : listDM) {
                 cbDanhMuc.addItem(dm);
             }     
-        JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
+        JComboBox<String> cbKho = new JComboBox<>(new String[]{
+    "KHO01", "KHO02"
+});
+            JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
         JTextField fieldTon    = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
         JComboBox<String> cbMauSac = new JComboBox<>(new String[]{
             "Đen", "Trắng", "Xám", "Xanh", "Đỏ"        });
@@ -332,12 +355,13 @@ public class ProductManagementPanel extends JPanel {
         addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
         addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
         addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
-        addRow(form, gbc, 3, "Giá bán (đ):",  fieldGia);
-        addRow(form, gbc, 4, "Tồn kho:",       fieldTon);
-        addRowCombo(form, gbc, 5, "Màu sắc:", cbMauSac);
-        addRowCombo(form, gbc, 6, "Kích cỡ:", cbKichCo);
-        addRowCombo(form, gbc, 7, "Trạng thái:", cbTrangThai);
-        addRow(form, gbc, 8, "Tên file ảnh:",  fieldAnh);
+        addRowCombo(form, gbc, 3, "Kho:", cbKho);
+        addRow(form, gbc, 4, "Giá bán (đ):",  fieldGia);
+        addRow(form, gbc, 5, "Tồn kho:",       fieldTon);
+        addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
+        addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
+        addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
+        addRow(form, gbc, 9, "Tên file ảnh:",  fieldAnh);
 
         // ----- Nút Lưu / Hủy -----
         JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -389,7 +413,14 @@ public class ProductManagementPanel extends JPanel {
                 existing.setKichCo(cbKichCo.getSelectedItem().toString());
                  existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
                 existing.setHinhAnh(fieldAnh.getText().trim());
-                // TODO: gọi DAO cập nhật xuống database
+                SanPhamDAO dao = new SanPhamDAO();
+                boolean ok = dao.updateSanPham(existing);
+
+                if (ok) {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Cập nhật thất bại!");
+                }
             } else {
                 // Tạo sản phẩm mới
                 DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
@@ -403,14 +434,22 @@ public class ProductManagementPanel extends JPanel {
                 ton,
                 cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
                 fieldTen.getText().trim(),
-                "", 
+                 cbKho.getSelectedItem().toString(), 
                 fieldAnh.getText().trim()
             );
                 products.add(sp);
-                // TODO: gọi DAO lưu xuống database
+                SanPhamDAO dao = new SanPhamDAO();
+boolean ok = dao.insertSanPham(sp);
+
+if (ok) {
+    JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
+    products.add(sp); // chỉ add khi DB thành công
+} else {
+    JOptionPane.showMessageDialog(dialog, "Thêm thất bại!");
+}
             }
 
-            filterTable();
+            loadDataFromDatabase();
             dialog.dispose();
         });
 
@@ -433,11 +472,21 @@ public class ProductManagementPanel extends JPanel {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Bạn có chắc muốn xóa sản phẩm \"" + name + "\" không?",
                 "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        if (confirm == JOptionPane.YES_OPTION) {
-            products.removeIf(p -> p.getMaSP().equals(code));
-            // TODO: gọi DAO xóa xuống database
-            filterTable();
+       if (confirm == JOptionPane.YES_OPTION) {
+    try {
+        boolean result = new SanPhamDAO().deleteSanPham(code);
+
+        if (result) {
+            loadDataFromDatabase(); // reload lại từ DB
+            JOptionPane.showMessageDialog(this, "Xóa thành công!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Xóa thất bại!");
         }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Không thể xóa! Có ràng buộc dữ liệu.");
+    }
+}
     }
 
     // =====================================================================
@@ -476,7 +525,7 @@ public class ProductManagementPanel extends JPanel {
         private int currentRow;
 
         ActionCellEditor() {
-            JButton editBtn = new JButton("✏");
+            JButton editBtn = new JButton("Sửa");
             editBtn.setBackground(EDIT_BLUE);
             editBtn.setForeground(Color.WHITE);
             editBtn.setBorderPainted(false);
@@ -493,7 +542,7 @@ public class ProductManagementPanel extends JPanel {
                 }
             });
 
-            JButton delBtn = new JButton("🗑");
+            JButton delBtn = new JButton("Xóa");
             delBtn.setBackground(DELETE_RED);
             delBtn.setForeground(Color.WHITE);
             delBtn.setBorderPainted(false);
