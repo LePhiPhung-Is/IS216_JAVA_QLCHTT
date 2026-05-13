@@ -159,7 +159,16 @@ btnLogin.addActionListener(e -> {
         
         // Đóng trang LoginUI hiện tại
         this.dispose(); 
-    } else {
+    } 
+    else if (user.equals("nvbanhang") && pass.equals("123")) {
+    JOptionPane.showMessageDialog(this, "Đăng nhập thành công ");
+    
+    // Mở giao diện Nhân viên bán hàng
+    new NV_BanHang_UI().setVisible(true); 
+    
+    // Đóng cửa sổ Login
+    this.dispose(); 
+}else {
         JOptionPane.showMessageDialog(this, "Sai tài khoản!");
     }
 });
