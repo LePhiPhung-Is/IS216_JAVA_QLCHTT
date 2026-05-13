@@ -143,6 +143,7 @@ public class QuanLyUI extends JFrame {
 
         // ===== Sự kiện chuột =====
         // ===== Sự kiện chuột khôi phục cho Doanh thu =====
+// ===== Sự kiện chuột cập nhật cho Quản lý nhà cung cấp =====
 panel.addMouseListener(new MouseAdapter() {
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -153,10 +154,16 @@ panel.addMouseListener(new MouseAdapter() {
             content.revalidate();
             content.repaint();
         } 
-        // --- ĐOẠN KHÔI PHỤC CHO BÁO CÁO DOANH THU ---
         else if (text.equals("THỐNG KÊ DOANH THU")) {
             content.removeAll();
-            content.add(new ThongKeDoanhThu(), BorderLayout.CENTER); // Nạp trang doanh thu
+            content.add(new ThongKeDoanhThu(), BorderLayout.CENTER); 
+            content.revalidate();
+            content.repaint();
+        }
+        // --- ĐOẠN THÊM MỚI CHO QUẢN LÝ NHÀ CUNG CẤP ---
+        else if (text.equals("QUẢN LÝ NHÀ CUNG CẤP")) {
+            content.removeAll();
+            content.add(new QuanLyNhaCungCap(), BorderLayout.CENTER); // Nạp giao diện quản lý NCC
             content.revalidate();
             content.repaint();
         }

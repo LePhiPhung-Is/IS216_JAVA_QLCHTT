@@ -118,7 +118,7 @@ public class NV_Kho_UI extends JFrame {
         content.setBackground(MAIN_BG);
 
         // Thêm các trang chức năng (đã được thiết kế layout cơ bản bên dưới)
-        content.add(createPhieuNhapKhoPanel(), "nhapkho");
+        content.add(new LapPhieuNhapKho(), "nhapkho");
         content.add(createKiemKeKhoPanel(), "kiemke");
         content.add(createThongKePanel(), "thongke");
         content.add(createPage("ĐĂNG XUẤT"), "logout");
