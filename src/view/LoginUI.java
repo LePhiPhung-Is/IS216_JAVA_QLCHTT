@@ -181,7 +181,13 @@ btnLogin.addActionListener(e -> {
                 JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền Nhân viên Kho!");
                 new NV_Kho_UI().setVisible(true); // Mở giao diện Nhân viên Kho
                 this.dispose();
-    } else {
+    } 
+    // Trong sự kiện btnLogin.addActionListener:
+else if (user.equals("nvbanhang") && pass.equals("123")) {
+    JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
+    new NV_BanHang_UI().setVisible(true);
+    this.dispose();
+}else {
         JOptionPane.showMessageDialog(this, "Sai tài khoản!");
     }
 });
