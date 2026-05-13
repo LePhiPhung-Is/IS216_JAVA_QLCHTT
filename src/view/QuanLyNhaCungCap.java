@@ -11,13 +11,14 @@ import java.sql.*;
 
 /**
  * Quản lý Nhà Cung Cấp - BEAUTY SHOP
- * Sinh viên: ĐOÀN XUÂN CHIẾN - MSSV: 24520217
+ * Sinh viên thực hiện: ĐOÀN XUÂN CHIẾN - MSSV: 24520217
  */
 public class QuanLyNhaCungCap extends JPanel {
     private JTable table;
     private DefaultTableModel model;
     private JTextField txtSearch;
     private JButton btnAdd;
+    private JButton btnSearch;
 
     private final Color BRAND_GOLD = new Color(212, 175, 55);
     private final Color ACTION_BLUE = new Color(51, 122, 183);
@@ -38,50 +39,61 @@ public class QuanLyNhaCungCap extends JPanel {
     }
 
     private void initHeader() {
-        // hgap = 20 giúp đẩy phần WEST và EAST ra xa nhau
         JPanel pnlHeader = new JPanel(new BorderLayout(20, 0));
         pnlHeader.setOpaque(false);
 
-        // Tiêu đề
+        // --- Cụm Tiêu đề (Bên trái) ---
         JPanel pnlTitle = new JPanel(new GridLayout(2, 1));
         pnlTitle.setOpaque(false);
         JLabel lblTitle = new JLabel("QUẢN LÝ NHÀ CUNG CẤP");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 26));
         lblTitle.setForeground(Color.BLACK);
         
-        JLabel lblSubTitle = new JLabel("Danh sách toàn bộ nhà cung cấp tại cửa hàng");
+        JLabel lblSubTitle = new JLabel("Danh sách toàn bộ đối tác cung ứng của cửa hàng");
         lblSubTitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSubTitle.setForeground(Color.GRAY);
         pnlTitle.add(lblTitle);
         pnlTitle.add(lblSubTitle);
 
-        // Actions: Dịch sang phải và thu nhỏ ô tìm kiếm
+        // --- Cụm Actions (Bên phải) ---
         JPanel pnlActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         pnlActions.setOpaque(false);
 
-        JLabel lblSearch = new JLabel("Tìm kiếm:");
-        lblSearch.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        // Nhóm tìm kiếm
+        JPanel pnlSearchGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        pnlSearchGroup.setOpaque(false);
         
         txtSearch = new JTextField();
-        txtSearch.setPreferredSize(new Dimension(180, 35)); // Thu nhỏ ô tìm kiếm
+        txtSearch.setPreferredSize(new Dimension(150, 35)); 
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        btnSearch = new JButton("Tìm kiếm");
+        btnSearch.setBackground(new Color(240, 240, 240));
+        btnSearch.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnSearch.setPreferredSize(new Dimension(100, 35));
+        btnSearch.setFocusPainted(false);
+
+        pnlSearchGroup.add(txtSearch);
+        pnlSearchGroup.add(btnSearch);
         
+        // Nút thêm mới
         btnAdd = new JButton("+ Thêm nhà cung cấp");
         btnAdd.setBackground(BRAND_GOLD);
         btnAdd.setForeground(Color.WHITE);
         btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnAdd.setPreferredSize(new Dimension(180, 40)); // Thu nhỏ nút bấm một chút
+        btnAdd.setPreferredSize(new Dimension(200, 40));
         btnAdd.setFocusPainted(false);
         btnAdd.setBorderPainted(false);
 
-        pnlActions.add(lblSearch);
-        pnlActions.add(txtSearch);
+        pnlActions.add(pnlSearchGroup);
         pnlActions.add(btnAdd);
 
         pnlHeader.add(pnlTitle, BorderLayout.WEST);
         pnlHeader.add(pnlActions, BorderLayout.EAST);
         add(pnlHeader, BorderLayout.NORTH);
 
+        // Sự kiện
+        btnSearch.addActionListener(e -> loadData());
         txtSearch.addActionListener(e -> loadData());
         btnAdd.addActionListener(e -> openSupplierDialog(null));
     }
@@ -98,13 +110,12 @@ public class QuanLyNhaCungCap extends JPanel {
         table = new JTable(model);
         table.setRowHeight(60);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        table.setForeground(Color.BLACK); 
-        table.setSelectionForeground(Color.BLACK);
-        table.setSelectionBackground(new Color(235, 235, 235));
-        table.setGridColor(new Color(230, 230, 230));
         table.setShowVerticalLines(false);
-
-        // Tắt tự động co giãn để tránh dấu "..." và dùng thanh cuộn ngang
+        
+        // FIX LỖI MẤT CHỮ: Thiết lập màu chữ khi được chọn là đen
+        table.setSelectionBackground(new Color(235, 235, 235)); 
+        table.setSelectionForeground(Color.BLACK); 
+        
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
 
         JTableHeader header = table.getTableHeader();
@@ -112,25 +123,20 @@ public class QuanLyNhaCungCap extends JPanel {
         header.setFont(new Font("Segoe UI", Font.BOLD, 14));
         header.setForeground(BRAND_GOLD);
         header.setPreferredSize(new Dimension(0, 45));
-        ((DefaultTableCellRenderer)header.getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
 
-        // Thiết lập độ rộng cố định cho từng cột
         TableColumnModel columnModel = table.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(100);  // Mã NCC
-        columnModel.getColumn(1).setPreferredWidth(250);  // Tên NCC
-        columnModel.getColumn(2).setPreferredWidth(300);  // Địa chỉ
-        columnModel.getColumn(3).setPreferredWidth(150);  // SĐT
-        columnModel.getColumn(4).setPreferredWidth(200);  // Email
-        columnModel.getColumn(5).setPreferredWidth(180);  // Thao tác
-        columnModel.getColumn(5).setMinWidth(180);
+        columnModel.getColumn(0).setPreferredWidth(100);
+        columnModel.getColumn(1).setPreferredWidth(250);
+        columnModel.getColumn(2).setPreferredWidth(300);
+        columnModel.getColumn(3).setPreferredWidth(150);
+        columnModel.getColumn(4).setPreferredWidth(200);
+        columnModel.getColumn(5).setPreferredWidth(180);
 
         table.getColumnModel().getColumn(5).setCellRenderer(new ActionButtonRenderer());
         table.getColumnModel().getColumn(5).setCellEditor(new ActionButtonEditor());
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createLineBorder(new Color(230, 230, 230)));
-        scrollPane.getViewport().setBackground(Color.WHITE);
         add(scrollPane, BorderLayout.CENTER);
     }
 
@@ -152,49 +158,49 @@ public class QuanLyNhaCungCap extends JPanel {
                     rs.getString("EMAIL"), ""
                 });
             }
-        } catch (SQLException ex) { ex.printStackTrace(); }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi kết nối: " + ex.getMessage());
+        }
     }
 
     private void openSupplierDialog(Object[] data) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
-                data == null ? "Thêm nhà cung cấp mới" : "Cập nhật thông tin NCC", true);
-        dialog.setSize(450, 550);
+                data == null ? "Thêm nhà cung cấp" : "Cập nhật NCC", true);
+        dialog.setSize(450, 500);
         dialog.setLayout(new GridBagLayout());
         dialog.setLocationRelativeTo(this);
         dialog.getContentPane().setBackground(Color.WHITE);
 
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(10, 20, 10, 20);
+        g.insets = new Insets(8, 20, 8, 20);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JTextField m = new JTextField(data != null ? (data[0] != null ? data[0].toString() : "") : "");
+        JTextField m = new JTextField(data != null ? data[0].toString() : "");
         if (data != null) m.setEditable(false);
         
-        JTextField t = new JTextField(data != null ? (data[1] != null ? data[1].toString() : "") : "");
-        JTextField d = new JTextField(data != null ? (data[2] != null ? data[2].toString() : "") : "");
-        JTextField s = new JTextField(data != null ? (data[3] != null ? data[3].toString() : "") : "");
-        JTextField e = new JTextField(data != null ? (data[4] != null ? data[4].toString() : "") : "");
+        JTextField t = new JTextField(data != null ? data[1].toString() : "");
+        JTextField d = new JTextField(data != null ? data[2].toString() : "");
+        JTextField s = new JTextField(data != null ? data[3].toString() : "");
+        JTextField e = new JTextField(data != null ? data[4].toString() : "");
 
         addField(dialog, "Mã NCC:", m, g, 0);
-        addField(dialog, "Tên nhà cung cấp:", t, g, 1);
+        addField(dialog, "Tên đối tác:", t, g, 1);
         addField(dialog, "Địa chỉ:", d, g, 2);
         addField(dialog, "Số điện thoại:", s, g, 3);
         addField(dialog, "Email:", e, g, 4);
 
-        JButton btnSave = new JButton("LƯU THÔNG TIN");
+        JButton btnSave = new JButton("LƯU DỮ LIỆU");
         btnSave.setBackground(BRAND_GOLD);
         btnSave.setForeground(Color.BLACK);
         btnSave.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnSave.setPreferredSize(new Dimension(0, 45));
-        btnSave.setOpaque(true);
-        btnSave.setBorderPainted(false);
         
-        g.gridx = 0; g.gridy = 5; g.gridwidth = 2; g.insets = new Insets(30, 20, 20, 20);
+        g.gridx = 0; g.gridy = 5; g.gridwidth = 2; g.insets = new Insets(25, 20, 20, 20);
         dialog.add(btnSave, g);
 
         btnSave.addActionListener(ev -> {
-            if (t.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Tên NCC không được bỏ trống!");
+            if (t.getText().trim().isEmpty() || m.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đủ Mã và Tên!");
                 return;
             }
             if (executeDBUpdate(data == null ? "INSERT" : "UPDATE", m, t, d, s, e)) {
@@ -230,12 +236,11 @@ public class QuanLyNhaCungCap extends JPanel {
             }
             return pstmt.executeUpdate() > 0;
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Lỗi Database: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
             return false;
         }
     }
 
-    // Các Renderer và Editor cho nút bấm
     class ActionButtonRenderer extends JPanel implements javax.swing.table.TableCellRenderer {
         public ActionButtonRenderer() {
             setOpaque(false);
@@ -261,15 +266,13 @@ public class QuanLyNhaCungCap extends JPanel {
         public ActionButtonEditor() {
             super(new JCheckBox());
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
-            panel.setOpaque(true); panel.setBackground(new Color(235, 235, 235));
+            panel.setBackground(new Color(245, 245, 245));
             
             JButton btnEdit = new JButton("Sửa");
             btnEdit.setBackground(ACTION_BLUE); btnEdit.setForeground(Color.WHITE);
-            btnEdit.setFont(new Font("Segoe UI", Font.BOLD, 12));
             
             JButton btnDelete = new JButton("Xóa");
             btnDelete.setBackground(ACTION_RED); btnDelete.setForeground(Color.WHITE);
-            btnDelete.setFont(new Font("Segoe UI", Font.BOLD, 12));
 
             btnEdit.addActionListener(e -> {
                 int row = table.getEditingRow();
