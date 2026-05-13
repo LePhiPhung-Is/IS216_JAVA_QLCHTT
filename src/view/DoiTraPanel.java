@@ -130,7 +130,7 @@ public class DoiTraPanel extends JPanel {
 
         // 6. Nút Xác nhận
         JPanel pnlBtns = new JPanel(new GridLayout(1, 2, 10, 0)); pnlBtns.setBackground(ROW_WHITE);
-        JButton btnXacNhan = new JButton("XÁC NHẬN"); btnXacNhan.setBackground(new Color(220, 53, 69)); btnXacNhan.setForeground(Color.WHITE);
+        JButton btnXacNhan = new JButton("XÁC NHẬN"); btnXacNhan.setBackground(new Color(220, 53, 69)); btnXacNhan.setForeground(Color.BLACK);
         JButton btnLamMoi = new JButton("Làm Mới"); btnLamMoi.setBackground(Color.LIGHT_GRAY);
         pnlBtns.add(btnLamMoi); pnlBtns.add(btnXacNhan);
         gbc.gridy = 10; gbc.insets = new Insets(15, 10, 10, 10); panel.add(pnlBtns, gbc);
