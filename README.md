@@ -1,6 +1,6 @@
-# 👗 Hệ Thống Quản Lý Cửa Hàng Thời Trang - Beauty Shop
+# Hệ Thống Quản Lý Cửa Hàng Thời Trang - Beauty Shop
 
-## 📖 Mô tả dự án
+## Mô tả dự án
 
 Hệ thống quản lý cửa hàng thời trang **Beauty Shop** là một ứng dụng được thiết kế để phục vụ và hỗ trợ việc thực thi công việc của các tác nhân trong cửa hàng. Hệ thống hướng tới việc tối ưu hóa quy trình làm việc cho:
 
