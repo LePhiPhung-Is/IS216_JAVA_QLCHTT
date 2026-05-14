@@ -79,9 +79,9 @@ public class LoginUI extends JFrame {
         JButton btnLogin = new JButton("Đăng nhập");
         btnLogin.setBounds(40, 210, 125, 40); // Thu hẹp chiều rộng để nhường chỗ
         btnLogin.setBackground(new Color(50, 50, 50));
-        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setForeground(Color.BLACK);
         btnLogin.setFocusPainted(false);
-        btnLogin.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+        btnLogin.setBorder(BorderFactory.createLineBorder(Color.black, 1));
 
         btnLogin.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -96,8 +96,8 @@ public class LoginUI extends JFrame {
         // Nút Thoát
         JButton btnExit = new JButton("Thoát");
         btnExit.setBounds(175, 210, 125, 40); // Đặt cạnh nút Đăng nhập
-        btnExit.setBackground(new Color(150, 40, 40)); // Màu đỏ sậm
-        btnExit.setForeground(Color.WHITE);
+        btnExit.setBackground(new Color(50, 50, 50)); // Màu đỏ sậm
+        btnExit.setForeground(Color.BLACK);
         btnExit.setFocusPainted(false);
         btnExit.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
 
@@ -203,8 +203,5 @@ else if (user.equals("nvbanhang") && pass.equals("123")) {
         });
         timer.start();
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginUI().setVisible(true));
-    }
 }
+    
