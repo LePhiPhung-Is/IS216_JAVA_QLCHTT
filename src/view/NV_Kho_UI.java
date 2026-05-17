@@ -1,43 +1,43 @@
 package src.view;
 
-import src.dao.SanPhamDAO;
-import src.model.SanPham;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
 
 public class NV_Kho_UI extends JFrame {
 
-    public final Color SIDEBAR_BG = new Color(5, 5, 5);
-    public final Color MAIN_BG = new Color(244, 247, 246);
-    public final Color BRAND_GOLD = new Color(212, 175, 55);
-    public final Color TEXT_LIGHT = new Color(209, 209, 209);
-    public final Color HOVER_BG = new Color(26, 26, 26);
-    public final Color DIVIDER_COLOR = new Color(51, 51, 51);
+    // ================= MÀU GIAO DIỆN =================
+    private final Color SIDEBAR_BG = new Color(5, 5, 5);
+    private final Color MAIN_BG = new Color(244, 247, 246);
+    private final Color BRAND_GOLD = new Color(212, 175, 55);
+    private final Color TEXT_LIGHT = new Color(209, 209, 209);
+    private final Color HOVER_BG = new Color(26, 26, 26);
+    private final Color DIVIDER_COLOR = new Color(51, 51, 51);
 
-    public CardLayout cardLayout;
-    public JPanel content;
-    public ArrayList<Integer> baibao = new ArrayList<>();
+    // ================= CARD LAYOUT =================
+    private CardLayout cardLayout;
+    private JPanel content;
 
     public NV_Kho_UI() {
+
         setTitle("Nhân viên Quản lý kho");
         setUndecorated(true); 
         setExtendedState(JFrame.MAXIMIZED_BOTH); 
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        // ================= SIDEBAR =================
         JPanel sidebar = new JPanel();
         sidebar.setPreferredSize(new Dimension(280, 700));
         sidebar.setBackground(SIDEBAR_BG);
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, HOVER_BG));
 
+        // ================= LOGO =================
         JLabel brandLabel = new JLabel("BEAUTY SHOP", SwingConstants.CENTER);
         brandLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         brandLabel.setForeground(BRAND_GOLD);
@@ -50,6 +50,7 @@ public class NV_Kho_UI extends JFrame {
         brandPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DIVIDER_COLOR));
         brandPanel.setMaximumSize(new Dimension(280, 100));
 
+        // ================= USER PANEL =================
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
         userPanel.setBackground(SIDEBAR_BG);
@@ -83,15 +84,18 @@ public class NV_Kho_UI extends JFrame {
         userPanel.add(nameLabel);
         userPanel.add(roleLabel);
 
+        // ================= MENU PANEL =================
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setBackground(SIDEBAR_BG);
         menuPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
+        // Các chức năng bám sát Use Case và Sequence Diagram
         menuPanel.add(createMenuItem("LẬP PHIẾU NHẬP KHO", "nhapkho"));
         menuPanel.add(createMenuItem("KIỂM KÊ KHO", "kiemke"));
         menuPanel.add(createMenuItem("THỐNG KÊ HÀNG TỒN", "thongke"));
 
+        // ===== Divider =====
         JPanel divider = new JPanel();
         divider.setBackground(DIVIDER_COLOR);
         divider.setMaximumSize(new Dimension(230, 1));
@@ -109,19 +113,24 @@ public class NV_Kho_UI extends JFrame {
         sidebar.add(menuPanel);
         sidebar.add(Box.createVerticalGlue());
 
+        // ================= CONTENT PANELS =================
         cardLayout = new CardLayout();
         content = new JPanel(cardLayout);
         content.setBackground(MAIN_BG);
 
+        // Thêm các trang chức năng (đã được thiết kế layout cơ bản bên dưới)
+        content.add(new LapPhieuNhapKho(), "nhapkho");
         content.add(createPhieuNhapKhoPanel(), "nhapkho");
         content.add(createKiemKeKhoPanel(), "kiemke");
         content.add(createThongKePanel(), "thongke");
+        content.add(createPage("ĐĂNG XUẤT"), "logout");
 
         add(sidebar, BorderLayout.WEST);
         add(content, BorderLayout.CENTER);
     }
 
-    public JPanel createMenuItem(String text, String cardName) {
+    // ================= MENU ITEM =================
+    private JPanel createMenuItem(String text, String cardName) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(SIDEBAR_BG);
         panel.setMaximumSize(new Dimension(280, 50));
@@ -142,6 +151,7 @@ public class NV_Kho_UI extends JFrame {
                 panel.setBorder(BorderFactory.createMatteBorder(0, 4, 0, 0, BRAND_GOLD));
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 panel.setBackground(SIDEBAR_BG);
@@ -149,23 +159,38 @@ public class NV_Kho_UI extends JFrame {
                 panel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 0));
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
+
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (cardName.equals("logout")) {
                     int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         new LoginUI().setVisible(true);
-                        dispose(); 
+                        dispose(); // Đóng cửa sổ hiện tại
                     }
                 } else {
                     cardLayout.show(content, cardName);
                 }
             }
         });
+
         return panel;
     }
 
-    public JPanel createPhieuNhapKhoPanel() {
+    // ================= TRANG TRỐNG MẶC ĐỊNH =================
+    private JPanel createPage(String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(MAIN_BG);
+        JLabel label = new JLabel(title, SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        label.setForeground(Color.GRAY);
+        panel.add(label, BorderLayout.CENTER);
+        return panel;
+    }
+
+    // ================= UI: LẬP PHIẾU NHẬP KHO =================
+    // Dựa trên Activity: Chọn NCC -> Chọn SP -> Nhập SL, Đơn giá -> Validate -> Lưu
+    private JPanel createPhieuNhapKhoPanel() {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(MAIN_BG);
         panel.setBorder(new EmptyBorder(20, 30, 20, 30));
@@ -177,61 +202,36 @@ public class NV_Kho_UI extends JFrame {
         JPanel formPanel = new JPanel(new GridLayout(5, 2, 10, 15));
         formPanel.setBackground(MAIN_BG);
         
-        JComboBox<String> cbNCC = new JComboBox<>(new String[]{"Nhà cung cấp A", "Nhà cung cấp B", "Công ty may mặc X"});
+        formPanel.add(new JLabel("Chọn Nhà Cung Cấp:"));
+        formPanel.add(new JComboBox<>(new String[]{" "}));
         
-        // Kéo danh sách Sản phẩm từ Database
-        JComboBox<String> cbSP = new JComboBox<>();
-        List<SanPham> listSP = new SanPhamDAO().getAllSanPham();
-        for (SanPham sp : listSP) {
-            cbSP.addItem(sp.getTenSP() + " (" + sp.getMaSP() + ")");
-        }
-
-        JTextField txtSoLuong = new JTextField();
-        JTextField txtDonGia = new JTextField();
-
-        formPanel.add(new JLabel("Chọn Nhà Cung Cấp:")); formPanel.add(cbNCC);
-        formPanel.add(new JLabel("Chọn Sản Phẩm:")); formPanel.add(cbSP);
-        formPanel.add(new JLabel("Số Lượng Nhập:")); formPanel.add(txtSoLuong);
-        formPanel.add(new JLabel("Đơn Giá Nhập (VNĐ):")); formPanel.add(txtDonGia);
+        formPanel.add(new JLabel("Chọn Sản Phẩm:"));
+        formPanel.add(new JComboBox<>(new String[]{"  "}));
+        
+        formPanel.add(new JLabel("Số Lượng Nhập:"));
+        formPanel.add(new JTextField());
+        
+        formPanel.add(new JLabel("Đơn Giá Nhập (VNĐ):"));
+        formPanel.add(new JTextField());
 
         JPanel centerContainer = new JPanel(new BorderLayout());
         centerContainer.setBackground(MAIN_BG);
         centerContainer.add(formPanel, BorderLayout.NORTH);
         
+        // Bảng tạm chứa các chi tiết phiếu nhập
         String[] columns = {"Sản Phẩm", "Số Lượng", "Đơn Giá", "Thành Tiền"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        JTable table = new JTable(model);
-        centerContainer.add(new JScrollPane(table), BorderLayout.CENTER);
+        JTable table = new JTable(new DefaultTableModel(columns, 0));
+        JScrollPane scrollPane = new JScrollPane(table);
+        centerContainer.add(scrollPane, BorderLayout.CENTER);
 
         panel.add(centerContainer, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.setBackground(MAIN_BG);
         JButton btnAdd = new JButton("Thêm vào danh sách");
-        btnAdd.addActionListener(e -> {
-            try {
-                int sl = Integer.parseInt(txtSoLuong.getText());
-                double gia = Double.parseDouble(txtDonGia.getText());
-                double thanhTien = sl * gia;
-                model.addRow(new Object[]{cbSP.getSelectedItem().toString(), sl, gia, thanhTien});
-                txtSoLuong.setText("");
-                txtDonGia.setText("");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(panel, "Vui lòng nhập số hợp lệ cho Số lượng và Đơn giá!");
-            }
-        });
-
         JButton btnSave = new JButton("Hoàn tất lập phiếu");
         btnSave.setBackground(BRAND_GOLD);
         btnSave.setForeground(Color.BLACK);
-        btnSave.addActionListener(e -> {
-            if (model.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(panel, "Danh sách nhập đang trống!");
-                return;
-            }
-            JOptionPane.showMessageDialog(panel, "Đã lưu phiếu nhập thành công (Cần có PhieuNhapDAO để ghi DB)!");
-            model.setRowCount(0);
-        });
         
         bottomPanel.add(btnAdd);
         bottomPanel.add(btnSave);
@@ -240,7 +240,9 @@ public class NV_Kho_UI extends JFrame {
         return panel;
     }
 
-    public JPanel createKiemKeKhoPanel() {
+    // ================= UI: KIỂM KÊ KHO =================
+    // Dựa trên Activity: Thống kê hệ thống -> Nhập SL thực tế -> Tính chênh lệch -> Ghi lý do -> Lưu
+    private JPanel createKiemKeKhoPanel() {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(MAIN_BG);
         panel.setBorder(new EmptyBorder(20, 30, 20, 30));
@@ -250,77 +252,75 @@ public class NV_Kho_UI extends JFrame {
         panel.add(title, BorderLayout.NORTH);
 
         String[] columns = {"Mã SP", "Tên Sản Phẩm", "Tồn Hệ Thống", "Tồn Thực Tế", "Chênh Lệch", "Lý Do"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        
-        List<SanPham> listSP = new SanPhamDAO().getAllSanPham();
-        for (SanPham sp : listSP) {
-            model.addRow(new Object[]{sp.getMaSP(), sp.getTenSP(), sp.getSoLuongTon(), "", "", ""});
-        }
-        
+        Object[][] data = {
+           /*  {"SP001", "Son môi MAC", 50, "", "", ""},
+            {"SP002", "Kem dưỡng ẩm Vichy", 30, "", "", ""}*/
+        };
+        DefaultTableModel model = new DefaultTableModel(data, columns);
         JTable table = new JTable(model);
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.setBackground(MAIN_BG);
+        JButton btnCalc = new JButton("Tính Chênh Lệch");
         JButton btnSave = new JButton("Xác Nhận Kiểm Kê");
         btnSave.setBackground(BRAND_GOLD);
         btnSave.setForeground(Color.BLACK);
-        btnSave.addActionListener(e -> JOptionPane.showMessageDialog(panel, "Lưu thông tin kiểm kê thành công!"));
 
+        bottomPanel.add(btnCalc);
         bottomPanel.add(btnSave);
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
     }
 
-    public JPanel createThongKePanel() {
+    // ================= UI: THỐNG KÊ HÀNG TỒN =================
+    // Dựa trên Activity: Chọn tiêu chí -> Truy xuất DB -> Tính tổng -> Hiển thị danh sách
+    private JPanel createThongKePanel() {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBackground(MAIN_BG);
         panel.setBorder(new EmptyBorder(20, 30, 20, 30));
 
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(MAIN_BG);
-        
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(MAIN_BG);
         JLabel title = new JLabel("THỐNG KÊ HÀNG TỒN KHO");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        headerPanel.add(title, BorderLayout.NORTH);
+        
+        topPanel.add(title);
         
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         filterPanel.setBackground(MAIN_BG);
-        JComboBox<String> cbFilter = new JComboBox<>(new String[]{"Tất cả sản phẩm", "Sắp hết hàng (< 10)", "Tồn nhiều (> 50)"});
         filterPanel.add(new JLabel("Tiêu chí lọc:"));
-        filterPanel.add(cbFilter);
-        
-        headerPanel.add(filterPanel, BorderLayout.SOUTH);
-        panel.add(headerPanel, BorderLayout.NORTH);
-
-        String[] columns = {"Mã SP", "Tên Sản Phẩm", "Danh Mục", "Số Lượng Tồn", "Trạng Thái"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
-        JTable table = new JTable(model);
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
-
-        JButton btnThongKe = new JButton("Lấy Dữ Liệu");
-        btnThongKe.addActionListener(e -> {
-            model.setRowCount(0);
-            List<SanPham> listSP = new SanPhamDAO().getAllSanPham();
-            int filterType = cbFilter.getSelectedIndex();
-            
-            for (SanPham sp : listSP) {
-                if (filterType == 1 && sp.getSoLuongTon() >= 10) continue;
-                if (filterType == 2 && sp.getSoLuongTon() <= 50) continue;
-                
-                model.addRow(new Object[]{sp.getMaSP(), sp.getTenSP(), sp.getMaDM(), sp.getSoLuongTon(), sp.getTrangThai()});
-            }
-        });
+        filterPanel.add(new JComboBox<>(new String[]{"Tất cả sản phẩm", "Sắp hết hàng (< 10)", "Tồn nhiều (> 50)"}));
+        JButton btnThongKe = new JButton("Thống Kê");
         filterPanel.add(btnThongKe);
 
-        // Click để nạp sẵn dữ liệu ban đầu
-        btnThongKe.doClick();
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(MAIN_BG);
+        headerPanel.add(topPanel, BorderLayout.NORTH);
+        headerPanel.add(filterPanel, BorderLayout.SOUTH);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        String[] columns = {"Mã SP", "Tên Sản Phẩm", "Phân Loại", "Size", "Số Lượng Tồn"};
+        JTable table = new JTable(new DefaultTableModel(columns, 0));
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
     }
 
+    // ================= MAIN =================
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new NV_Kho_UI().setVisible(true));
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            new NV_Kho_UI().setVisible(true);
+        });
     }
 }

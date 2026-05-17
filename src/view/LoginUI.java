@@ -79,9 +79,9 @@ public class LoginUI extends JFrame {
         JButton btnLogin = new JButton("Đăng nhập");
         btnLogin.setBounds(40, 210, 125, 40); // Thu hẹp chiều rộng để nhường chỗ
         btnLogin.setBackground(new Color(50, 50, 50));
-        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setForeground(Color.BLACK);
         btnLogin.setFocusPainted(false);
-        btnLogin.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+        btnLogin.setBorder(BorderFactory.createLineBorder(Color.black, 1));
 
         btnLogin.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -96,8 +96,8 @@ public class LoginUI extends JFrame {
         // Nút Thoát
         JButton btnExit = new JButton("Thoát");
         btnExit.setBounds(175, 210, 125, 40); // Đặt cạnh nút Đăng nhập
-        btnExit.setBackground(new Color(150, 40, 40)); // Màu đỏ sậm
-        btnExit.setForeground(Color.WHITE);
+        btnExit.setBackground(new Color(50, 50, 50)); // Màu đỏ sậm
+        btnExit.setForeground(Color.BLACK);
         btnExit.setFocusPainted(false);
         btnExit.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
 
@@ -118,17 +118,35 @@ public class LoginUI extends JFrame {
         });
 
         // ==========================================
-
-        // ===== Link =====
+// ===== Link =====
         JLabel lblRegister = new JLabel("Đăng ký");
         lblRegister.setForeground(Color.CYAN);
         lblRegister.setBounds(40, 265, 80, 20);
+
+        //lblRegister.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
+        
+        // Bắt sự kiện khi click chuột vào chữ "Đăng ký"
+        lblRegister.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new DangKyUI().setVisible(true);
+                LoginUI.this.dispose(); 
+            }
+        });
+        
         panel.add(lblRegister);
 
         JLabel lblForgot = new JLabel("Quên mật khẩu?");
         lblForgot.setForeground(Color.CYAN);
         lblForgot.setBounds(180, 265, 150, 20);
         panel.add(lblForgot);
+
+        lblForgot.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                new QuenMatKhauUI().setVisible(true); // Mở trang Quên mật khẩu
+                LoginUI.this.dispose();               // Đóng trang Đăng nhập
+            }
+        });
 
         // ===== Logo =====
         JLabel logo = new JLabel("BEAUTY SHOP");
@@ -159,7 +177,17 @@ btnLogin.addActionListener(e -> {
         
         // Đóng trang LoginUI hiện tại
         this.dispose(); 
-    } else {
+    } else if (user.equals("kho") && pass.equals("123")) {
+                JOptionPane.showMessageDialog(this, "Đăng nhập thành công với quyền Nhân viên Kho!");
+                new NV_Kho_UI().setVisible(true); // Mở giao diện Nhân viên Kho
+                this.dispose();
+    } 
+    // Trong sự kiện btnLogin.addActionListener:
+else if (user.equals("nvbanhang") && pass.equals("123")) {
+    JOptionPane.showMessageDialog(this, "Đăng nhập thành công!");
+    new NV_BanHang_UI().setVisible(true);
+    this.dispose();
+}else {
         JOptionPane.showMessageDialog(this, "Sai tài khoản!");
     }
 });
@@ -175,8 +203,5 @@ btnLogin.addActionListener(e -> {
         });
         timer.start();
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginUI().setVisible(true));
-    }
 }
+    
