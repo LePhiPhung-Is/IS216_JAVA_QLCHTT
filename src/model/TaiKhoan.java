@@ -5,17 +5,18 @@ public class TaiKhoan {
     private String matKhau;
     private String quyen;
     private int trangThai;
+    private String email; // Thêm trường Email
 
     public TaiKhoan() {}
 
-    public TaiKhoan(String tenDangNhap, String matKhau, String quyen, int trangThai) {
+    public TaiKhoan(String tenDangNhap, String matKhau, String quyen, int trangThai, String email) {
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
         this.quyen = quyen;
         this.trangThai = trangThai;
+        this.email = email;
     }
 
-    // Các hàm Getters và Setters
     public String getTenDangNhap() { return tenDangNhap; }
     public void setTenDangNhap(String tenDangNhap) { this.tenDangNhap = tenDangNhap; }
 
@@ -27,4 +28,7 @@ public class TaiKhoan {
 
     public int getTrangThai() { return trangThai; }
     public void setTrangThai(int trangThai) { this.trangThai = trangThai; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 }
