@@ -1,7 +1,9 @@
 package src.dao;
 
 import src.model.KhuyenMai;
-import src.database.DatabaseConnection; 
+import src.database.DatabaseConnection;
+
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,25 +66,30 @@ public class KhuyenMaiDAO {
     }
 
     // 3. Thêm mới khuyến mãi
-    public boolean insertKhuyenMai(KhuyenMai km) {
-        String sql = "INSERT INTO KhuyenMai (MaKM, TenKM, PhanTramGiam, GiaTriToiThieu, GiamToiDa, NgayBatDau, NgayKetThuc, SoLuotDung, TrangThai) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, km.getMaKM());
-            ps.setString(2, km.getTenKM());
-            ps.setDouble(3, km.getPhanTramGiam());
-            ps.setDouble(4, km.getGiaTriToiThieu());
-            ps.setDouble(5, km.getGiamToiDa());
-            ps.setDate(6, new java.sql.Date(km.getNgayBatDau().getTime()));
-            ps.setDate(7, new java.sql.Date(km.getNgayKetThuc().getTime()));
-            ps.setLong(8, km.getSoLuotDung()); // Sửa thành setLong
-            ps.setString(9, km.getTrangThai());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+        // Sửa lại insertKhuyenMai trong DAO
+public boolean insertKhuyenMai(KhuyenMai km) {
+    String sql = "{call SP_THEM_KHUYENMAI(?, ?, ?, ?, ?, ?, ?, ?, ?)}"; // 9 tham số
+    try (Connection conn = DatabaseConnection.getConnection();
+         CallableStatement cs = conn.prepareCall(sql)) {
+
+        cs.setString(1, km.getMaKM());        // Người dùng tự nhập VD: FREE60
+        cs.setString(2, km.getTenKM());
+        cs.setDouble(3, km.getPhanTramGiam());
+        cs.setDouble(4, km.getGiaTriToiThieu());
+        cs.setDouble(5, km.getGiamToiDa());
+        cs.setDate(6, new java.sql.Date(km.getNgayBatDau().getTime()));
+        cs.setDate(7, new java.sql.Date(km.getNgayKetThuc().getTime()));
+        cs.setLong(8, km.getSoLuotDung());
+        cs.setString(9, km.getTrangThai());
+
+        cs.execute();
+        return true;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException(e.getMessage(), e);
     }
+}
 
     // 4. Cập nhật khuyến mãi
     public boolean updateKhuyenMai(KhuyenMai km) {
@@ -107,16 +114,17 @@ public class KhuyenMaiDAO {
 
     // 5. Xóa khuyến mãi
     public boolean deleteKhuyenMai(String maKM) {
-        String sql = "DELETE FROM KhuyenMai WHERE MaKM=?";
-        try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, maKM);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+    String sql = "{call SP_XOA_KHUYENMAI(?)}";  // ← tên procedure của bạn
+    try (Connection con = DatabaseConnection.getConnection();
+         CallableStatement cs = con.prepareCall(sql)) {
+        cs.setString(1, maKM);
+        cs.execute();
+        return true;
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException(e.getMessage(), e);
     }
+}
 
     // 6. Lấy khuyến mãi hợp lệ
     public KhuyenMai getKhuyenMaiHopLe(String maKM) {

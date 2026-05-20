@@ -177,17 +177,19 @@ public class QuanLyNhaCungCap extends JPanel {
 
         JTextField m = new JTextField(strMa);
         if (data != null) m.setEditable(false); // Mã không được sửa
-        
+        if (data == null) {
+        m.setVisible(false);
+        m.setText("AUTO");
+    }
         JTextField t = new JTextField(strTen);
         JTextField d = new JTextField(strDiaChi);
         JTextField s = new JTextField(strSDT);
         JTextField e = new JTextField(strEmail);
 
-        addField(dialog, "Mã NCC:", m, g, 0);
-        addField(dialog, "Tên đối tác:", t, g, 1);
-        addField(dialog, "Địa chỉ:", d, g, 2);
-        addField(dialog, "Số điện thoại:", s, g, 3);
-        addField(dialog, "Email:", e, g, 4);
+        addField(dialog, "Tên đối tác:", t, g, 0);
+        addField(dialog, "Địa chỉ:", d, g, 1);
+        addField(dialog, "Số điện thoại:", s, g, 2);
+        addField(dialog, "Email:", e, g, 3);
 
         JButton btnSave = new JButton("LƯU DỮ LIỆU");
         btnSave.setBackground(BRAND_GOLD);
@@ -221,29 +223,40 @@ public class QuanLyNhaCungCap extends JPanel {
         d.add(tf, g);
     }
 
-    private boolean executeDBUpdate(String type, JTextField m, JTextField t, JTextField d, JTextField s, JTextField e) {
-        String sql = type.equals("INSERT") ? 
-            "INSERT INTO NHACUNGCAP (MANCC, TENNCC, DIACHI, SDT, EMAIL) VALUES(?,?,?,?,?)" :
-            "UPDATE NHACUNGCAP SET TENNCC=?, DIACHI=?, SDT=?, EMAIL=? WHERE MANCC=?";
-        
+    private boolean executeDBUpdate(String type, JTextField m, JTextField t, 
+                                 JTextField d, JTextField s, JTextField e) {
+    if (type.equals("INSERT")) {
+        // Gọi procedure - không cần truyền mã, Oracle tự tạo
+        String sql = "{call SP_THEM_NHACUNGCAP(?, ?, ?, ?)}";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            if (type.equals("INSERT")) {
-                pstmt.setString(1, m.getText()); pstmt.setString(2, t.getText());
-                pstmt.setString(3, d.getText()); pstmt.setString(4, s.getText());
-                pstmt.setString(5, e.getText());
-            } else {
-                pstmt.setString(1, t.getText()); pstmt.setString(2, d.getText());
-                pstmt.setString(3, s.getText()); pstmt.setString(4, e.getText());
-                pstmt.setString(5, m.getText());
-            }
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException ex) {
+             CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, t.getText()); // TenNCC
+            cs.setString(2, d.getText()); // DiaChi
+            cs.setString(3, s.getText()); // SDT
+            cs.setString(4, e.getText()); // Email
+            cs.execute();
+            return true;
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
+            return false;
+        }
+    } else {
+        // UPDATE vẫn dùng SQL thẳng hoặc procedure nếu có
+        String sql = "UPDATE NHACUNGCAP SET TENNCC=?, DIACHI=?, SDT=?, EMAIL=? WHERE MANCC=?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, t.getText());
+            ps.setString(2, d.getText());
+            ps.setString(3, s.getText());
+            ps.setString(4, e.getText());
+            ps.setString(5, m.getText());
+            return ps.executeUpdate() > 0;
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
             return false;
         }
     }
-
+}
     class ActionButtonRenderer extends JPanel implements javax.swing.table.TableCellRenderer {
         public ActionButtonRenderer() {
             setOpaque(false);
@@ -290,35 +303,31 @@ public class QuanLyNhaCungCap extends JPanel {
             });
 
             btnDelete.addActionListener(e -> {
-                int row = table.getEditingRow();
-                if (row != -1) {
-                    String id = model.getValueAt(row, 0).toString();
-                    if (JOptionPane.showConfirmDialog(null, "Xóa nhà cung cấp " + id + "?", 
-                            "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                        try (Connection conn = DatabaseConnection.getConnection();
-                             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM NHACUNGCAP WHERE MANCC=?")) {
-                            pstmt.setString(1, id);
-                            int rowsAffected = pstmt.executeUpdate();
-                            
-                            if (rowsAffected > 0) {
-                                JOptionPane.showMessageDialog(null, "Đã xóa nhà cung cấp thành công!");
-                            }
-                            
-                            fireEditingStopped();
-                            loadData();
-                        } catch (SQLException ex) { 
-                            if (ex.getErrorCode() == 2292) {
-                                JOptionPane.showMessageDialog(null, "Không thể xóa! Nhà cung cấp này đã có dữ liệu liên quan trong các phiếu nhập.");
-                            } else {
-                                JOptionPane.showMessageDialog(null, "Lỗi Database: " + ex.getMessage());
-                            }
-                            fireEditingStopped();
-                        }
-                    } else { 
-                        fireEditingStopped(); 
+            int row = table.getEditingRow();
+            if (row != -1) {
+                String id = model.getValueAt(row, 0).toString();
+                String ten = model.getValueAt(row, 1).toString();
+                if (JOptionPane.showConfirmDialog(null, 
+                        "Xóa nhà cung cấp \"" + ten + "\"?",
+                        "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    
+                    String sql = "{call SP_XOA_NHACUNGCAP(?)}"; // ← dùng procedure
+                    try (Connection conn = DatabaseConnection.getConnection();
+                        CallableStatement cs = conn.prepareCall(sql)) {
+                        cs.setString(1, id);
+                        cs.execute();
+                        JOptionPane.showMessageDialog(null, "Đã xóa thành công!");
+                        fireEditingStopped();
+                        loadData();
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
+                        fireEditingStopped();
                     }
+                } else {
+                    fireEditingStopped();
                 }
-            });
+            }
+        });
 
             panel.add(btnEdit); panel.add(btnDelete);
         }

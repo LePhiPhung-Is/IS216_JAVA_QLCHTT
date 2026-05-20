@@ -53,66 +53,32 @@ public class NhanVienDAO {
     // =====================================================
     // INSERT
     // =====================================================
-    public boolean insertNhanVien(NhanVien nv) {
+public boolean insertNhanVien(NhanVien nv) {
+        String sql = "{call SP_THEM_NHANVIEN(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
 
-        String sql =
-                "INSERT INTO NHANVIEN " +
-                "(MaNV, TenNV, NgaySinh, GioiTinh, SDT, DiaChi, " +
-                "ChucVu, NgayVaoLam, TrangThai, TenDangNhap) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            cs.setString(1, nv.getTenNV());
+            cs.setDate(2, new java.sql.Date(nv.getNgaySinh().getTime()));
+            cs.setString(3, nv.getGioiTinh());
+            cs.setString(4, nv.getSdt());
+            cs.setString(5, nv.getDiaChi());
+            cs.setString(6, nv.getChucVu());
+            cs.setDate(7, new java.sql.Date(nv.getNgayVaoLam().getTime()));
+            cs.setInt(8, nv.getTrangThai());
 
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, nv.getMaNV());
-
-            ps.setString(2, nv.getTenNV());
-
-            ps.setDate(
-                    3,
-                    new java.sql.Date(
-                            nv.getNgaySinh().getTime()
-                    )
-            );
-
-            ps.setString(4, nv.getGioiTinh());
-
-            ps.setString(5, nv.getSdt());
-
-            ps.setString(6, nv.getDiaChi());
-
-            ps.setString(7, nv.getChucVu());
-
-            ps.setDate(
-                    8,
-                    new java.sql.Date(
-                            nv.getNgayVaoLam().getTime()
-                    )
-            );
-
-            ps.setInt(9, nv.getTrangThai());
-
-            if (
-                    nv.getTenDangNhap() == null
-                    || nv.getTenDangNhap().trim().isEmpty()
-            ) {
-
-                ps.setNull(10, Types.VARCHAR);
-
+            if (nv.getTenDangNhap() == null || nv.getTenDangNhap().trim().isEmpty()) {
+                cs.setNull(9, Types.VARCHAR);
             } else {
-
-                ps.setString(10, nv.getTenDangNhap());
+                cs.setString(9, nv.getTenDangNhap());
             }
 
-            return ps.executeUpdate() > 0;
+            cs.execute();
+            return true;
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return false;
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -120,66 +86,32 @@ public class NhanVienDAO {
     // UPDATE
     // =====================================================
     public boolean updateNhanVien(NhanVien nv) {
+        String sql = "{call SP_SUA_NHANVIEN(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
 
-        String sql =
-                "UPDATE NHANVIEN SET " +
-                "TenNV=?, NgaySinh=?, GioiTinh=?, SDT=?, " +
-                "DiaChi=?, ChucVu=?, NgayVaoLam=?, " +
-                "TrangThai=?, TenDangNhap=? " +
-                "WHERE MaNV=?";
+            cs.setString(1, nv.getMaNV());
+            cs.setString(2, nv.getTenNV());
+            cs.setDate(3, new java.sql.Date(nv.getNgaySinh().getTime()));
+            cs.setString(4, nv.getGioiTinh());
+            cs.setString(5, nv.getSdt());
+            cs.setString(6, nv.getDiaChi());
+            cs.setString(7, nv.getChucVu());
+            cs.setDate(8, new java.sql.Date(nv.getNgayVaoLam().getTime()));
+            cs.setInt(9, nv.getTrangThai());
 
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, nv.getTenNV());
-
-            ps.setDate(
-                    2,
-                    new java.sql.Date(
-                            nv.getNgaySinh().getTime()
-                    )
-            );
-
-            ps.setString(3, nv.getGioiTinh());
-
-            ps.setString(4, nv.getSdt());
-
-            ps.setString(5, nv.getDiaChi());
-
-            ps.setString(6, nv.getChucVu());
-
-            ps.setDate(
-                    7,
-                    new java.sql.Date(
-                            nv.getNgayVaoLam().getTime()
-                    )
-            );
-
-            ps.setInt(8, nv.getTrangThai());
-
-            if (
-                    nv.getTenDangNhap() == null
-                    || nv.getTenDangNhap().trim().isEmpty()
-            ) {
-
-                ps.setNull(9, Types.VARCHAR);
-
+            if (nv.getTenDangNhap() == null || nv.getTenDangNhap().trim().isEmpty()) {
+                cs.setNull(10, Types.VARCHAR);
             } else {
-
-                ps.setString(9, nv.getTenDangNhap());
+                cs.setString(10, nv.getTenDangNhap());
             }
 
-            ps.setString(10, nv.getMaNV());
-
-            return ps.executeUpdate() > 0;
+            cs.execute();
+            return true;
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return false;
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -187,24 +119,15 @@ public class NhanVienDAO {
     // DELETE
     // =====================================================
     public boolean deleteNhanVien(String maNV) {
-
-        String sql =
-                "DELETE FROM NHANVIEN WHERE MaNV=?";
-
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, maNV);
-
-            return ps.executeUpdate() > 0;
-
+        String sql = "{call SP_XOA_NHANVIEN(?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
+            cs.setString(1, maNV);
+            cs.execute();
+            return true;
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            return false;
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 }
