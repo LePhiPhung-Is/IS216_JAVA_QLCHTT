@@ -19,14 +19,14 @@ public class KhuyenMaiDAO {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 KhuyenMai km = new KhuyenMai();
-                km.setMaKM(rs.getString("MaKM"));
+                km.setMaKM(rs.getString("MaKM").trim()); // Thêm trim() cho sạch dữ liệu
                 km.setTenKM(rs.getString("TenKM"));
                 km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
                 km.setGiaTriToiThieu(rs.getDouble("GiaTriToiThieu"));
                 km.setGiamToiDa(rs.getDouble("GiamToiDa"));
                 km.setNgayBatDau(rs.getDate("NgayBatDau"));
                 km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
-                km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
+                km.setSoLuotDung(rs.getLong("SoLuotDung"));
                 km.setTrangThai(rs.getString("TrangThai"));
                 list.add(km);
             }
@@ -38,21 +38,22 @@ public class KhuyenMaiDAO {
 
     // 2. Lấy khuyến mãi theo Mã
     public KhuyenMai getById(String maKM) {
-        String sql = "SELECT * FROM KhuyenMai WHERE MaKM = ?";
+        // Thêm TRIM để chống lỗi dư dấu cách trong DB
+        String sql = "SELECT * FROM KhuyenMai WHERE TRIM(MaKM) = ?";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, maKM);
+            ps.setString(1, maKM.trim());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     KhuyenMai km = new KhuyenMai();
-                    km.setMaKM(rs.getString("MaKM"));
+                    km.setMaKM(rs.getString("MaKM").trim());
                     km.setTenKM(rs.getString("TenKM"));
                     km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
                     km.setGiaTriToiThieu(rs.getDouble("GiaTriToiThieu"));
                     km.setGiamToiDa(rs.getDouble("GiamToiDa"));
                     km.setNgayBatDau(rs.getDate("NgayBatDau"));
                     km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
-                    km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
+                    km.setSoLuotDung(rs.getLong("SoLuotDung"));
                     km.setTrangThai(rs.getString("TrangThai"));
                     return km;
                 }
@@ -75,7 +76,7 @@ public class KhuyenMaiDAO {
             ps.setDouble(5, km.getGiamToiDa());
             ps.setDate(6, new java.sql.Date(km.getNgayBatDau().getTime()));
             ps.setDate(7, new java.sql.Date(km.getNgayKetThuc().getTime()));
-            ps.setLong(8, km.getSoLuotDung()); // Sửa thành setLong
+            ps.setLong(8, km.getSoLuotDung());
             ps.setString(9, km.getTrangThai());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -86,7 +87,7 @@ public class KhuyenMaiDAO {
 
     // 4. Cập nhật khuyến mãi
     public boolean updateKhuyenMai(KhuyenMai km) {
-        String sql = "UPDATE KhuyenMai SET TenKM=?, PhanTramGiam=?, GiaTriToiThieu=?, GiamToiDa=?, NgayBatDau=?, NgayKetThuc=?, SoLuotDung=?, TrangThai=? WHERE MaKM=?";
+        String sql = "UPDATE KhuyenMai SET TenKM=?, PhanTramGiam=?, GiaTriToiThieu=?, GiamToiDa=?, NgayBatDau=?, NgayKetThuc=?, SoLuotDung=?, TrangThai=? WHERE TRIM(MaKM)=?";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, km.getTenKM());
@@ -95,9 +96,9 @@ public class KhuyenMaiDAO {
             ps.setDouble(4, km.getGiamToiDa());
             ps.setDate(5, new java.sql.Date(km.getNgayBatDau().getTime()));
             ps.setDate(6, new java.sql.Date(km.getNgayKetThuc().getTime()));
-            ps.setLong(7, km.getSoLuotDung()); // Sửa thành setLong
+            ps.setLong(7, km.getSoLuotDung());
             ps.setString(8, km.getTrangThai());
-            ps.setString(9, km.getMaKM());
+            ps.setString(9, km.getMaKM().trim());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,10 +108,10 @@ public class KhuyenMaiDAO {
 
     // 5. Xóa khuyến mãi
     public boolean deleteKhuyenMai(String maKM) {
-        String sql = "DELETE FROM KhuyenMai WHERE MaKM=?";
+        String sql = "DELETE FROM KhuyenMai WHERE TRIM(MaKM)=?";
         try (Connection con = DatabaseConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, maKM);
+            ps.setString(1, maKM.trim());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,26 +121,27 @@ public class KhuyenMaiDAO {
 
     // 6. Lấy khuyến mãi hợp lệ
     public KhuyenMai getKhuyenMaiHopLe(String maKM) {
-        String sql = "SELECT * FROM KHUYENMAI WHERE MaKM = ? " +
-                     "AND TrangThai = 'Đang áp dụng' " +
+        // Đã sửa lại chữ 'Đang diễn ra' cho khớp với DB và thêm TRIM
+        String sql = "SELECT * FROM KHUYENMAI WHERE TRIM(MaKM) = ? " +
+                     "AND TrangThai = 'Đang diễn ra' " +
                      "AND SYSDATE BETWEEN NgayBatDau AND NgayKetThuc " +
                      "AND SoLuotDung > 0";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, maKM);
+            pstmt.setString(1, maKM.trim());
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     KhuyenMai km = new KhuyenMai();
-                    km.setMaKM(rs.getString("MaKM"));
+                    km.setMaKM(rs.getString("MaKM").trim());
                     km.setTenKM(rs.getString("TenKM"));
                     km.setPhanTramGiam(rs.getDouble("PhanTramGiam"));
                     km.setGiaTriToiThieu(rs.getDouble("GiaTriToiThieu"));
                     km.setGiamToiDa(rs.getDouble("GiamToiDa"));
                     km.setNgayBatDau(rs.getDate("NgayBatDau"));
                     km.setNgayKetThuc(rs.getDate("NgayKetThuc"));
-                    km.setSoLuotDung(rs.getLong("SoLuotDung")); // Sửa thành getLong
+                    km.setSoLuotDung(rs.getLong("SoLuotDung")); 
                     km.setTrangThai(rs.getString("TrangThai"));
                     return km;
                 }

@@ -83,7 +83,7 @@ public class QuanLyDonHangPanel extends JPanel {
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY), "🔍 Tìm Kiếm Sản Phẩm"));
 
         txtTimKiem = new JTextField();
-        txtTimKiem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+txtTimKiem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtTimKiem.setPreferredSize(new Dimension(200, 35));
         txtTimKiem.setToolTipText("Nhập mã SP (VD: SP01, SP02) hoặc Tên SP");
 
@@ -160,7 +160,7 @@ public class QuanLyDonHangPanel extends JPanel {
         card.setBackground(ROW_WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
-                new EmptyBorder(10, 10, 10, 10)
+new EmptyBorder(10, 10, 10, 10)
         ));
         card.setMaximumSize(new Dimension(400, 150));
 
@@ -229,7 +229,7 @@ public class QuanLyDonHangPanel extends JPanel {
 
         if (sp.getSoLuongTon() <= 0) {
             btnAdd.setEnabled(false);
-            btnAdd.setText("Hết hàng");
+btnAdd.setText("Hết hàng");
             btnAdd.setBackground(Color.GRAY);
         }
 
@@ -292,7 +292,7 @@ public class QuanLyDonHangPanel extends JPanel {
         btnKhuyenMai.addActionListener(e -> apDungKhuyenMai());
 
         JPanel memberPanel = new JPanel(new BorderLayout(5, 0));
-        txtSdtKhachHang = new JTextField();
+txtSdtKhachHang = new JTextField();
         JButton btnTichDiem = new JButton("Tìm KH");
         btnTichDiem.setBackground(BRAND_GOLD);
         btnTichDiem.setForeground(Color.BLACK); 
@@ -357,7 +357,7 @@ public class QuanLyDonHangPanel extends JPanel {
             } else {
                 txtSdtKhachHang.setText(""); currentMaKH = null;
             }
-        }
+}
     }
 
     private void apDungKhuyenMai() {
@@ -421,7 +421,7 @@ public class QuanLyDonHangPanel extends JPanel {
         dh.setMaGiamGia(khuyenMaiDangApDung != null ? khuyenMaiDangApDung.getMaKM() : null);
         dh.setTongTien(thanhToanCuoi);
         dh.setHinhThucThanhToan("Tiền mặt");
-        dh.setDiemThuong(diemThuong);
+dh.setDiemThuong(diemThuong);
         dh.setDiemSuDung(0);
         dh.setGhiChu("Bán tại quầy");
 
@@ -469,7 +469,7 @@ public class QuanLyDonHangPanel extends JPanel {
         sb.append("<tr style='background-color: #f9f9f9; border-bottom: 2px solid #ddd;'>");
         sb.append("<th align='left' style='padding: 6px;'>Sản phẩm</th>");
         sb.append("<th align='center'>SL</th>");
-        sb.append("<th align='right'>Thành tiền</th></tr>");
+sb.append("<th align='right'>Thành tiền</th></tr>");
 
         for (int i = 0; i < cartTableModel.getRowCount(); i++) {
             sb.append("<tr>");
@@ -510,7 +510,7 @@ public class QuanLyDonHangPanel extends JPanel {
             JFileChooser fc = new JFileChooser(); fc.setSelectedFile(new File("HoaDon_" + maDH + ".pdf"));
             if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 Document doc = new Document(); PdfWriter.getInstance(doc, new FileOutputStream(fc.getSelectedFile()));
-                doc.open(); doc.add(new Paragraph(noidung, FontFactory.getFont(FontFactory.COURIER, 12))); doc.close();
+doc.open(); doc.add(new Paragraph(noidung, FontFactory.getFont(FontFactory.COURIER, 12))); doc.close();
             }
         } catch (Exception e) { e.printStackTrace(); }
     }

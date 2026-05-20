@@ -1,110 +1,66 @@
 package src.dao;
 
-import src.model.DonHang;
-import src.model.ChiTietDonHang;
 import src.database.DatabaseConnection;
-
+import src.model.ChiTietDonHang;
+import src.model.DonHang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 
 public class DonHangDAO {
 
-    public boolean taoDonHangTaiQuay(DonHang dh, List<ChiTietDonHang> listCTDH) {
-        Connection conn = null;
-        PreparedStatement psDonHang = null;
-        PreparedStatement psChiTiet = null;
-        PreparedStatement psCapNhatKho = null;
+    public boolean taoDonHangTaiQuay(DonHang dh, List<ChiTietDonHang> dsCTDH) {
+        Connection con = null;
+        PreparedStatement psDH = null;
+        PreparedStatement psCT = null;
 
         try {
-            conn = DatabaseConnection.getConnection();
+            con = DatabaseConnection.getConnection();
+            con.setAutoCommit(false); 
+
+            // Câu lệnh SQL khớp 100% với cấu trúc bảng trong ảnh của bạn
+            String sqlDH = "INSERT INTO DONHANG (MADH, MAKH, MANV, MAKM, LOAIDON, NGAYDAT, TRANGTHAI, TONGTIEN, HINHTHUCTHANHTOAN, DIEMTHUONG, DIEMSUDUNG, GHICHU) " +
+                           "VALUES (?, ?, ?, ?, 'OFFLINE', SYSDATE, 'Đã hoàn thành', ?, ?, ?, ?, ?)";
             
-            // TẮT AUTO-COMMIT ĐỂ BẮT ĐẦU TRANSACTION
-            conn.setAutoCommit(false); 
-
-            // ==========================================================
-            // 1. LƯU ĐƠN HÀNG (Bảng DONHANG)
-            // ==========================================================
-            String sqlDH = "INSERT INTO DONHANG (MaDH, MaKH, MaNV, MaGiamGia, LoaiDon, TrangThai, TongTien, HinhThucThanhToan, DiemThuong, DiemSuDung, GhiChu) " +
-                           "VALUES (?, ?, ?, ?, 'OFFLINE', 'Hoàn thành', ?, ?, ?, ?, ?)";
-            psDonHang = conn.prepareStatement(sqlDH);
-            psDonHang.setString(1, dh.getMaDH());
-            psDonHang.setString(2, dh.getMaKH()); // Có thể null
-            psDonHang.setString(3, dh.getMaNV());
-            psDonHang.setString(4, dh.getMaGiamGia());
-            psDonHang.setDouble(5, dh.getTongTien());
-            psDonHang.setString(6, dh.getHinhThucThanhToan());
-            psDonHang.setInt(7, dh.getDiemThuong());
-            psDonHang.setInt(8, dh.getDiemSuDung());
-            psDonHang.setString(9, dh.getGhiChu());
+            psDH = con.prepareStatement(sqlDH);
+            psDH.setString(1, dh.getMaDH());
+            psDH.setString(2, dh.getMaKH());
+            psDH.setString(3, dh.getMaNV());
+            psDH.setString(4, dh.getMaGiamGia());
+            psDH.setDouble(5, dh.getTongTien());
+            psDH.setString(6, dh.getHinhThucThanhToan());
+            psDH.setInt(7, dh.getDiemThuong());
+            psDH.setInt(8, dh.getDiemSuDung());
+            psDH.setString(9, dh.getGhiChu());
             
-            psDonHang.executeUpdate();
+            psDH.executeUpdate();
 
-            // ==========================================================
-            // 2. LƯU CHI TIẾT ĐƠN HÀNG 
-            // ĐÃ SỬA THÀNH: CHITIET_DONHANG (CÓ DẤU GẠCH DƯỚI)
-            // ==========================================================
-            String sqlCT = "INSERT INTO CHITIET_DONHANG (MaDH, MaSP, SoLuong, DonGia, ThanhTien) VALUES (?, ?, ?, ?, ?)";
-            psChiTiet = conn.prepareStatement(sqlCT);
-
-            // ==========================================================
-            // 3. CẬP NHẬT TỒN KHO SẢN PHẨM 
-            // (Đã sửa SoLuong thành SoLuongTon cho bảng SANPHAM)
-            // ==========================================================
-            String sqlKho = "UPDATE SANPHAM SET SoLuongTon = SoLuongTon - ? WHERE MaSP = ?";
-            psCapNhatKho = conn.prepareStatement(sqlKho);
-
-            // Duyệt qua giỏ hàng và Add vào Batch
-            for (ChiTietDonHang ct : listCTDH) {
-                // Set parameter cho chi tiết
-                psChiTiet.setString(1, ct.getMaDH());
-                psChiTiet.setString(2, ct.getMaSP());
-                psChiTiet.setInt(3, ct.getSoLuong());
-                psChiTiet.setDouble(4, ct.getDonGia());
-                
-                // Tính và gán Thành Tiền cho cột thứ 5
-                double thanhTienMonHang = ct.getSoLuong() * ct.getDonGia();
-                psChiTiet.setDouble(5, thanhTienMonHang); 
-                
-                psChiTiet.addBatch();
-
-                // Set parameter cho tồn kho
-                psCapNhatKho.setInt(1, ct.getSoLuong());
-                psCapNhatKho.setString(2, ct.getMaSP());
-                psCapNhatKho.addBatch();
+            // INSERT CHI TIẾT
+            String sqlCT = "INSERT INTO CHITIETDONHANG (MADH, MASP, SOLUONG, DONGIA) VALUES (?, ?, ?, ?)";
+            psCT = con.prepareStatement(sqlCT);
+            for (ChiTietDonHang ct : dsCTDH) {
+                psCT.setString(1, ct.getMaDH());
+                psCT.setString(2, ct.getMaSP());
+                psCT.setInt(3, ct.getSoLuong());
+                psCT.setDouble(4, ct.getDonGia());
+                psCT.addBatch();
             }
+            psCT.executeBatch();
 
-            // Thực thi Batch
-            psChiTiet.executeBatch();
-            psCapNhatKho.executeBatch();
-
-            // NẾU MỌI THỨ THÀNH CÔNG -> LƯU VĨNH VIỄN VÀO DB
-            conn.commit(); 
+            con.commit();
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace(); 
-            
-            // NẾU CÓ BẤT KỲ LỖI GÌ -> HOÀN TÁC TOÀN BỘ
-            try {
-                if (conn != null) conn.rollback();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+            if (con != null) try { con.rollback(); } catch (Exception ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+            System.err.println("LỖI SQL CHI TIẾT: " + e.getMessage());
             return false;
         } finally {
             try {
-                if (psDonHang != null) psDonHang.close();
-                if (psChiTiet != null) psChiTiet.close();
-                if (psCapNhatKho != null) psCapNhatKho.close();
-                if (conn != null) {
-                    conn.setAutoCommit(true); 
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+                if (psDH != null) psDH.close();
+                if (psCT != null) psCT.close();
+                if (con != null) con.close();
+            } catch (Exception e) { e.printStackTrace(); }
         }
     }
 }

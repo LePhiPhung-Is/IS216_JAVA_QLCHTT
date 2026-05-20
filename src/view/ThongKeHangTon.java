@@ -115,13 +115,16 @@ public class ThongKeHangTon extends JPanel {
         int tong = 0; int stt = 1;
         String selected = (String) cbDanhMuc.getSelectedItem();
         
-        // Xây dựng câu lệnh SQL có JOIN để lọc theo tên danh mục
-        String sql = "SELECT s.MASP, s.TENSP, s.SoLuongTon " +
-                     "FROM SANPHAM s JOIN DANHMUC d ON s.MaDM = d.MaDM ";
+        // SỬA ĐỔI LỚN: Xây dựng câu lệnh SQL phù hợp với mô hình N-N
+        String sql = "SELECT s.MaSP, s.TenSP, s.SoLuongTon FROM SANPHAM s ";
         
+        // Nếu chọn danh mục cụ thể, tiến hành JOIN qua bảng trung gian
         if (selected != null && !selected.equals("Tất cả")) {
-            sql += "WHERE d.TenDM = ? ";
+            sql += "JOIN CHITIET_DANHMUC ctdm ON s.MaSP = ctdm.MaSP " +
+                   "JOIN DANHMUC d ON ctdm.MaDM = d.MaDM " +
+                   "WHERE d.TenDM = ? ";
         }
+        
         sql += "ORDER BY s.SoLuongTon DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -135,7 +138,7 @@ public class ThongKeHangTon extends JPanel {
             while (rs.next()) {
                 int sl = rs.getInt("SoLuongTon");
                 tong += sl;
-                model.addRow(new Object[]{stt++, rs.getString("MASP"), rs.getString("TENSP"), sl});
+                model.addRow(new Object[]{stt++, rs.getString("MaSP"), rs.getString("TenSP"), sl});
             }
             lblTongSoLuong.setText("Tổng số lượng tồn kho hiện tại: " + tong);
         } catch (SQLException ex) { 

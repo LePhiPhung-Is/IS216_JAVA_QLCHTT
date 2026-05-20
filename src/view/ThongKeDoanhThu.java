@@ -42,12 +42,15 @@ import com.itextpdf.text.pdf.PdfWriter;
  */
 public class ThongKeDoanhThu extends JPanel {
     private JDateChooser dcTuNgay, dcDenNgay;
+    private JComboBox<String> cboTuGio, cboDenGio; 
     private JButton btnThongKe, btnXuatPDF;
     private JTable tableOrders;
     private DefaultTableModel model;
     private JLabel lblTongTienHienThi;
     private ChartPanel pnlBarChart, pnlPieChart;
 
+    // Định nghĩa màu vàng sáng chuẩn cho nút Xuất PDF
+    private final Color YELLOW_BTN = new Color(255, 221, 0);
     private final Color BRAND_GOLD = new Color(212, 175, 55);
 
     public ThongKeDoanhThu() {
@@ -59,39 +62,61 @@ public class ThongKeDoanhThu extends JPanel {
 
     private void initComponents() {
         // --- HEADER ---
-        JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         pnlHeader.setOpaque(false);
 
         pnlHeader.add(new JLabel("Từ ngày:"));
         dcTuNgay = new JDateChooser();
         dcTuNgay.setDateFormatString("dd/MM/yyyy");
-        dcTuNgay.setPreferredSize(new Dimension(140, 30));
+        dcTuNgay.setPreferredSize(new Dimension(120, 30));
         setInitialDate(dcTuNgay, true);
         pnlHeader.add(dcTuNgay);
+
+        pnlHeader.add(new JLabel("lúc"));
+        cboTuGio = new JComboBox<>();
+        for (int i = 0; i < 24; i++) cboTuGio.addItem(i + "h");
+        cboTuGio.setSelectedIndex(0); 
+        cboTuGio.setPreferredSize(new Dimension(60, 30));
+        pnlHeader.add(cboTuGio);
+
+        pnlHeader.add(Box.createHorizontalStrut(10)); 
 
         pnlHeader.add(new JLabel("Đến ngày:"));
         dcDenNgay = new JDateChooser();
         dcDenNgay.setDateFormatString("dd/MM/yyyy");
-        dcDenNgay.setPreferredSize(new Dimension(140, 30));
+        dcDenNgay.setPreferredSize(new Dimension(120, 30));
         setInitialDate(dcDenNgay, false);
         pnlHeader.add(dcDenNgay);
 
+        pnlHeader.add(new JLabel("lúc"));
+        cboDenGio = new JComboBox<>();
+        for (int i = 0; i < 24; i++) cboDenGio.addItem(i + "h");
+        cboDenGio.setSelectedIndex(23); 
+        cboDenGio.setPreferredSize(new Dimension(60, 30));
+        pnlHeader.add(cboDenGio);
+
+        // Nút Thống Kê - NỀN ĐEN CHỮ TRẮNG
         btnThongKe = new JButton("Thống kê");
         btnThongKe.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnThongKe.setBackground(Color.BLACK);
         btnThongKe.setForeground(Color.WHITE);
-        btnThongKe.setPreferredSize(new Dimension(120, 30));
+        btnThongKe.setPreferredSize(new Dimension(100, 30));
         btnThongKe.setFocusPainted(false);
+        btnThongKe.setOpaque(true);
         btnThongKe.setBorderPainted(false);
+        btnThongKe.setContentAreaFilled(true);
         pnlHeader.add(btnThongKe);
 
+        // Nút Xuất PDF - NỀN VÀNG CHỮ ĐEN
         btnXuatPDF = new JButton("Xuất PDF");
         btnXuatPDF.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnXuatPDF.setBackground(BRAND_GOLD);
+        btnXuatPDF.setBackground(YELLOW_BTN);
         btnXuatPDF.setForeground(Color.BLACK);
-        btnXuatPDF.setPreferredSize(new Dimension(120, 30));
+        btnXuatPDF.setPreferredSize(new Dimension(100, 30));
         btnXuatPDF.setFocusPainted(false);
+        btnXuatPDF.setOpaque(true);
         btnXuatPDF.setBorderPainted(false);
+        btnXuatPDF.setContentAreaFilled(true);
         pnlHeader.add(btnXuatPDF);
 
         add(pnlHeader, BorderLayout.NORTH);
@@ -101,7 +126,7 @@ public class ThongKeDoanhThu extends JPanel {
 
         // --- TAB 1: DANH SÁCH ĐƠN HÀNG ---
         JPanel pnlTable = new JPanel(new BorderLayout());
-        String[] columns = {"STT", "Mã Đơn Hàng", "Ngày Đặt", "Mã Nhân Viên", "Tổng tiền (VNĐ)"};
+        String[] columns = {"STT", "Mã Đơn Hàng", "Thời Gian Đặt", "Mã Nhân Viên", "Tổng tiền (VNĐ)"};
         model = new DefaultTableModel(columns, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
@@ -134,17 +159,10 @@ public class ThongKeDoanhThu extends JPanel {
 
         add(tabbedPane, BorderLayout.CENTER);
 
-        btnThongKe.addActionListener(e -> {
-            queryData(dcTuNgay.getDate(), dcDenNgay.getDate());
-            veBieuDoTheoNgay(dcTuNgay.getDate(), dcDenNgay.getDate());
-        });
+        btnThongKe.addActionListener(e -> thucHienThongKe());
         btnXuatPDF.addActionListener(e -> moCuaSoXemTruoc());
     }
 
-    /**
-     * HIỂN THỊ CHI TIẾT SẢN PHẨM TRONG ĐƠN HÀNG
-     * Đã cập nhật đúng tên cột KichCo theo bảng SANPHAM mới
-     */
     private void hienThiSanPhamCuaDonHang(String maDH) {
         JDialog detailDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết đơn hàng: " + maDH, true);
         detailDialog.setSize(850, 450);
@@ -159,7 +177,6 @@ public class ThongKeDoanhThu extends JPanel {
         detailTable.setRowHeight(35);
         detailTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
 
-        // SQL: Sửa s.KichThuoc -> s.KichCo cho đúng cấu trúc bảng
         String sql = "SELECT s.MaSP, s.TenSP, s.KichCo, s.MauSac, ct.DonGia, ct.SoLuong, ct.ThanhTien " +
                      "FROM CHITIET_DONHANG ct " +
                      "JOIN SANPHAM s ON ct.MaSP = s.MaSP " +
@@ -175,14 +192,8 @@ public class ThongKeDoanhThu extends JPanel {
 
             while (rs.next()) {
                 detailModel.addRow(new Object[]{
-                    stt++,
-                    rs.getString("MaSP"),
-                    rs.getString("TenSP"),
-                    rs.getString("KichCo"), // Sửa tại đây
-                    rs.getString("MauSac"),
-                    df.format(rs.getLong("DonGia")),
-                    rs.getInt("SoLuong"),
-                    df.format(rs.getLong("ThanhTien"))
+                    stt++, rs.getString("MaSP"), rs.getString("TenSP"), rs.getString("KichCo"),
+                    rs.getString("MauSac"), df.format(rs.getLong("DonGia")), rs.getInt("SoLuong"), df.format(rs.getLong("ThanhTien"))
                 });
             }
         } catch (SQLException ex) { 
@@ -211,17 +222,49 @@ public class ThongKeDoanhThu extends JPanel {
         dateChooser.setDate(cal.getTime());
     }
 
-    private void queryData(Date tu, Date den) {
-        if (tu == null || den == null) return;
-        Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date denPlusOne = cal.getTime();
+    private Timestamp getTimestampBoundary(Date date, int hour, boolean isEndOfHour) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, isEndOfHour ? 59 : 0);
+        cal.set(Calendar.SECOND, isEndOfHour ? 59 : 0);
+        return new Timestamp(cal.getTimeInMillis());
+    }
+
+    private void thucHienThongKe() {
+        if (dcTuNgay.getDate() == null || dcDenNgay.getDate() == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc!");
+            return;
+        }
+
+        int tuGio = cboTuGio.getSelectedIndex();
+        int denGio = cboDenGio.getSelectedIndex();
+        
+        Timestamp tsTu = getTimestampBoundary(dcTuNgay.getDate(), tuGio, false);
+        Timestamp tsDen = getTimestampBoundary(dcDenNgay.getDate(), denGio, true);
+
+        if (tsTu.after(tsDen)) {
+            JOptionPane.showMessageDialog(this, "Thời gian bắt đầu không được lớn hơn thời gian kết thúc!");
+            return;
+        }
+
+        queryData(tsTu, tsDen);
+        veBieuDoTheoNgay(dcTuNgay.getDate(), dcDenNgay.getDate(), tuGio, denGio, tsTu, tsDen);
+    }
+
+    private void queryData(Timestamp tsTu, Timestamp tsDen) {
         model.setRowCount(0); long tong = 0; int stt = 1;
+        // Đã sửa 'Hoàn thành' thành 'Đã hoàn thành'
         String sql = "SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY HH24:MI') as Ngay, MaNV, TongTien FROM DONHANG " +
-                     "WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE' ORDER BY NgayDat DESC";
+                     "WHERE NgayDat >= ? AND NgayDat <= ? AND LoaiDon = 'OFFLINE' AND TrangThai = N'Đã hoàn thành' " +
+                     "ORDER BY NgayDat DESC";
+
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setDate(1, new java.sql.Date(tu.getTime()));
-            pstmt.setDate(2, new java.sql.Date(denPlusOne.getTime()));
+            
+            pstmt.setTimestamp(1, tsTu);
+            pstmt.setTimestamp(2, tsDen);
+            
             ResultSet rs = pstmt.executeQuery();
             DecimalFormat df = new DecimalFormat("#,###");
             while (rs.next()) {
@@ -232,85 +275,91 @@ public class ThongKeDoanhThu extends JPanel {
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
 
-    private void veBieuDoTheoNgay(Date tu, Date den) {
-        if (tu == null || den == null) return;
-        Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);
-        Date denPlusOne = cal.getTime();
+    private void veBieuDoTheoNgay(Date dateTu, Date dateDen, int tuGio, int denGio, Timestamp tsTu, Timestamp tsDen) {
         DefaultCategoryDataset barDS = new DefaultCategoryDataset();
         DefaultPieDataset<String> pieDS = new DefaultPieDataset<>();
 
-        String sqlBar = "SELECT TO_CHAR(NgayDat, 'DD/MM') as Ngay, SUM(TongTien) as DT FROM DONHANG " +
-                        "WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE' GROUP BY TO_CHAR(NgayDat, 'DD/MM') ORDER BY MIN(NgayDat)";
-        String sqlPie = "SELECT d.TenDM, SUM(ct.ThanhTien) as DT FROM DONHANG h JOIN CHITIET_DONHANG ct ON h.MaDH = ct.MaDH " +
-                        "JOIN SANPHAM s ON ct.MaSP = s.MaSP JOIN DANHMUC d ON s.MaDM = d.MaDM " +
-                        "WHERE h.NgayDat >= ? AND h.NgayDat < ? AND h.LoaiDon = 'OFFLINE' GROUP BY d.TenDM";
-
         try (Connection conn = DatabaseConnection.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(sqlBar)) {
-                ps.setDate(1, new java.sql.Date(tu.getTime())); ps.setDate(2, new java.sql.Date(denPlusOne.getTime()));
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) barDS.addValue(rs.getDouble("DT"), "Doanh thu", rs.getString("Ngay"));
+            String callFunc = "{ ? = call fn_DoanhThuTheoGio(?, ?, ?) }";
+            try (CallableStatement cs = conn.prepareCall(callFunc)) {
+                cs.registerOutParameter(1, Types.NUMERIC);
+                cs.setDate(2, new java.sql.Date(dateTu.getTime()));
+                cs.setDate(3, new java.sql.Date(dateDen.getTime()));
+                
+                int loopStart = (dateTu.compareTo(dateDen) == 0) ? tuGio : 0;
+                int loopEnd = (dateTu.compareTo(dateDen) == 0) ? denGio : 23;
+
+                for (int i = loopStart; i <= loopEnd; i++) {
+                    cs.setInt(4, i);
+                    cs.execute();
+                    double dt = cs.getDouble(1);
+                    if (dt > 0) {
+                        barDS.addValue(dt, "Doanh thu", i + "h");
+                    }
+                }
             }
+
+            // Đã cập nhật JOIN qua CHITIET_DANHMUC và cập nhật trạng thái 'Đã hoàn thành'
+            String sqlPie = "SELECT d.TenDM, SUM(ct.ThanhTien) as DT " +
+                            "FROM DONHANG h " +
+                            "JOIN CHITIET_DONHANG ct ON h.MaDH = ct.MaDH " +
+                            "JOIN SANPHAM s ON ct.MaSP = s.MaSP " +
+                            "JOIN CHITIET_DANHMUC ctdm ON s.MaSP = ctdm.MaSP " +
+                            "JOIN DANHMUC d ON ctdm.MaDM = d.MaDM " +
+                            "WHERE h.NgayDat >= ? AND h.NgayDat <= ? AND h.LoaiDon = 'OFFLINE' AND h.TrangThai = N'Đã hoàn thành' " +
+                            "GROUP BY d.TenDM";
+            
             try (PreparedStatement ps = conn.prepareStatement(sqlPie)) {
-                ps.setDate(1, new java.sql.Date(tu.getTime())); ps.setDate(2, new java.sql.Date(denPlusOne.getTime()));
+                ps.setTimestamp(1, tsTu);
+                ps.setTimestamp(2, tsDen);
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) pieDS.setValue(rs.getString("TenDM"), rs.getDouble("DT"));
             }
-            JFreeChart bar = ChartFactory.createBarChart("DOANH THU THEO NGÀY", "Ngày", "VNĐ", barDS, PlotOrientation.VERTICAL, false, true, false);
-            JFreeChart pie = ChartFactory.createPieChart("CƠ CẤU DOANH THU THEO DANH MỤC", pieDS, true, true, false);
+            
+            JFreeChart bar = ChartFactory.createBarChart("DOANH THU THEO GIỜ", "Khung Giờ", "VNĐ", barDS, PlotOrientation.VERTICAL, false, true, false);
+            JFreeChart pie = ChartFactory.createPieChart("CƠ CẤU DOANH THU", pieDS, true, true, false);
             ((PiePlot) pie.getPlot()).setLabelGenerator(new StandardPieSectionLabelGenerator("{0}: {2}"));
             pnlBarChart.setChart(bar); pnlPieChart.setChart(pie);
         } catch (SQLException ex) { ex.printStackTrace(); }
     }
 
     private void moCuaSoXemTruoc() {
+        if (dcTuNgay.getDate() == null || dcDenNgay.getDate() == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày tháng!");
+            return;
+        }
+
         JDialog dialog = new JDialog((Frame) null, "Xem trước báo cáo", true);
         dialog.setSize(1000, 700); dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout(15, 15));
 
-        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        JDateChooser pdfTuNgay = new JDateChooser();
-        pdfTuNgay.setDateFormatString("dd/MM/yyyy");
-        pdfTuNgay.setDate(dcTuNgay.getDate()); 
-        
-        JDateChooser pdfDenNgay = new JDateChooser();
-        pdfDenNgay.setDateFormatString("dd/MM/yyyy");
-        pdfDenNgay.setDate(dcDenNgay.getDate());
-
-        JButton btnXemTruoc = new JButton("Cập nhật xem trước");
-        btnXemTruoc.setBackground(new Color(173, 216, 230));
-        
-        pnlTop.add(new JLabel("Từ ngày:"));
-        pnlTop.add(pdfTuNgay);
-        pnlTop.add(new JLabel("Đến ngày:"));
-        pnlTop.add(pdfDenNgay);
-        pnlTop.add(btnXemTruoc);
-        dialog.add(pnlTop, BorderLayout.NORTH);
+        int tuGio = cboTuGio.getSelectedIndex();
+        int denGio = cboDenGio.getSelectedIndex();
+        Timestamp tsTu = getTimestampBoundary(dcTuNgay.getDate(), tuGio, false);
+        Timestamp tsDen = getTimestampBoundary(dcDenNgay.getDate(), denGio, true);
 
         JEditorPane txtPreview = new JEditorPane(); 
         txtPreview.setContentType("text/html");
         txtPreview.setEditable(false);
-        txtPreview.setText(generatePreviewContent(pdfTuNgay.getDate(), pdfDenNgay.getDate()));
+        txtPreview.setText(generatePreviewContent(tsTu, tsDen));
         dialog.add(new JScrollPane(txtPreview), BorderLayout.CENTER);
 
         JPanel pnlBtn = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 10));
+        
         JButton btnLuu = new JButton("Xác nhận lưu PDF");
         btnLuu.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnLuu.setBackground(BRAND_GOLD); 
+        btnLuu.setBackground(YELLOW_BTN); 
         btnLuu.setForeground(Color.BLACK);
         btnLuu.setPreferredSize(new Dimension(160, 35));
+        btnLuu.setFocusPainted(false);
+        btnLuu.setOpaque(true);
         btnLuu.setBorderPainted(false);
         pnlBtn.add(btnLuu);
-
-        btnXemTruoc.addActionListener(e -> {
-            txtPreview.setText(generatePreviewContent(pdfTuNgay.getDate(), pdfDenNgay.getDate()));
-            txtPreview.setCaretPosition(0);
-        });
 
         btnLuu.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
             if (fc.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
-                thucHienXuatPDF(pdfTuNgay.getDate(), pdfDenNgay.getDate(), fc.getSelectedFile().getAbsolutePath() + ".pdf");
+                thucHienXuatPDF(tsTu, tsDen, fc.getSelectedFile().getAbsolutePath() + ".pdf");
                 dialog.dispose();
             }
         });
@@ -319,27 +368,26 @@ public class ThongKeDoanhThu extends JPanel {
         dialog.setVisible(true);
     }
 
-    private String generatePreviewContent(Date tu, Date den) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private String generatePreviewContent(Timestamp tsTu, Timestamp tsDen) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         DecimalFormat df = new DecimalFormat("#,###");
         StringBuilder sb = new StringBuilder("<html><body style='font-family: Arial; padding: 20px;'>");
         sb.append("<h2 align='center' style='color:#D4AF37;'>CỬA HÀNG BEAUTY SHOP</h2>");
         sb.append("<h3 align='center'>BÁO CÁO TỔNG TIỀN CHI TIẾT</h3>");
-        sb.append("<p align='center'><i>Giai đoạn: ").append(sdf.format(tu)).append(" - ").append(sdf.format(den)).append("</i></p>");
+        sb.append("<p align='center'><i>Giai đoạn: ").append(sdf.format(tsTu)).append(" - ").append(sdf.format(tsDen)).append("</i></p>");
         sb.append("<table border='1' width='100%' style='border-collapse: collapse;'>");
-        sb.append("<tr bgcolor='#f2f2f2'><th>STT</th><th>Mã Đơn</th><th>Ngày Đặt</th><th>Tổng tiền</th></tr>");
+        sb.append("<tr bgcolor='#f2f2f2'><th>STT</th><th>Mã Đơn</th><th>Thời Gian Đặt</th><th>Tổng tiền</th></tr>");
         
         long tong = 0;
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE'")) {
-            ps.setDate(1, new java.sql.Date(tu.getTime()));
-            Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);
-            ps.setDate(2, new java.sql.Date(cal.getTime().getTime()));
+             PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY HH24:MI') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat <= ? AND LoaiDon = 'OFFLINE' AND TrangThai = N'Đã hoàn thành' ORDER BY NgayDat ASC")) {
+            ps.setTimestamp(1, tsTu);
+            ps.setTimestamp(2, tsDen);
             ResultSet rs = ps.executeQuery();
             int i = 1;
             while (rs.next()) {
                 long val = rs.getLong("TongTien"); tong += val;
-                sb.append("<tr><td>").append(i++).append("</td><td>").append(rs.getString(1)).append("</td><td>").append(rs.getString(2)).append("</td><td align='right'>").append(df.format(val)).append("</td></tr>");
+                sb.append("<tr><td align='center'>").append(i++).append("</td><td align='center'>").append(rs.getString(1)).append("</td><td align='center'>").append(rs.getString(2)).append("</td><td align='right'>").append(df.format(val)).append("</td></tr>");
             }
         } catch (SQLException ex) { ex.printStackTrace(); }
         
@@ -348,7 +396,7 @@ public class ThongKeDoanhThu extends JPanel {
         return sb.toString();
     }
 
-    private void thucHienXuatPDF(Date tu, Date den, String path) {
+    private void thucHienXuatPDF(Timestamp tsTu, Timestamp tsDen, String path) {
         Document doc = new Document();
         try {
             PdfWriter.getInstance(doc, new FileOutputStream(path));
@@ -360,21 +408,22 @@ public class ThongKeDoanhThu extends JPanel {
             doc.add(new Paragraph("BÁO CÁO TỔNG TIỀN OFFLINE", new com.itextpdf.text.Font(bf, 16, com.itextpdf.text.Font.BOLD, new BaseColor(212, 175, 55))));
             doc.add(new Paragraph(" "));
             PdfPTable t = new PdfPTable(4); t.setWidthPercentage(100);
-            String[] h = {"STT", "Mã Đơn", "Ngày Đặt", "Tổng tiền"};
+            String[] h = {"STT", "Mã Đơn", "Thời Gian Đặt", "Tổng tiền"};
             for (String s : h) { PdfPCell c = new PdfPCell(new Phrase(s, fBold)); c.setBackgroundColor(BaseColor.LIGHT_GRAY); t.addCell(c); }
             
             long tong = 0;
             try (Connection conn = DatabaseConnection.getConnection();
-                 PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat < ? AND LoaiDon = 'OFFLINE'")) {
-                ps.setDate(1, new java.sql.Date(tu.getTime()));
-                Calendar cal = Calendar.getInstance(); cal.setTime(den); cal.add(Calendar.DAY_OF_MONTH, 1);
-                ps.setDate(2, new java.sql.Date(cal.getTime().getTime()));
+                 PreparedStatement ps = conn.prepareStatement("SELECT MaDH, TO_CHAR(NgayDat, 'DD/MM/YYYY HH24:MI') as Ngay, TongTien FROM DONHANG WHERE NgayDat >= ? AND NgayDat <= ? AND LoaiDon = 'OFFLINE' AND TrangThai = N'Đã hoàn thành' ORDER BY NgayDat ASC")) {
+                ps.setTimestamp(1, tsTu);
+                ps.setTimestamp(2, tsDen);
                 ResultSet rs = ps.executeQuery();
                 int i = 1;
                 while (rs.next()) {
                     long val = rs.getLong("TongTien"); tong += val;
-                    t.addCell(new Phrase(String.valueOf(i++), fNormal)); t.addCell(new Phrase(rs.getString(1), fNormal));
-                    t.addCell(new Phrase(rs.getString(2), fNormal));
+                    
+                    PdfPCell cStt = new PdfPCell(new Phrase(String.valueOf(i++), fNormal)); cStt.setHorizontalAlignment(Element.ALIGN_CENTER); t.addCell(cStt);
+                    PdfPCell cMa = new PdfPCell(new Phrase(rs.getString(1), fNormal)); cMa.setHorizontalAlignment(Element.ALIGN_CENTER); t.addCell(cMa);
+                    PdfPCell cTime = new PdfPCell(new Phrase(rs.getString(2), fNormal)); cTime.setHorizontalAlignment(Element.ALIGN_CENTER); t.addCell(cTime);
                     PdfPCell cVal = new PdfPCell(new Phrase(new DecimalFormat("#,###").format(val), fNormal));
                     cVal.setHorizontalAlignment(Element.ALIGN_RIGHT); t.addCell(cVal);
                 }
