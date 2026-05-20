@@ -1,0 +1,30 @@
+-- =====================================================
+-- 00_reset_giaotac.sql
+-- Reset dữ liệu trước khi mô phỏng giao tác đồng thời
+-- =====================================================
+
+SET SERVEROUTPUT ON;
+
+UPDATE SANPHAM
+SET SoLuongTon = 20,
+    GiaBan = 250000,
+    TrangThai = N'Đang bán'
+WHERE MaSP = 'SP01';
+
+UPDATE SANPHAM
+SET GiaBan = 350000,
+    SoLuongTon = 15,
+    TrangThai = N'Đang bán'
+WHERE MaSP = 'SP02';
+
+UPDATE SANPHAM
+SET GiaBan = 420000,
+    SoLuongTon = 12,
+    TrangThai = N'Đang bán'
+WHERE MaSP = 'SP03';
+
+COMMIT;
+
+SELECT MaSP, TenSP, GiaBan, SoLuongTon, TrangThai
+FROM SANPHAM
+WHERE MaSP IN ('SP01', 'SP02', 'SP03');
