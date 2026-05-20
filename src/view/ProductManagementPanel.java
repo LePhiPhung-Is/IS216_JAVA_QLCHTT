@@ -314,229 +314,230 @@ public class ProductManagementPanel extends JPanel {
     //  existing = null → thêm mới | existing != null → sửa (form có sẵn dữ liệu)
     // =====================================================================
 
-    private void openProductDialog(SanPham existing, int productIndex) {
-        boolean isEdit = (existing != null);
+ private void openProductDialog(SanPham existing, int productIndex) {
+    boolean isEdit = (existing != null);
 
-        Window owner = SwingUtilities.getWindowAncestor(this);
-        JDialog dialog = new JDialog(owner instanceof Frame ? (Frame) owner : null,
-                isEdit ? "Sửa sản phẩm" : "Thêm sản phẩm mới", true);
-        dialog.setSize(500, 480);
-        dialog.setLocationRelativeTo(this);
-        dialog.setLayout(new BorderLayout());
-        dialog.getContentPane().setBackground(MAIN_BG);
+    Window owner = SwingUtilities.getWindowAncestor(this);
+    JDialog dialog = new JDialog(owner instanceof Frame ? (Frame) owner : null,
+            isEdit ? "Sửa sản phẩm" : "Thêm sản phẩm mới", true);
+    dialog.setSize(500, 520); // Tăng nhẹ chiều cao để form hiển thị thoải mái
+    dialog.setLocationRelativeTo(this);
+    dialog.setLayout(new BorderLayout());
+    dialog.getContentPane().setBackground(MAIN_BG);
 
-        // ----- Title bar -----
-        JPanel titleBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        titleBar.setBackground(HEADER_BG);
-        titleBar.setBorder(new EmptyBorder(14, 20, 14, 20));
-        JLabel lbTitle = new JLabel(isEdit ? "SỬA SẢN PHẨM" : "THÊM SẢN PHẨM MỚI");
-        lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lbTitle.setForeground(BRAND_GOLD);
-        titleBar.add(lbTitle);
+    // ----- Title bar -----
+    JPanel titleBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    titleBar.setBackground(HEADER_BG);
+    titleBar.setBorder(new EmptyBorder(14, 20, 14, 20));
+    JLabel lbTitle = new JLabel(isEdit ? "SỬA SẢN PHẨM" : "THÊM SẢN PHẨM MỚI");
+    lbTitle.setFont(new Font("Segoe UI", Font.BOLD, 15));
+    lbTitle.setForeground(BRAND_GOLD);
+    titleBar.add(lbTitle);
 
-        // ----- Form -----
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(MAIN_BG);
-        form.setBorder(new EmptyBorder(20, 28, 10, 28));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 4, 8, 4);
-        gbc.fill   = GridBagConstraints.HORIZONTAL;
+    // ----- Form -----
+    JPanel form = new JPanel(new GridBagLayout());
+    form.setBackground(MAIN_BG);
+    form.setBorder(new EmptyBorder(20, 28, 10, 28));
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(8, 4, 8, 4);
+    gbc.fill   = GridBagConstraints.HORIZONTAL;
 
-        // Các field — điền sẵn nếu đang sửa
-        JTextField fieldMa     = makeField(isEdit ? existing.getMaSP()               : "");
-        JTextField fieldTen    = makeField(isEdit ? existing.getTenSP()              : "");
-       JComboBox<DanhMuc> cbDanhMuc = new JComboBox<>();
-       DanhMucDAO daoDM = new DanhMucDAO();
-        List<DanhMuc> listDM = daoDM.getAllDanhMuc();
-
-            for (DanhMuc dm : listDM) {
-                cbDanhMuc.addItem(dm);
-            }     
-        JComboBox<String> cbKho = new JComboBox<>(new String[]{
-    "KHO01", "KHO02"
-});
-            JTextField fieldGia    = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
-        JTextField fieldTon    = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
-        JComboBox<String> cbMauSac = new JComboBox<>(new String[]{
-            "Đen", "Trắng", "Xám", "Xanh", "Đỏ"        });
-
-        JComboBox<String> cbKichCo = new JComboBox<>(new String[]{
-            "S", "M", "L", "XL", "XXL"        });
-
-        JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
-            "Đang bán", "Ngừng bán"        });
-        
-
-        fieldMa.setEditable(!isEdit); // Không cho sửa mã khi đang edit
-        // --- Ảnh: preview + nút chọn ---
-        final String[] selectedFileName = { isEdit ? existing.getHinhAnh() : "" };
-
-        JLabel previewLabel = new JLabel();
-        previewLabel.setPreferredSize(new Dimension(70, 70));
-        previewLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
-        previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        // Load ảnh hiện tại nếu đang sửa
-        if (isEdit && existing.getHinhAnh() != null && !existing.getHinhAnh().isEmpty()) {
-                ImageIcon icon = loadImage(
-                 existing.getHinhAnh(),
-                68, 68
-        );
-
-        previewLabel.setIcon(icon);
-        previewLabel.setText("");
-        } else {
-            previewLabel.setText("No img");
-        }
-
-        JLabel fileNameLabel = new JLabel(selectedFileName[0].isEmpty() ? "Chưa chọn ảnh" : selectedFileName[0]);
-        fileNameLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
-        fileNameLabel.setForeground(new Color(120, 120, 120));
-
-        JButton btnChonAnh = makePlainButton("📂 Chọn ảnh");
-        btnChonAnh.addActionListener(ev -> {
-            String fileName = chooseAndCopyImage(dialog);
-            if (fileName != null) {
-                selectedFileName[0] = fileName;
-                fileNameLabel.setText(fileName);
-                // Cập nhật preview ngay lập tức
-                ImageIcon icon = loadImage( fileName, 68, 68);
-                previewLabel.setIcon(icon);
-                previewLabel.setText("");
-                dialog.repaint();
-            }
-        });
-
-        // Panel chứa preview + tên file + nút chọn
-        JPanel anhPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        anhPanel.setBackground(MAIN_BG);
-        anhPanel.add(previewLabel);
-        JPanel anhRight = new JPanel();
-        anhRight.setLayout(new BoxLayout(anhRight, BoxLayout.Y_AXIS));
-        anhRight.setBackground(MAIN_BG);
-        anhRight.add(btnChonAnh);
-        anhRight.add(Box.createVerticalStrut(6));
-        anhRight.add(fileNameLabel);
-        anhPanel.add(anhRight);
-
-        // Thêm vào form
-        gbc.gridx = 0; gbc.gridy = 9; gbc.weightx = 0.3;
-        JLabel lblAnh = new JLabel("Hình ảnh:");
-        lblAnh.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblAnh.setForeground(new Color(60, 60, 60));
-        form.add(lblAnh, gbc);
-        gbc.gridx = 1; gbc.weightx = 0.7;
-        form.add(anhPanel, gbc);
-        addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
-        addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
-        addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
-        addRowCombo(form, gbc, 3, "Kho:", cbKho);
-        addRow(form, gbc, 4, "Giá bán (đ):",  fieldGia);
-        addRow(form, gbc, 5, "Tồn kho:",       fieldTon);
-        addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
-        addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
-        addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
-        
-
-        // ----- Nút Lưu / Hủy -----
-        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        btnRow.setBackground(MAIN_BG);
-        btnRow.setBorder(new EmptyBorder(0, 28, 20, 28));
-
-        JButton cancelBtn = makePlainButton("Hủy");
-        cancelBtn.addActionListener(e -> dialog.dispose());
-
-        JButton saveBtn = makeGoldButton(isEdit ? "Lưu thay đổi" : "Thêm mới");
-        saveBtn.addActionListener(e -> {
-            // Validate bắt buộc
-            if (fieldMa.getText().trim().isEmpty() || fieldTen.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Vui lòng điền đầy đủ Mã và Tên sản phẩm.",
-                        "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            double gia;
-            int    ton;
-            try {
-                gia = Double.parseDouble(fieldGia.getText().trim());
-                ton = Integer.parseInt(fieldTon.getText().trim());
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Giá bán và Tồn kho phải là số.",
-                        "Dữ liệu không hợp lệ", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (isEdit) {
-
-                for (int i = 0; i < cbDanhMuc.getItemCount(); i++) {
-                    DanhMuc dm = cbDanhMuc.getItemAt(i);
-                    if (dm.getMaDM().equals(existing.getMaDM())) {
-                        cbDanhMuc.setSelectedIndex(i);
-                        break;
-                     }
-                 }
-                
-                // Cập nhật thông tin sản phẩm đang sửa
-                existing.setTenSP(fieldTen.getText().trim());
-                DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
-                existing.setMaDM(dm.getMaDM());
-                existing.setGiaBan(gia);
-                existing.setSoLuongTon(ton);
-                existing.setMauSac(cbMauSac.getSelectedItem().toString());
-                existing.setKichCo(cbKichCo.getSelectedItem().toString());
-                 existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
-                existing.setHinhAnh(selectedFileName[0]);
-                SanPhamDAO dao = new SanPhamDAO();
-                boolean ok = dao.updateSanPham(existing);
-
-                if (ok) {
-                    JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "Cập nhật thất bại!");
-                }
-            } else {
-                // Tạo sản phẩm mới
-                DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
-
-            SanPham sp = new SanPham(
-                fieldMa.getText().trim(),
-                dm.getMaDM(),
-                cbMauSac.getSelectedItem().toString(),
-                cbKichCo.getSelectedItem().toString(),
-                gia,
-                ton,
-                cbTrangThai.getSelectedItem().toString(), // nên dùng cái này luôn
-                fieldTen.getText().trim(),
-                 cbKho.getSelectedItem().toString(), 
-                selectedFileName[0]
-            );
-                
-                SanPhamDAO dao = new SanPhamDAO();
-                boolean ok = dao.insertSanPham(sp);
-
-if (ok) {
-    JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
-    products.add(sp); // chỉ add khi DB thành công
-} else {
-    JOptionPane.showMessageDialog(dialog, "Thêm thất bại!");
-}
-            }
-
-            loadDataFromDatabase();
-            dialog.dispose();
-        });
-
-        btnRow.add(cancelBtn);
-        btnRow.add(saveBtn);
-
-        dialog.add(titleBar, BorderLayout.NORTH);
-        dialog.add(new JScrollPane(form), BorderLayout.CENTER);
-        dialog.add(btnRow,   BorderLayout.SOUTH);
-        dialog.setVisible(true);
+    // Các field — Điền sẵn dữ liệu cũ nếu đang sửa
+    // Nếu thêm mới: Khóa ô nhập mã để Database tự xử lý sinh mã
+    JTextField fieldMa = makeField(isEdit ? existing.getMaSP() : "[Mã hệ thống tự sinh]");
+    fieldMa.setEditable(false);
+    if (!isEdit) {
+        fieldMa.setForeground(Color.GRAY);
+        fieldMa.setFont(new Font("Segoe UI", Font.ITALIC, 12));
     }
 
+    JTextField fieldTen     = makeField(isEdit ? existing.getTenSP() : "");
+    JTextField fieldGia     = makeField(isEdit ? String.valueOf((int) existing.getGiaBan()) : "");
+    JTextField fieldTon     = makeField(isEdit ? String.valueOf(existing.getSoLuongTon())   : "");
+    
+    JComboBox<String> cbKho = new JComboBox<>(new String[]{"KHO01", "KHO02"});
+    if (isEdit) cbKho.setSelectedItem(existing.getMaKho());
+
+    JComboBox<String> cbMauSac = new JComboBox<>(new String[]{"Đen", "Trắng", "Xám", "Xanh", "Đỏ"});
+    if (isEdit) cbMauSac.setSelectedItem(existing.getMauSac());
+
+    JComboBox<String> cbKichCo = new JComboBox<>(new String[]{"Freesize","S", "M", "L", "XL", "XXL" ,"36","37","38","39","40","41","42","43","44"});
+    if (isEdit) cbKichCo.setSelectedItem(existing.getKichCo());
+
+    JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{"Đang bán", "Ngừng bán"});
+    if (isEdit) cbTrangThai.setSelectedItem(existing.getTrangThai());
+
+    // Load danh mục từ database và gán dữ liệu ban đầu (Đã sửa lỗi đưa từ sự kiện nút lưu lên đây)
+    JComboBox<DanhMuc> cbDanhMuc = new JComboBox<>();
+    DanhMucDAO daoDM = new DanhMucDAO();
+    List<DanhMuc> listDM = daoDM.getAllDanhMuc();
+    for (DanhMuc dm : listDM) {
+        cbDanhMuc.addItem(dm);
+        if (isEdit && dm.getMaDM().equals(existing.getMaDM())) {
+            cbDanhMuc.setSelectedItem(dm);
+        }
+    }
+
+    // --- Ảnh: preview + nút chọn ---
+    final String[] selectedFileName = { isEdit ? existing.getHinhAnh() : "" };
+
+    JLabel previewLabel = new JLabel();
+    previewLabel.setPreferredSize(new Dimension(70, 70));
+    previewLabel.setBorder(BorderFactory.createLineBorder(BORDER_COLOR));
+    previewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+    // Load ảnh hiện tại nếu đang sửa
+    if (isEdit && existing.getHinhAnh() != null && !existing.getHinhAnh().isEmpty()) {
+        ImageIcon icon = loadImage(existing.getHinhAnh(), 68, 68);
+        previewLabel.setIcon(icon);
+        previewLabel.setText("");
+    } else {
+        previewLabel.setText("No img");
+    }
+
+    JLabel fileNameLabel = new JLabel(selectedFileName[0].isEmpty() ? "Chưa chọn ảnh" : selectedFileName[0]);
+    fileNameLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+    fileNameLabel.setForeground(new Color(120, 120, 120));
+
+    JButton btnChonAnh = makePlainButton("📂 Chọn ảnh");
+    btnChonAnh.addActionListener(ev -> {
+        String fileName = chooseAndCopyImage(dialog);
+        if (fileName != null) {
+            selectedFileName[0] = fileName;
+            fileNameLabel.setText(fileName);
+            // Cập nhật preview ngay lập tức
+            ImageIcon icon = loadImage(fileName, 68, 68);
+            previewLabel.setIcon(icon);
+            previewLabel.setText("");
+            dialog.repaint();
+        }
+    });
+
+    // Panel chứa preview + tên file + nút chọn
+    JPanel anhPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    anhPanel.setBackground(MAIN_BG);
+    anhPanel.add(previewLabel);
+    JPanel anhRight = new JPanel();
+    anhRight.setLayout(new BoxLayout(anhRight, BoxLayout.Y_AXIS));
+    anhRight.setBackground(MAIN_BG);
+    anhRight.add(btnChonAnh);
+    anhRight.add(Box.createVerticalStrut(6));
+    anhRight.add(fileNameLabel);
+    anhPanel.add(anhRight);
+
+    // Thêm các thành phần vào form theo thứ tự
+    addRow(form, gbc, 0, "Mã sản phẩm:",  fieldMa);
+    addRow(form, gbc, 1, "Tên sản phẩm:", fieldTen);
+    addRowCombo(form, gbc, 2, "Danh mục:", cbDanhMuc);
+    addRowCombo(form, gbc, 3, "Kho:", cbKho);
+    addRow(form, gbc, 4, "Giá bán (đ):",  fieldGia);
+    addRow(form, gbc, 5, "Tồn kho:",       fieldTon);
+    addRowCombo(form, gbc, 6, "Màu sắc:", cbMauSac);
+    addRowCombo(form, gbc, 7, "Kích cỡ:", cbKichCo);
+    addRowCombo(form, gbc, 8, "Trạng thái:", cbTrangThai);
+    
+    // Thêm phần ảnh vào cuối form (Dòng số 9)
+    gbc.gridx = 0; gbc.gridy = 9; gbc.weightx = 0.3;
+    JLabel lblAnh = new JLabel("Hình ảnh:");
+    lblAnh.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+    lblAnh.setForeground(new Color(60, 60, 60));
+    form.add(lblAnh, gbc);
+    gbc.gridx = 1; gbc.weightx = 0.7;
+    form.add(anhPanel, gbc);
+
+    // ----- Nút Lưu / Hủy -----
+    JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+    btnRow.setBackground(MAIN_BG);
+    btnRow.setBorder(new EmptyBorder(0, 28, 20, 28));
+
+    JButton cancelBtn = makePlainButton("Hủy");
+    cancelBtn.addActionListener(e -> dialog.dispose());
+
+    JButton saveBtn = makeGoldButton(isEdit ? "Lưu thay đổi" : "Thêm mới");
+    saveBtn.addActionListener(e -> {
+        // Validate tên sản phẩm (Mã không cần validate nữa vì hệ thống tự sinh khi thêm mới)
+        if (fieldTen.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(dialog,
+                    "Vui lòng điền đầy đủ Tên sản phẩm.",
+                    "Thiếu thông tin", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        double gia;
+        int ton;
+        try {
+            gia = Double.parseDouble(fieldGia.getText().trim());
+            ton = fieldTon.getText().trim().isEmpty() ? 0 : Integer.parseInt(fieldTon.getText().trim());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(dialog,
+                    "Giá bán và Tồn kho phải là số hợp lệ.",
+                    "Dữ liệu không hợp lệ", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DanhMuc dm = (DanhMuc) cbDanhMuc.getSelectedItem();
+        if (dm == null) {
+            JOptionPane.showMessageDialog(dialog, "Vui lòng chọn Danh mục sản phẩm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        SanPhamDAO dao = new SanPhamDAO();
+
+        if (isEdit) {
+            // Cập nhật thông tin sản phẩm từ những gì người dùng vừa chọn trên Form
+            existing.setTenSP(fieldTen.getText().trim());
+            existing.setMaDM(dm.getMaDM());
+            existing.setGiaBan(gia);
+            existing.setSoLuongTon(ton);
+            existing.setMauSac(cbMauSac.getSelectedItem().toString());
+            existing.setKichCo(cbKichCo.getSelectedItem().toString());
+            existing.setTrangThai(cbTrangThai.getSelectedItem().toString());
+            existing.setHinhAnh(selectedFileName[0]);
+            existing.setMaKho(cbKho.getSelectedItem().toString());
+
+            boolean ok = dao.updateSanPham(existing);
+            if (ok) {
+                JOptionPane.showMessageDialog(dialog, "Cập nhật thành công!");
+                loadDataFromDatabase();
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Cập nhật thất bại!");
+            }
+        } else {
+            // Tạo đối tượng sản phẩm mới để gửi xuống Database (Mã sản phẩm truyền null/rỗng để Procedure tự sinh)
+            SanPham sp = new SanPham(
+                    null, 
+                    dm.getMaDM(),
+                    cbMauSac.getSelectedItem().toString(),
+                    cbKichCo.getSelectedItem().toString(),
+                    gia,
+                    ton,
+                    cbTrangThai.getSelectedItem().toString(),
+                    fieldTen.getText().trim(),
+                    cbKho.getSelectedItem().toString(),
+                    selectedFileName[0]
+            );
+
+            boolean ok = dao.insertSanPham(sp);
+            if (ok) {
+                JOptionPane.showMessageDialog(dialog, "Thêm thành công!");
+                // Để tránh việc list trên bộ nhớ bị lệch mã với Database, ta gọi thẳng hàm tải lại dữ liệu mới từ DB
+                loadDataFromDatabase(); 
+                dialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Thêm thất bại!");
+            }
+        }
+    });
+
+    btnRow.add(cancelBtn);
+    btnRow.add(saveBtn);
+
+    dialog.add(titleBar, BorderLayout.NORTH);
+    dialog.add(new JScrollPane(form), BorderLayout.CENTER);
+    dialog.add(btnRow, BorderLayout.SOUTH);
+    dialog.setVisible(true);
+}
     // =====================================================================
     //  XÓA SẢN PHẨM
     // =====================================================================
