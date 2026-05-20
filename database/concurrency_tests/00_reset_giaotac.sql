@@ -23,7 +23,18 @@ SET GiaBan = 420000,
     TrangThai = N'Đang bán'
 WHERE MaSP = 'SP03';
 
+-- Reset đơn hàng dùng để mô phỏng Lost Update tổng tiền
+UPDATE DONHANG
+SET TongTien = 0,
+    GhiChu = N'Demo Lost Update TongTien'
+WHERE MaDH = 'DH01';
+
+
 COMMIT;
+
+SELECT MaDH, TongTien, GhiChu
+FROM DONHANG
+WHERE MaDH = 'DH01';
 
 SELECT MaSP, TenSP, GiaBan, SoLuongTon, TrangThai
 FROM SANPHAM
