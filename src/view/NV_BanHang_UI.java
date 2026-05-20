@@ -361,7 +361,8 @@ public class NV_BanHang_UI extends JFrame {
                         );
 
                         // TODO:
-                        // new LoginUI().setVisible(true);
+                        new LoginUI().setVisible(true);
+                        dispose();
                     }
 
                 } else {
