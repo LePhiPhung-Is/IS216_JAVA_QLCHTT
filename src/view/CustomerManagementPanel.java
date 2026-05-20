@@ -173,27 +173,46 @@ public class CustomerManagementPanel extends JPanel {
                 return;
             }
 
+            // Xử lý chuẩn hóa Tên đăng nhập: Nếu để trống thì truyền null để tránh lỗi khóa ngoại trong Database
+            String tenDN = fTenDN.getText().trim();
+            if(tenDN.isEmpty()) {
+                tenDN = null; 
+            }
+
             if(isEdit) {
-                target.setTenKH(fTen.getText()); 
-                target.setSdt(fSDT.getText()); 
-                target.setEmail(fEmail.getText());
+                target.setTenKH(fTen.getText().trim()); 
+                target.setSdt(fSDT.getText().trim()); 
+                target.setEmail(fEmail.getText().trim());
                 target.setDiemTichLuy(diemTichLuy);
-                target.setTenDangNhap(fTenDN.getText());
+                target.setTenDangNhap(tenDN);
                 
-                dao.suaKhachHang(target);
+                // Kiểm tra kết quả Sửa
+                if(dao.suaKhachHang(target)) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thông tin khách hàng thành công!");
+                    loadData(); 
+                    d.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(d, "Cập nhật thất bại! Vui lòng kiểm tra lại dữ liệu hoặc Console log.", "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 KhachHang newK = new KhachHang(
-                    fMa.getText(), 
-                    fTen.getText(), 
-                    fSDT.getText(), 
+                    fMa.getText().trim(), 
+                    fTen.getText().trim(), 
+                    fSDT.getText().trim(), 
                     diemTichLuy, 
-                    fEmail.getText(), 
-                    fTenDN.getText()
+                    fEmail.getText().trim(), 
+                    tenDN
                 );
-                dao.themKhachHang(newK);
+                
+                // Kiểm tra kết quả Thêm mới
+                if(dao.themKhachHang(newK)) {
+                    JOptionPane.showMessageDialog(this, "Thêm khách hàng mới thành công!");
+                    loadData(); 
+                    d.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(d, "Không thể thêm khách hàng!\nLợi gợi ý: Hãy chắc chắn 'Tên đăng nhập' đã tồn tại trong hệ thống tài khoản hoặc để trống.", "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+                }
             }
-            loadData(); 
-            d.dispose();
         });
         
         d.add(pForm, BorderLayout.CENTER);
@@ -223,9 +242,23 @@ public class CustomerManagementPanel extends JPanel {
                 fireEditingStopped();
                 int conf = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa khách hàng " + customers.get(row).getTenKH() + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                 if(conf == JOptionPane.YES_OPTION) { 
-                    dao.xoaKhachHang(customers.get(row).getMaKH()); 
-                    loadData(); 
-                    JOptionPane.showMessageDialog(null, "Đã xóa thành công!");
+                    try {
+                        // Nhận kết quả true/false từ DAO thay vì chạy suông
+                        boolean isDeleted = dao.xoaKhachHang(customers.get(row).getMaKH()); 
+                        
+                        if (isDeleted) {
+                            JOptionPane.showMessageDialog(null, "Đã xóa thành công!");
+                            loadData(); // Cập nhật lại bảng
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Lỗi: Không tìm thấy khách hàng này trong CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception ex) {
+                        // Bắt lỗi RuntimeException ném ra từ DAO nếu dính khóa ngoại (Đã lập hóa đơn)
+                        JOptionPane.showMessageDialog(null, 
+                            "Không thể xóa khách hàng này vì đã có dữ liệu Hóa Đơn/Đơn Hàng liên quan trong hệ thống!", 
+                            "Lỗi ràng buộc dữ liệu", 
+                            JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             });
             p.add(btnE); p.add(btnD);
