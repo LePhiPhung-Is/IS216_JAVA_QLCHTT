@@ -48,50 +48,57 @@ public class SanPhamDAO {
         }
         return list;
     }
+    //Gọi PROCEDURE để thêm sản phẩm
     public boolean insertSanPham(SanPham sp) {
-    String sql = "INSERT INTO SANPHAM (MASP, MADM, MAUSAC, KICHCO, GIABAN, SOLUONGTON, TRANGTHAI, TENSP, MAKHO, HINHANH) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // Chỉ còn 9 dấu hỏi chấm vì mã sản phẩm do DB tự lo
+    String sql = "{call SP_THEM_SANPHAM(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+         java.sql.CallableStatement cs = conn.prepareCall(sql)) {
 
-        ps.setString(1, sp.getMaSP());
-        ps.setString(2, sp.getMaDM());
-        ps.setString(3, sp.getMauSac());
-        ps.setString(4, sp.getKichCo());
-        ps.setDouble(5, sp.getGiaBan());
-        ps.setInt(6, sp.getSoLuongTon());
-        ps.setString(7, sp.getTrangThai());
-        ps.setString(8, sp.getTenSP());
-        ps.setString(9, sp.getMaKho());
-        ps.setString(10, sp.getHinhAnh());
+        // Tham số 1 lúc này dịch chuyển thành MaDM
+        cs.setString(1, sp.getMaDM());
+        cs.setString(2, sp.getMaKho());
+        cs.setString(3, sp.getTenSP());
+        cs.setString(4, sp.getMauSac());
+        cs.setString(5, sp.getKichCo());
+        cs.setDouble(6, sp.getGiaBan());
+        cs.setInt(7, sp.getSoLuongTon());
+        cs.setString(8, sp.getTrangThai());
+        cs.setString(9, sp.getHinhAnh());
 
-        return ps.executeUpdate() > 0;
+        cs.execute();
+        return true;
 
     } catch (Exception e) {
+        System.out.println("Lỗi gọi thủ tục thêm sản phẩm tự động mã!");
         e.printStackTrace();
         return false;
     }
 }
     public boolean updateSanPham(SanPham sp) {
-    String sql = "UPDATE SANPHAM SET MADM=?, MAUSAC=?, KICHCO=?, GIABAN=?, SOLUONGTON=?, TRANGTHAI=?, TENSP=?, MAKHO=?, HINHANH=? WHERE MASP=?";
+    // Thứ tự 10 dấu chấm hỏi khớp chính xác với khai báo tham số trong SP_SUA_SANPHAM
+    String sql = "{call SP_SUA_SANPHAM(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+         java.sql.CallableStatement cs = conn.prepareCall(sql)) {
 
-        ps.setString(1, sp.getMaDM());
-        ps.setString(2, sp.getMauSac());
-        ps.setString(3, sp.getKichCo());
-        ps.setDouble(4, sp.getGiaBan());
-        ps.setInt(5, sp.getSoLuongTon());
-        ps.setString(6, sp.getTrangThai());
-        ps.setString(7, sp.getTenSP());
-        ps.setString(8, sp.getMaKho());
-        ps.setString(9, sp.getHinhAnh());
-        ps.setString(10, sp.getMaSP());
+        cs.setString(1, sp.getMaSP());
+        cs.setString(2, sp.getMaDM());
+        cs.setString(3, sp.getMaKho());
+        cs.setString(4, sp.getTenSP());
+        cs.setString(5, sp.getMauSac());
+        cs.setString(6, sp.getKichCo());
+        cs.setDouble(7, sp.getGiaBan());
+        cs.setInt(8, sp.getSoLuongTon());
+        cs.setString(9, sp.getTrangThai());
+        cs.setString(10, sp.getHinhAnh());
 
-        return ps.executeUpdate() > 0;
+        cs.execute();
+        return true;
 
     } catch (Exception e) {
+        System.out.println("Lỗi khi gọi Procedure SP_SUA_SANPHAM!");
         e.printStackTrace();
         return false;
     }
@@ -135,20 +142,24 @@ public class SanPhamDAO {
         }
         return sp; // Trả về null nếu không tìm thấy
     }
+
+    // Gọi PROCEDURE xóa sản phẩm
 public boolean deleteSanPham(String maSP) {
-    String sql = "DELETE FROM SanPham WHERE MaSP = ?";
+    String sql = "{call SP_XOA_SANPHAM(?)}";
 
     try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+         java.sql.CallableStatement cs = conn.prepareCall(sql)) {
 
-        ps.setString(1, maSP);
+        // Chỉ cần truyền duy nhất mã sản phẩm cần xóa
+        cs.setString(1, maSP);
 
-        return ps.executeUpdate() > 0;
+        cs.execute();
+        return true;
 
     } catch (Exception e) {
-        throw new RuntimeException(e); // để UI catch
+        System.out.println("Lỗi khi gọi Procedure SP_XOA_SANPHAM!");
+        e.printStackTrace();
+        return false;
     }
-
-   
 }
 }

@@ -71,35 +71,36 @@ public class KhachHangDAO {
     // =======================================================
     // 3. THÊM KHÁCH HÀNG MỚI
     // =======================================================
-    public boolean themKhachHang(KhachHang kh) {
-        String sql = "INSERT INTO KHACHHANG (MAKH, TENKH, SDT, DIEMTICHLUY, EMAIL, TENDANGNHAP) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+   // Sửa đổi: Thêm "throws Exception" để ném lỗi chuẩn từ Oracle về màn hình UI
+public boolean themKhachHang(KhachHang kh) throws Exception {
+    // Gọi thẳng tên Procedure của Oracle, chỉ truyền 5 tham số (Bỏ Mã KH)
+    String sql = "{call SP_THEM_KHACHHANG(?, ?, ?, ?, ?)}";
+    
+    try (Connection conn = DatabaseConnection.getConnection();
+         java.sql.CallableStatement cs = conn.prepareCall(sql)) {
 
-            ps.setString(1, kh.getMaKH());
-            ps.setString(2, kh.getTenKH());
-            ps.setString(3, kh.getSdt());
-            ps.setInt(4, kh.getDiemTichLuy());
-            ps.setString(5, kh.getEmail());
-            ps.setString(6, kh.getTenDangNhap());
+        // Set các tham số theo đúng thứ tự khai báo trong Procedure
+        cs.setString(1, kh.getTenKH());
+        cs.setString(2, kh.getSdt()); // khớp với phương thức getSdt() của bạn
+        cs.setInt(3, kh.getDiemTichLuy());
+        cs.setString(4, kh.getEmail());
+        cs.setString(5, kh.getTenDangNhap());
 
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.out.println("Lỗi DAO: Không thể thêm Khách Hàng!");
-            e.printStackTrace();
-            return false;
-        }
+        // Thực thi Procedure dưới Oracle
+        cs.execute();
+        return true; 
     }
+    // Bỏ khối catch ở đây để lỗi từ raise_application_error bắn thẳng về lớp Giao diện xử lý
+}
 
-    // Hàm phụ trợ được gọi bên form Lập Đơn Hàng (Chức năng y hệt hàm trên)
-    public boolean themKhachHangMoi(KhachHang kh) {
-        return themKhachHang(kh);
-    }
-
+   // Hàm phụ trợ được gọi bên form Lập Đơn Hàng (Chức năng y hệt hàm trên)
+public boolean themKhachHangMoi(KhachHang kh) throws Exception {
+    return themKhachHang(kh);
+}
     // =======================================================
     // 4. SỬA THÔNG TIN KHÁCH HÀNG
     // =======================================================
-    public boolean suaKhachHang(KhachHang kh) {
+    public boolean suaKhachHang(KhachHang kh)  throws Exception{
         String sql = "UPDATE KHACHHANG SET TENKH = ?, SDT = ?, DIEMTICHLUY = ?, EMAIL = ?, TENDANGNHAP = ? WHERE MAKH = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -122,17 +123,15 @@ public class KhachHangDAO {
     // =======================================================
     // 5. XÓA KHÁCH HÀNG
     // =======================================================
-    public boolean xoaKhachHang(String maKH) {
-        String sql = "DELETE FROM KHACHHANG WHERE MAKH = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    public boolean xoaKhachHang(String maKH) throws Exception {
+    String sql = "{call SP_XOA_KHACHHANG(?)}";
 
-            ps.setString(1, maKH);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.out.println("Lỗi DAO: Không thể xóa Khách Hàng (Có thể bị dính khóa ngoại với Đơn hàng)!");
-            e.printStackTrace();
-            throw new RuntimeException("Lỗi khóa ngoại khi xóa KH", e); 
-        }
+    try (Connection conn = DatabaseConnection.getConnection();
+         java.sql.CallableStatement cs = conn.prepareCall(sql)) {
+
+        cs.setString(1, maKH);
+        cs.execute();
+        return true; // Trả về true nếu Oracle chạy mượt mà không vấp phải error nào
     }
+}
 }

@@ -1,6 +1,8 @@
 package src.view;
 
 import src.model.KhachHang;
+import src.view.CustomerManagementPanel.ActionEditor;
+import src.view.CustomerManagementPanel.ActionRenderer;
 import src.dao.KhachHangDAO;
 
 import javax.swing.*;
@@ -114,17 +116,17 @@ public class CustomerManagementPanel extends JPanel {
             });
         }
     }
-
-    private String autoMaKH() {
-        int max = 0;
-        for(KhachHang k : customers) {
-            try { 
-                String numPart = k.getMaKH().replaceAll("[^0-9]", "");
-                max = Math.max(max, Integer.parseInt(numPart)); 
-            } catch(Exception e){}
-        }
-        return String.format("KH%03d", max + 1);
-    }
+// Đã có hàm tạo tự động
+    // private String autoMaKH() {
+    //     int max = 0;
+    //     for(KhachHang k : customers) {
+    //         try { 
+    //             String numPart = k.getMaKH().replaceAll("[^0-9]", "");
+    //             max = Math.max(max, Integer.parseInt(numPart)); 
+    //         } catch(Exception e){}
+    //     }
+    //     return String.format("KH%03d", max + 1);
+    // }
 
     private void openDialog(KhachHang target) {
         boolean isEdit = (target != null);
@@ -137,9 +139,13 @@ public class CustomerManagementPanel extends JPanel {
         JPanel pForm = new JPanel(new GridLayout(6, 2, 10, 20));
         pForm.setBorder(new EmptyBorder(25, 25, 25, 25));
 
-        JTextField fMa = new JTextField(isEdit ? target.getMaKH() : autoMaKH());
+        JTextField fMa = new JTextField(isEdit ? target.getMaKH() : "[Mã hệ thống tự sinh]");
         fMa.setEditable(false);
         fMa.setBackground(new Color(235, 235, 235));
+        if (!isEdit) {
+        fMa.setForeground(Color.GRAY);
+        fMa.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+    }
         
         JTextField fTen = new JTextField(isEdit ? target.getTenKH() : "");
         JTextField fSDT = new JTextField(isEdit ? target.getSdt() : "");
@@ -178,8 +184,10 @@ public class CustomerManagementPanel extends JPanel {
             if(tenDN.isEmpty()) {
                 tenDN = null; 
             }
-
+        try {
+           
             if(isEdit) {
+                
                 target.setTenKH(fTen.getText().trim()); 
                 target.setSdt(fSDT.getText().trim()); 
                 target.setEmail(fEmail.getText().trim());
@@ -196,7 +204,7 @@ public class CustomerManagementPanel extends JPanel {
                 }
             } else {
                 KhachHang newK = new KhachHang(
-                    fMa.getText().trim(), 
+                    null, 
                     fTen.getText().trim(), 
                     fSDT.getText().trim(), 
                     diemTichLuy, 
@@ -207,13 +215,16 @@ public class CustomerManagementPanel extends JPanel {
                 // Kiểm tra kết quả Thêm mới
                 if(dao.themKhachHang(newK)) {
                     JOptionPane.showMessageDialog(this, "Thêm khách hàng mới thành công!");
-                    loadData(); 
+                    loadData(); // Tải lại bảng để thấy khách hàng kèm mã mới xuất hiện từ DB
                     d.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(d, "Không thể thêm khách hàng!\nLợi gợi ý: Hãy chắc chắn 'Tên đăng nhập' đã tồn tại trong hệ thống tài khoản hoặc để trống.", "Lỗi Database", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        });
+        } catch (Exception ex) {
+            // Hứng trọn vẹn thông báo từ raise_application_error (Ví dụ: "Lỗi: Số điện thoại đã tồn tại...")
+            String fullError = ex.getMessage();
+            JOptionPane.showMessageDialog(d, fullError, "Lỗi thực thi Database", JOptionPane.ERROR_MESSAGE);
+        }
+    });
         
         d.add(pForm, BorderLayout.CENTER);
         d.add(btnSave, BorderLayout.SOUTH);
@@ -249,18 +260,20 @@ public class CustomerManagementPanel extends JPanel {
                         if (isDeleted) {
                             JOptionPane.showMessageDialog(null, "Đã xóa thành công!");
                             loadData(); // Cập nhật lại bảng
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Lỗi: Không tìm thấy khách hàng này trong CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                        }
+                        } 
                     } catch (Exception ex) {
                         // Bắt lỗi RuntimeException ném ra từ DAO nếu dính khóa ngoại (Đã lập hóa đơn)
-                        JOptionPane.showMessageDialog(null, 
-                            "Không thể xóa khách hàng này vì đã có dữ liệu Hóa Đơn/Đơn Hàng liên quan trong hệ thống!", 
-                            "Lỗi ràng buộc dữ liệu", 
-                            JOptionPane.ERROR_MESSAGE);
-                    }
+                        String thongBaoLoi = ex.getMessage();
+                        JOptionPane.showMessageDialog(
+                null, 
+                        thongBaoLoi, 
+                        "Lỗi thực thi Database", 
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    ex.printStackTrace(); // Vẫn in ra Console của NetBeans/Eclipse để bạn tiện theo dõi khi code
                 }
-            });
+            }
+        });
             p.add(btnE); p.add(btnD);
             return p;
         }

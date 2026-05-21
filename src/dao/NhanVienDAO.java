@@ -1,4 +1,4 @@
-package src.dao;
+package src.dao; // Khuyên dùng: Bỏ "src." nếu thư mục src đã là Source Root của dự án
 
 import src.database.DatabaseConnection;
 import src.model.NhanVien;
@@ -6,6 +6,7 @@ import src.model.NhanVien;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane; // Thêm thư viện để thông báo trực tiếp lên giao diện Swing
 
 public class NhanVienDAO {
 
@@ -13,21 +14,16 @@ public class NhanVienDAO {
     // GET ALL
     // =====================================================
     public List<NhanVien> getAllNhanVien() {
-
         List<NhanVien> list = new ArrayList<>();
-
         String sql = "SELECT * FROM NHANVIEN";
 
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                Statement st = con.createStatement();
-                ResultSet rs = st.executeQuery(sql)
-        ) {
+        // Tách biệt rõ ràng Connection để quản lý tài nguyên tối ưu nhất
+        try (Connection con = DatabaseConnection.getConnection();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-
                 NhanVien nv = new NhanVien();
-
                 nv.setMaNV(rs.getString("MaNV"));
                 nv.setTenNV(rs.getString("TenNV"));
                 nv.setNgaySinh(rs.getDate("NgaySinh"));
@@ -41,12 +37,10 @@ public class NhanVienDAO {
 
                 list.add(nv);
             }
-
-        } catch (Exception e) {
-
+        } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Lỗi tải danh sách nhân viên: " + e.getMessage(), "Lỗi Database", JOptionPane.ERROR_MESSAGE);
         }
-
         return list;
     }
 
@@ -54,65 +48,34 @@ public class NhanVienDAO {
     // INSERT
     // =====================================================
     public boolean insertNhanVien(NhanVien nv) {
+        String sql = "{call SP_THEM_NHANVIEN(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
 
-        String sql =
-                "INSERT INTO NHANVIEN " +
-                "(MaNV, TenNV, NgaySinh, GioiTinh, SDT, DiaChi, " +
-                "ChucVu, NgayVaoLam, TrangThai, TenDangNhap) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            cs.setString(1, nv.getTenNV());
+            cs.setDate(2, nv.getNgaySinh() != null ? new java.sql.Date(nv.getNgaySinh().getTime()) : null);
+            cs.setString(3, nv.getGioiTinh());
+            cs.setString(4, nv.getSdt());
+            cs.setString(5, nv.getDiaChi());
+            cs.setString(6, nv.getChucVu());
+            cs.setDate(7, nv.getNgayVaoLam() != null ? new java.sql.Date(nv.getNgayVaoLam().getTime()) : null);
+            cs.setInt(8, nv.getTrangThai());
 
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, nv.getMaNV());
-
-            ps.setString(2, nv.getTenNV());
-
-            ps.setDate(
-                    3,
-                    new java.sql.Date(
-                            nv.getNgaySinh().getTime()
-                    )
-            );
-
-            ps.setString(4, nv.getGioiTinh());
-
-            ps.setString(5, nv.getSdt());
-
-            ps.setString(6, nv.getDiaChi());
-
-            ps.setString(7, nv.getChucVu());
-
-            ps.setDate(
-                    8,
-                    new java.sql.Date(
-                            nv.getNgayVaoLam().getTime()
-                    )
-            );
-
-            ps.setInt(9, nv.getTrangThai());
-
-            if (
-                    nv.getTenDangNhap() == null
-                    || nv.getTenDangNhap().trim().isEmpty()
-            ) {
-
-                ps.setNull(10, Types.VARCHAR);
-
+            if (nv.getTenDangNhap() == null || nv.getTenDangNhap().trim().isEmpty()) {
+                cs.setNull(9, Types.VARCHAR);
             } else {
-
-                ps.setString(10, nv.getTenDangNhap());
+                cs.setString(9, nv.getTenDangNhap());
             }
 
-            return ps.executeUpdate() > 0;
+            cs.execute();
+            return true;
 
-        } catch (Exception e) {
-
+        } catch (SQLException e) {
             e.printStackTrace();
-
-            return false;
+            // Lọc thông báo lỗi từ Oracle và hiển thị trực tiếp lên UI cho nhân viên đọc
+            String friendlyError = cleanErrorMessage(e.getMessage());
+            JOptionPane.showMessageDialog(null, friendlyError, "Lỗi Thêm Nhân Viên", JOptionPane.ERROR_MESSAGE);
+            return false; 
         }
     }
 
@@ -120,65 +83,33 @@ public class NhanVienDAO {
     // UPDATE
     // =====================================================
     public boolean updateNhanVien(NhanVien nv) {
+        String sql = "{call SP_SUA_NHANVIEN(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
 
-        String sql =
-                "UPDATE NHANVIEN SET " +
-                "TenNV=?, NgaySinh=?, GioiTinh=?, SDT=?, " +
-                "DiaChi=?, ChucVu=?, NgayVaoLam=?, " +
-                "TrangThai=?, TenDangNhap=? " +
-                "WHERE MaNV=?";
+            cs.setString(1, nv.getMaNV());
+            cs.setString(2, nv.getTenNV());
+            cs.setDate(3, nv.getNgaySinh() != null ? new java.sql.Date(nv.getNgaySinh().getTime()) : null);
+            cs.setString(4, nv.getGioiTinh());
+            cs.setString(5, nv.getSdt());
+            cs.setString(6, nv.getDiaChi());
+            cs.setString(7, nv.getChucVu());
+            cs.setDate(8, nv.getNgayVaoLam() != null ? new java.sql.Date(nv.getNgayVaoLam().getTime()) : null);
+            cs.setInt(9, nv.getTrangThai());
 
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, nv.getTenNV());
-
-            ps.setDate(
-                    2,
-                    new java.sql.Date(
-                            nv.getNgaySinh().getTime()
-                    )
-            );
-
-            ps.setString(3, nv.getGioiTinh());
-
-            ps.setString(4, nv.getSdt());
-
-            ps.setString(5, nv.getDiaChi());
-
-            ps.setString(6, nv.getChucVu());
-
-            ps.setDate(
-                    7,
-                    new java.sql.Date(
-                            nv.getNgayVaoLam().getTime()
-                    )
-            );
-
-            ps.setInt(8, nv.getTrangThai());
-
-            if (
-                    nv.getTenDangNhap() == null
-                    || nv.getTenDangNhap().trim().isEmpty()
-            ) {
-
-                ps.setNull(9, Types.VARCHAR);
-
+            if (nv.getTenDangNhap() == null || nv.getTenDangNhap().trim().isEmpty()) {
+                cs.setNull(10, Types.VARCHAR);
             } else {
-
-                ps.setString(9, nv.getTenDangNhap());
+                cs.setString(10, nv.getTenDangNhap());
             }
 
-            ps.setString(10, nv.getMaNV());
+            cs.execute();
+            return true;
 
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-
+        } catch (SQLException e) {
             e.printStackTrace();
-
+            String friendlyError = cleanErrorMessage(e.getMessage());
+            JOptionPane.showMessageDialog(null, friendlyError, "Lỗi Cập Nhật Nhân Viên", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
@@ -187,24 +118,34 @@ public class NhanVienDAO {
     // DELETE
     // =====================================================
     public boolean deleteNhanVien(String maNV) {
-
-        String sql =
-                "DELETE FROM NHANVIEN WHERE MaNV=?";
-
-        try (
-                Connection con = DatabaseConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
-        ) {
-
-            ps.setString(1, maNV);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (Exception e) {
-
+        String sql = "{call SP_XOA_NHANVIEN(?)}";
+        try (Connection con = DatabaseConnection.getConnection();
+             CallableStatement cs = con.prepareCall(sql)) {
+            
+            cs.setString(1, maNV);
+            cs.execute();
+            return true;
+            
+        } catch (SQLException e) {
             e.printStackTrace();
-
+            String friendlyError = cleanErrorMessage(e.getMessage());
+            JOptionPane.showMessageDialog(null, friendlyError, "Lỗi Xóa Nhân Viên", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+    }
+
+    // =====================================================
+    // UTILITY: Lọc sạch chuỗi lỗi ORA nghiệp vụ
+    // =====================================================
+    private String cleanErrorMessage(String rawMessage) {
+        if (rawMessage == null) return "Kết nối cơ sở dữ liệu thất bại hoặc có lỗi không xác định!";
+        // Tìm và cắt chuỗi lỗi tự định nghĩa từ RAISE_APPLICATION_ERROR bên Oracle
+        if (rawMessage.contains("ORA-")) {
+            String[] parts = rawMessage.split("\n")[0].split(":", 3);
+            if (parts.length >= 3) {
+                return parts[2].trim();
+            }
+        }
+        return rawMessage;
     }
 }

@@ -51,7 +51,6 @@ public class QuanLyDonHangPanel extends JPanel {
     private double tienGiamGia = 0;
     
     // Đã sửa lại thành new Locale để tương thích mọi phiên bản Java
-    private final NumberFormat currencyVN = NumberFormat.getCurrencyInstance(Locale.of("vi", "VN"));
 
     public QuanLyDonHangPanel() {
         setLayout(new BorderLayout(20, 20));
@@ -332,33 +331,46 @@ txtSdtKhachHang = new JTextField();
         return panel;
     }
 
-    private void xuLyTimKhachHang() {
-        String sdt = txtSdtKhachHang.getText().trim();
-        if(sdt.isEmpty()) {
-            currentMaKH = null;
-            JOptionPane.showMessageDialog(this, "Khách hàng không tích điểm (Vãng lai).");
-            return;
-        }
-
-        KhachHang kh = new KhachHangDAO().getKhachHangBySDT(sdt);
-        if (kh != null) {
-            currentMaKH = kh.getMaKH();
-            JOptionPane.showMessageDialog(this, "Khách hàng quen: " + kh.getTenKH() + "\nĐiểm: " + kh.getDiemTichLuy());
-        } else {
-            JTextField txtTenKH = new JTextField();
-            Object[] msg = { "SĐT:", new JTextField(sdt){{setEditable(false);}}, "Tên KH:", txtTenKH };
-            if (JOptionPane.showConfirmDialog(this, msg, "Đăng Ký KH", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-                String newMaKH = "KH" + System.currentTimeMillis();
-                KhachHang newKH = new KhachHang(newMaKH, txtTenKH.getText().trim(), sdt, 0, "", "");
-                if (new KhachHangDAO().themKhachHangMoi(newKH)) {
-                    currentMaKH = newMaKH;
-                    JOptionPane.showMessageDialog(this, "Đăng ký thành công!");
-                }
-            } else {
-                txtSdtKhachHang.setText(""); currentMaKH = null;
-            }
-}
+private void xuLyTimKhachHang() {
+    String sdt = txtSdtKhachHang.getText().trim();
+    if (sdt.isEmpty()) {
+        currentMaKH = null;
+        JOptionPane.showMessageDialog(this, "Khách hàng không tích điểm (Vãng lai).");
+        return;
     }
+
+    KhachHang kh = new KhachHangDAO().getKhachHangBySDT(sdt);
+    if (kh != null) {
+        currentMaKH = kh.getMaKH();
+        JOptionPane.showMessageDialog(this, "Khách hàng quen: " + kh.getTenKH() + "\nĐiểm: " + kh.getDiemTichLuy());
+    } else { 
+        // Bắt đầu khối ELSE (Khi không tìm thấy khách hàng dựa trên SĐT)
+        JTextField txtTenKH = new JTextField();
+        Object[] msg = { "SĐT:", new JTextField(sdt){{setEditable(false);}}, "Tên KH:", txtTenKH };
+        
+        if (JOptionPane.showConfirmDialog(this, msg, "Đăng Ký KH", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            try {
+                // Truyền mã KH là null để nhường quyền sinh mã KH00000x tự động cho Database
+                KhachHang newKH = new KhachHang(null, txtTenKH.getText().trim(), sdt, 0, "", null);
+                
+                if (new KhachHangDAO().themKhachHangMoi(newKH)) {
+                    // Lấy lại thông tin khách hàng từ DB dựa vào số điện thoại vừa tạo để cập nhật mã chính xác
+                    KhachHang khVuaTao = new KhachHangDAO().getKhachHangBySDT(sdt);
+                    if (khVuaTao != null) {
+                        currentMaKH = khVuaTao.getMaKH();
+                    }
+                    JOptionPane.showMessageDialog(this, "Đăng ký thành công! Mã khách hàng: " + currentMaKH);
+                }
+            } catch (Exception ex) {
+                // Hứng trọn vẹn thông báo lỗi tiếng Việt thực tế từ raise_application_error của Oracle
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Lỗi hệ thống Oracle", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            txtSdtKhachHang.setText(""); 
+            currentMaKH = null;
+        }
+    } // ĐÂY LÀ DẤU NGOẶC ĐÓNG KHỐI ELSE LỚN (Đoạn code cũ bị thiếu dấu này)
+} // ĐÓNG HÀM xuLyTimKhachHang
 
     private void apDungKhuyenMai() {
         String maKM = txtKhuyenMai.getText().trim();
