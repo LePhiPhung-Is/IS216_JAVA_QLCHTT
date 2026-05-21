@@ -91,7 +91,21 @@ public class QuanLyNhaCungCap extends JPanel {
         txtSearch.addActionListener(e -> loadData());
         btnAdd.addActionListener(e -> openSupplierDialog(null));
     }
-
+    // Thêm vào ngay trên hàm initHeader()
+    private String cleanErrorMessage(String rawMessage) {
+        if (rawMessage == null) return "Lỗi không xác định.";
+        if (rawMessage.contains("ORA-")) {
+            try {
+                int start = rawMessage.indexOf(":", rawMessage.indexOf("ORA-")) + 1;
+                int end = rawMessage.indexOf("ORA-", start);
+                if (end == -1) return rawMessage.substring(start).trim();
+                return rawMessage.substring(start, end).trim();
+            } catch (Exception e) {
+                return rawMessage;
+            }
+        }
+        return rawMessage;
+    }
     private void initTable() {
         String[] columns = {"Mã NCC", "Tên nhà cung cấp", "Địa chỉ", "Số điện thoại", "Email", "Thao tác"};
         model = new DefaultTableModel(columns, 0) {
@@ -223,40 +237,48 @@ public class QuanLyNhaCungCap extends JPanel {
         d.add(tf, g);
     }
 
-    private boolean executeDBUpdate(String type, JTextField m, JTextField t, 
-                                 JTextField d, JTextField s, JTextField e) {
-    if (type.equals("INSERT")) {
-        // Gọi procedure - không cần truyền mã, Oracle tự tạo
-        String sql = "{call SP_THEM_NHACUNGCAP(?, ?, ?, ?)}";
-        try (Connection conn = DatabaseConnection.getConnection();
-             CallableStatement cs = conn.prepareCall(sql)) {
-            cs.setString(1, t.getText()); // TenNCC
-            cs.setString(2, d.getText()); // DiaChi
-            cs.setString(3, s.getText()); // SDT
-            cs.setString(4, e.getText()); // Email
-            cs.execute();
-            return true;
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
-            return false;
-        }
-    } else {
-        // UPDATE vẫn dùng SQL thẳng hoặc procedure nếu có
-        String sql = "UPDATE NHACUNGCAP SET TENNCC=?, DIACHI=?, SDT=?, EMAIL=? WHERE MANCC=?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, t.getText());
-            ps.setString(2, d.getText());
-            ps.setString(3, s.getText());
-            ps.setString(4, e.getText());
-            ps.setString(5, m.getText());
-            return ps.executeUpdate() > 0;
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
-            return false;
+private boolean executeDBUpdate(String type, JTextField m, JTextField t, 
+                                  JTextField d, JTextField s, JTextField e) {
+        if (type.equals("INSERT")) {
+            String sql = "{call SP_THEM_NHACUNGCAP(?, ?, ?, ?)}";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 CallableStatement cs = conn.prepareCall(sql)) {
+                cs.setString(1, t.getText().trim());
+                cs.setString(2, d.getText().trim());
+                cs.setString(3, s.getText().trim());
+                cs.setString(4, e.getText().trim());
+                cs.execute();
+                JOptionPane.showMessageDialog(this, "Thêm nhà cung cấp mới thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            } catch (SQLException ex) {
+                // SỬA TẠI ĐÂY: Lọc lỗi tiếng Việt từ database
+                String friendlyError = cleanErrorMessage(ex.getMessage());
+                JOptionPane.showMessageDialog(this, friendlyError, "Lỗi Thêm Mới", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } else {
+            String sql = "UPDATE NHACUNGCAP SET TENNCC=?, DIACHI=?, SDT=?, EMAIL=? WHERE MANCC=?";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, t.getText().trim());
+                ps.setString(2, d.getText().trim());
+                ps.setString(3, s.getText().trim());
+                ps.setString(4, e.getText().trim());
+                ps.setString(5, m.getText().trim());
+                
+                if (ps.executeUpdate() > 0) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                    return true;
+                }
+                return false;
+            } catch (SQLException ex) {
+                // SỬA TẠI ĐÂY: Lọc lỗi tiếng Việt từ database
+                String friendlyError = cleanErrorMessage(ex.getMessage());
+                JOptionPane.showMessageDialog(this, friendlyError, "Lỗi Cập Nhật", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
         }
     }
-}
     class ActionButtonRenderer extends JPanel implements javax.swing.table.TableCellRenderer {
         public ActionButtonRenderer() {
             setOpaque(false);
@@ -316,11 +338,14 @@ public class QuanLyNhaCungCap extends JPanel {
                         CallableStatement cs = conn.prepareCall(sql)) {
                         cs.setString(1, id);
                         cs.execute();
-                        JOptionPane.showMessageDialog(null, "Đã xóa thành công!");
+
+                    JOptionPane.showMessageDialog(null, "Đã xóa đối tác thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         fireEditingStopped();
                         loadData();
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
+                    } catch (SQLException ex) {
+                        // SỬA TẠI ĐÂY: Sử dụng cleanErrorMessage để bóc tách lỗi ràng buộc
+                        String friendlyError = cleanErrorMessage(ex.getMessage());
+                        JOptionPane.showMessageDialog(null, friendlyError, "Lỗi Xóa Nhà Cung Cấp", JOptionPane.ERROR_MESSAGE);
                         fireEditingStopped();
                     }
                 } else {

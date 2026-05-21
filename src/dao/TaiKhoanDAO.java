@@ -2,7 +2,7 @@ package src.dao;
 
 import src.database.DatabaseConnection;
 import src.model.TaiKhoan;
-import src.database.hash;
+import src.database.PasswordUtil;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
