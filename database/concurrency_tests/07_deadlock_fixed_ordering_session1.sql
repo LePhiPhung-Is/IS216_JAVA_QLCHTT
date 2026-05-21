@@ -29,7 +29,6 @@ WHERE MaSP = 'SP02';
 -- =====================================================
 
 COMMIT;
-
 SELECT MaSP, TenSP, SoLuongTon
 FROM SANPHAM
 WHERE MaSP IN ('SP01', 'SP02')
